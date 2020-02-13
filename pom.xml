@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.progbits.api</groupId>
+    <artifactId>ApiParent</artifactId>
+    <version>1.0.6</version>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <packaging>pom</packaging>
+    <modules>
+        <!-- <module>ApiCxfProxy</module> -->
+        <module>ApiTransforms</module>
+        <module>ApiCore</module>
+        <module>ApiUtils</module>
+        <module>ApiUtilsTest</module>
+        <module>ApiMappingGraalVM</module>
+        <module>GraalVMJSOsgi</module>
+        <module>EventLogFormatter</module>
+        <module>EventElasticAppender</module>
+        <module>ElasticUtils</module>
+    </modules>
+
+</project>

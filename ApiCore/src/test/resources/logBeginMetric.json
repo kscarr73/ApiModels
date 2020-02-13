@@ -1,0 +1,53 @@
+{
+	"name": "logBeginMetric",
+	"className": "com.icg.isg.log.ws.LogBeginMetric",
+	"desc": "Starts a Metric in the Logger System, and returns a Log Structure.",
+	"lastUpdated": "2016-04-11T22:04:29.392Z",
+	"fields": [
+		{
+			"name": "appInfo",
+			"type": "Object",
+			"subType": "com.icg.isg.log.ws.ApplicationInfo",
+			"desc": "Application Information for each function call.",
+			"min": 1,
+			"max": 1,
+			"sampleData": "",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "transactionId",
+			"type": "String",
+			"subType": "",
+			"desc": "ID for the Transaction",
+			"min": 0,
+			"max": 1,
+			"sampleData": "",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "transactionDate",
+			"type": "DateTime",
+			"subType": "",
+			"desc": "Date for the Transaction to store",
+			"min": 0,
+			"max": 1,
+			"sampleData": "",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "Fields",
+			"type": "Object",
+			"subType": "com.icg.isg.log.CustomFields",
+			"desc": "Custom Fields to populate business keys.",
+			"min": 0,
+			"max": 1,
+			"length": 0,
+			"sampleData": "",
+			"format": "",
+			"defaultValue": ""
+		}
+	]
+}

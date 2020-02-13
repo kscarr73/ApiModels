@@ -1,0 +1,77 @@
+{
+	"index_patterns": [
+		"ds_metric-*"
+	],
+	"settings": {
+		"index": {
+			"number_of_shards": "1",
+			"number_of_replicas": "0"
+		}
+	},
+	"mappings": {
+		"_doc": {
+			"properties": {
+				"host": {
+					"type": "keyword"
+				},
+				"timestamp": {
+					"type": "date",
+					"format": "strict_date_optional_time||epoch_millis"
+				},
+				"threadName": {
+					"type": "keyword"
+				},
+				"className": {
+					"type": "keyword"
+				},
+				"subClass": {
+					"type": "keyword"
+				},
+				"splintName": {
+					"type": "keyword"
+				},
+				"TransId": {
+					"type": "keyword"
+				},
+				"logLevel": {
+					"type": "keyword"
+				},
+				"stackTrace": {
+					"type": "text"
+				},
+				"message": {
+					"type": "text"
+				},
+				"Duration": {
+					"type": "long"
+				},
+				"StartTime": {
+					"format": "dateOptionalTime",
+					"type": "date"
+				},
+				"EndTime": {
+					"format": "dateOptionalTime",
+					"type": "date"
+				},
+				"Status": {
+					"type": "keyword"
+				},
+				"fields": {
+					"properties": {
+						"field": {
+							"properties": {
+								"name": {
+									"type": "keyword"
+								},
+								"value": {
+									"type": "text"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"aliases": {}
+}

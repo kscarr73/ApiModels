@@ -1,0 +1,8 @@
+{
+	"name": "JsonWriterTest",
+	"stringArray": [
+		"This",
+		"That",
+		"Other"
+	]
+}
