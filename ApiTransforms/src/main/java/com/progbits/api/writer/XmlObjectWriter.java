@@ -14,6 +14,8 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +23,6 @@ import java.util.Map;
 import javolution.xml.stream.XMLOutputFactory;
 import javolution.xml.stream.XMLStreamException;
 import javolution.xml.stream.XMLStreamWriter;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -268,7 +268,7 @@ public class XmlObjectWriter implements ObjectWriter {
                     type = TYPES.Integer.name();
                 } else if (value instanceof Boolean) {
                     type = TYPES.Boolean.name();
-                } else if (value instanceof DateTime) {
+                } else if (value instanceof OffsetDateTime) {
                     type = TYPES.DateTime.name();
                 } else if (value instanceof Long) {
                     type = TYPES.Long.name();

@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +18,6 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -237,22 +235,20 @@ public class JsonObjectWriter implements ObjectWriter {
                writeOut.write(fldKey, (Boolean) fldValue);
             } else if (fldValue instanceof Long) {
                writeOut.write(fldKey, (Long) fldValue);
-            } else if (fldValue instanceof DateTime) {
+            } else if (fldValue instanceof OffsetDateTime) {
                if (!_dtFormats.containsKey(fldKey)) {
                   if (format != null && !format.isEmpty()) {
-                     DateTimeFormatter dtFormat = DateTimeFormat.forPattern(
-                             format);
+                     DateTimeFormatter dtFormat = DateTimeFormatter.ofPattern(format);
 
                      _dtFormats.put(fldKey, dtFormat);
                   } else {
-                     _dtFormats.put(fldKey, ISODateTimeFormat.
-                             dateTime());
+                     _dtFormats.put(fldKey, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                   }
                }
 
-               writeOut.write(fldKey, ((DateTime) fldValue).
-                       toString(
-                               _dtFormats.get(fldKey)));
+               OffsetDateTime dtValue = (OffsetDateTime) fldValue;
+               
+               writeOut.write(fldKey, dtValue.format(_dtFormats.get(fldKey)));
             } else if (fldValue instanceof Boolean) {
                writeOut.write(fldKey, String.valueOf((Boolean) fldValue));
             }

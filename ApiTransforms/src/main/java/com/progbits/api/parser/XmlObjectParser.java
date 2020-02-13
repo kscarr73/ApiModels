@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +20,6 @@ import javolution.text.CharArray;
 import javolution.xml.stream.XMLInputFactory;
 import javolution.xml.stream.XMLStreamException;
 import javolution.xml.stream.XMLStreamReader;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -325,20 +324,17 @@ public class XmlObjectParser implements ObjectParser {
                   String format = fld.getString("format");
 
                   if (format != null && !format.isEmpty()) {
-                     DateTimeFormatter dtFormat = DateTimeFormat.
-                             forPattern(format);
+                     DateTimeFormatter dtFormat = DateTimeFormatter.
+                             ofPattern(format);
 
                      _dtFormats.put(name, dtFormat);
                   } else {
-                     _dtFormats.put(name, ISODateTimeFormat.
-                             dateTimeParser());
+                     _dtFormats.put(name, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                   }
                }
 
                if (value.length() > 0) {
-                  obj.setDateTime(name, _dtFormats.get(name).
-                          parseDateTime(value.
-                                  toString()));
+                  obj.setDateTime(name, OffsetDateTime.parse(value, _dtFormats.get(name)));
                }
 
                break;

@@ -14,11 +14,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.format.DateTimeFormatter;
 import org.osgi.service.component.annotations.Component;
 
 /**

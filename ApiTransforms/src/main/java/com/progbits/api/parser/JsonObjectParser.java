@@ -10,15 +10,14 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -267,20 +266,17 @@ public class JsonObjectParser implements ObjectParser {
                                 String format = curField.getString("format");
 
                                 if (format != null && !format.isEmpty()) {
-                                    DateTimeFormatter dtFormat = DateTimeFormat.
-                                            forPattern(format);
+                                    DateTimeFormatter dtFormat = DateTimeFormatter.
+                                            ofPattern(format);
 
                                     _dtFormats.put(key, dtFormat);
                                 } else {
-                                    _dtFormats.put(key, ISODateTimeFormat.
-                                            dateTimeParser());
+                                    _dtFormats.put(key, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
                                 }
                             }
 
                             if (parse.getString().length() > 0) {
-                                obj.setDateTime(key, _dtFormats.get(key).
-                                        parseDateTime(parse.
-                                                getString()));
+                                obj.setDateTime(key, OffsetDateTime.parse(parse.getString(), _dtFormats.get(key)));
                             }
                         } else if ("ArrayString".equals(curField.getString("type"))) {
                             if (obj.isNull(key)) {

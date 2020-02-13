@@ -1,8 +1,13 @@
 package com.progbits.api.formaters;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,64 +17,70 @@ import org.slf4j.LoggerFactory;
  */
 public class TransformDate {
 
-	private final static Logger LOG = LoggerFactory.getLogger(
-			  TransformDate.class);
-	private static final DateTime EPOCH_START_INSTANT = new DateTime(0);
+    private final static Logger LOG = LoggerFactory.getLogger(
+            TransformDate.class);
 
-	public static DateTime transformDate(String value, String format) {
-		DateTimeFormatter df;
-		DateTime dt = null;
+    public static OffsetDateTime transformDate(String value, String format) {
+        DateTimeFormatter df;
+        OffsetDateTime dt = null;
 
-		if ("EPOCHDAYS".equals(format)) {
-			dt = EPOCH_START_INSTANT.plusDays(Integer.parseInt(value));
-		} else {
-			if (format == null || format.isEmpty()) {
-				df = DateTimeFormat.forPattern("MM/dd/yyyy");
-			} else {
-				df = DateTimeFormat.forPattern(format);
-			}
+        if ("EPOCHDAYS".equals(format)) {
+            Instant instant = Instant.EPOCH.plus(Integer.parseInt(value), ChronoUnit.DAYS);
 
-			try {
-				if (value != null && !value.replace("0", "").trim().isEmpty()) {
-					dt = df.parseDateTime(value);
-				}
-			} catch (Exception ex) {
-				LOG.info("transformDate: " + value + " Format: " + format, ex);
-			}
-		}
+            dt = OffsetDateTime.ofInstant(instant, ZoneId.systemDefault());
+        } else {
+            if (format == null || format.isEmpty()) {
+                df = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+            } else {
+                df = DateTimeFormatter.ofPattern(format);
+            }
 
-		return dt;
-	}
+            try {
+                if (value != null && !value.replace("0", "").trim().isEmpty()) {
+                    TemporalAccessor ta = df.parse(value);
 
-	public static String formatDate(Object value, String format) {
-		if (value instanceof DateTime) {
-			DateTime dValue = (DateTime) value;
+                    LocalDateTime ldt = LocalDateTime.from(ta);
+                    dt = ldt.atOffset(ZoneOffset.UTC);
+                }
+            } catch (Exception ex) {
+                LOG.info("transformDate: " + value + " Format: " + format, ex);
+            }
+        }
 
-			if (format == null || format.isEmpty()) {
-				return dValue.toString();
-			} else {
-				if (format.contains("|")) {
-					int iLoc = format.indexOf("|");
+        return dt;
+    }
 
-					if (iLoc > -1) {
-						format = format.substring(0, iLoc);
-					}
-				}
+    public static String formatDate(Object value, String format) {
+        if (value instanceof OffsetDateTime) {
+            OffsetDateTime dValue = (OffsetDateTime) value;
 
-				return dValue.toString(format);
-			}
-		} else {
-			String strRet = "";
+            if (format == null || format.isEmpty()) {
+                return dValue.toString();
+            } else {
+                if (format.contains("|")) {
+                    int iLoc = format.indexOf("|");
 
-			if (format.contains("|")) {
-				int iLoc = format.indexOf("|");
+                    if (iLoc > -1) {
+                        format = format.substring(0, iLoc);
+                    }
+                }
 
-				if (iLoc > -1) {
-					strRet = format.substring(iLoc + 1);
-				}
-			}
+                DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
 
-			return strRet;
-		}
-	}
+                return df.format(dValue);
+            }
+        } else {
+            String strRet = "";
+
+            if (format.contains("|")) {
+                int iLoc = format.indexOf("|");
+
+                if (iLoc > -1) {
+                    strRet = format.substring(iLoc + 1);
+                }
+            }
+
+            return strRet;
+        }
+    }
 }

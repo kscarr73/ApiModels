@@ -15,8 +15,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import javax.script.Bindings;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
+
+import java.time.OffsetDateTime;
+
 
 /**
  * Runtime Representation of API Classes
@@ -123,21 +124,20 @@ public class ApiObject implements Bindings {
         _fields.put(key, value);
     }
 
-    public DateTime getDateTime(String key) {
+    public OffsetDateTime getDateTime(String key) {
         Object obj = getCoreObject(key);
 
-        if (obj instanceof DateTime) {
-            return (DateTime) obj;
+        if (obj instanceof OffsetDateTime) {
+            return (OffsetDateTime) obj;
         } else if (obj instanceof String) {
-            return ISODateTimeFormat.dateTimeParser().
-                    parseDateTime((String) obj);
+            return OffsetDateTime.parse((String) obj);
         }
 
         return null;
     }
 
-    public DateTime getDateTime(String key, DateTime defValue) {
-        DateTime dtRet = (DateTime) getCoreObject(key);
+    public OffsetDateTime getDateTime(String key, OffsetDateTime defValue) {
+        OffsetDateTime dtRet = (OffsetDateTime) getCoreObject(key);
 
         if (dtRet == null) {
             return defValue;
@@ -146,7 +146,7 @@ public class ApiObject implements Bindings {
         }
     }
 
-    public void setDateTime(String key, DateTime value) {
+    public void setDateTime(String key, OffsetDateTime value) {
         _fields.put(key, value);
     }
 
@@ -687,8 +687,8 @@ public class ApiObject implements Bindings {
             return (((Integer) obj) != 0);
         } else if (obj instanceof Long) {
             return (((Long) obj) != 0);
-        } else if (obj instanceof DateTime) {
-            return (((DateTime) obj).getMillis() != 0);
+        } else if (obj instanceof OffsetDateTime) {
+            return (((OffsetDateTime) obj).getNano() != 0);
         } else if (obj instanceof Double) {
             return (((Double) obj) != 0);
         } else if (obj instanceof Boolean) {
@@ -721,7 +721,7 @@ public class ApiObject implements Bindings {
             return TYPE_INTEGER;
         } else if (obj instanceof Long) {
             return TYPE_LONG;
-        } else if (obj instanceof DateTime) {
+        } else if (obj instanceof OffsetDateTime) {
             return TYPE_DATETIME;
         } else if (obj instanceof Double) {
             return TYPE_DOUBLE;
@@ -855,7 +855,7 @@ public class ApiObject implements Bindings {
                                 errors.add(
                                         strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
-                        } else if (!(oFld instanceof DateTime)) {
+                        } else if (!(oFld instanceof OffsetDateTime)) {
                             errors.add(
                                     strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an DateTime");
                         }
@@ -1012,7 +1012,7 @@ public class ApiObject implements Bindings {
                         break;
 
                     case TYPE_DATETIME:
-                        retObj.setDateTime(k, new DateTime((DateTime) v));
+                        retObj.setDateTime(k, ((OffsetDateTime) v).plusNanos(0));
                         break;
 
                     case TYPE_DECIMAL:
@@ -1099,9 +1099,7 @@ public class ApiObject implements Bindings {
                         if (((String) value).isEmpty()) {
                             return _fields.put(name, null);
                         } else {
-                            return _fields.put(name, ISODateTimeFormat.
-                                    dateTimeParser().
-                                    parseDateTime((String) value));
+                            return _fields.put(name, OffsetDateTime.parse((String) value));
                         }
 
                     } else {
