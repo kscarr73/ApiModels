@@ -1,0 +1,459 @@
+[#include "*/header.html"]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <h1>Models</h1>
+
+        <button id="btnAddClass"></button> <button id="btnEdit"></button> <button id="btnDelete"></button> <button id="btnRefresh"></button>
+
+
+        <div id="gridContainer"></div>
+
+        <div id="apiDialog">
+            <table class="dijitDialogPaneContentArea">
+                <tr>
+                    <td><label for="name">Name:</label></td>
+                    <td><input id="name"></td>
+                </tr>
+                <tr>
+                    <td><label for="className">Class Name:</label></td>
+                    <td><input id="className"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="classDesc">Class Desc:</label></td>
+                    <td><div id="classDesc"></div></td>
+                </tr>
+
+                <tr>
+                    <td><label for="classStatus">Class Status:</label></td>
+                    <td><input id="classStatus"></td>
+                </tr>
+
+
+            </table>
+
+            <button id="btnAddField"></button> <button id="btnEditField"></button> <button id="btnDeleteField"></button> 
+
+            <div id="fldGrid"></div>
+
+            <div class="dijitDialogPaneActionBar">
+                <button type="submit" id="dlgOk">OK</button>
+                <button type="button" id="dlgCancel">Cancel</button>
+            </div>
+        </div>
+
+        <div id="apiFieldDialog">
+            <table class="dijitDialogPaneContentArea">
+                <tr>
+                    <td><label for="fieldName">Name:</label></td>
+                    <td><input id="fieldName"></td>
+                </tr>
+                <tr>
+                    <td><label for="fieldType">Type:</label></td>
+                    <td><input id="fieldType"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldSubType">Sub Type:</label></td>
+                    <td><input id="fieldSubType"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldDesc">Description:</label></td>
+                    <td><div id="fieldDesc"></div></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldMin">Min:</label></td>
+                    <td><input id="fieldMin"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldMax">Max:</label></td>
+                    <td><input id="fieldMax"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldSampleData">Sample Data:</label></td>
+                    <td><input id="fieldSampleData"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldLength">Length:</label></td>
+                    <td><input id="fieldLength"></td>
+                </tr>
+
+                <tr>
+                    <td><label for="fieldFormat">Format:</label></td>
+                    <td><input id="fieldFormat"></td>
+                </tr>
+                
+                <tr>
+                    <td><label for="fieldDefault">Default Value:</label></td>
+                    <td><input id="fieldDefault"></td>
+                </tr>
+
+            </table>
+
+            <div class="dijitDialogPaneActionBar">
+                <button type="submit" id="dlgFieldOk">OK</button>
+                <button type="button" id="dlgFieldCancel">Cancel</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var fldData = [];
+            var fldEdit = false;
+            var classId = "";
+
+            require(["gridx/Grid", "gridx/core/model/cache/Async", "dojo/store/Memory",
+                "dijit/form/Button", "dijit/Dialog", "dijit/form/TextBox",
+                "dijit/form/NumberTextBox", "dijit/form/Textarea", "dojo/store/JsonRest",
+                "dijit/form/Select",
+                "dijit/Editor",
+                "gridx/modules/select/Row",
+                "gridx/modules/SingleSort", "gridx/modules/RowHeader",
+                "gridx/modules/move/Row", "gridx/modules/dnd/Row", "gridx/modules/SingleSort",
+                "gridx/modules/IndirectSelect",
+                "gridx/modules/Pagination",
+		"gridx/modules/pagination/PaginationBar",
+		"gridx/modules/Filter",
+		"gridx/modules/filter/FilterBar"
+            ],
+                    function (Grid, Cache, Memory, Button, Dialog, TextBox,
+                            NumberTextBox, TextArea, JsonRest, Select, Editor) {
+
+                        var apiDialog = Dialog({title: "API Class", style: "width: 800px; height: 650px;"}, "apiDialog");
+
+                        apiDialog.startup();
+
+                        var apiFieldDialog = Dialog({title: "API Field", style: "width: 800px; height: 400px;"}, "apiFieldDialog");
+
+                        apiFieldDialog.startup();
+
+                        var fldStore = new Memory({data: fldData, idProperty: "name"});
+                        var store = new JsonRest({
+                            target: "/apiweb/es/apiclasses/apiclass/",
+                            idProperty: "_id"
+                        });
+
+                        var btnAddFld = new Button({
+                            iconClass: "dijitIconNewTask",
+                            showLabel: true,
+                            label: "Add Field",
+                            onClick: function () {
+                                dijit.byId("fieldName").set("value", "");
+                                dijit.byId("fieldType").set("value", "");
+                                dijit.byId("fieldSubType").set("value", "");
+                                dijit.byId("fieldDesc").set("value", "");
+                                dijit.byId("fieldMin").set("value", "");
+                                dijit.byId("fieldMax").set("value", "");
+                                dijit.byId("fieldLength").set("value", "");
+                                dijit.byId("fieldFormat").set("value", "");
+                                dijit.byId("fieldSampleData").set("value", "");
+                                dijit.byId("fieldDefault").set("value", "");
+                                
+
+                                fldEdit = false;
+                                apiFieldDialog.show();
+                            }
+                        }, "btnAddField").startup();
+
+                        var btnEditField2 = new Button({
+                            iconClass: "dijitIconEditTask",
+                            showLabel: true,
+                            label: "Edit",
+                            onClick: function () {
+                                var dataItem = fldGrid.select.row.getSelected();
+                                var item = fldStore.get(dataItem[0]);
+
+                                dijit.byId("fieldName").set("value", item.name);
+                                dijit.byId("fieldType").set("value", item.type);
+                                dijit.byId("fieldSubType").set("value", item.subType);
+                                dijit.byId("fieldDesc").set("value", item.desc);
+                                dijit.byId("fieldMin").set("value", item.min);
+                                dijit.byId("fieldMax").set("value", item.max);
+                                dijit.byId("fieldSampleData").set("value", item.sampleData);
+                                
+                                if (item.length) {
+                                    dijit.byId("fieldLength").set("value", item.length);
+                                } else {
+                                    dijit.byId("fieldLength").set("value", 0);
+                                }
+                                
+                                dijit.byId("fieldFormat").set("value", item.format);
+                                dijit.byId("fieldDefault").set("value", item.defaultValue);
+
+                                fldEdit = true;
+                                apiFieldDialog.show();
+                            }
+                        }, "btnEditField").startup();
+
+                        var btnDeleteField2 = new Button({
+                            iconClass: "dijitIconDelete",
+                            showLabel: true,
+                            label: "Delete",
+                            onClick: function () {
+                                var dataItem = fldGrid.select.row.getSelected();
+
+                                fldStore.remove(dataItem[0]);
+
+                                //deleteByName(fldData, dataItem);
+
+                                //fldStore = new Memory({data: fldData, idProperty: 'name'});
+                                //fldGrid.model.setStore(fldStore);
+                            }
+                        }, "btnDeleteField").startup();
+
+                        var fldName = new TextBox({style: "width: 150px;"}, "name");
+                        var fldClassName = new TextBox({style: "width: 150px;"}, "className");
+                        var fldClassDesc = new Editor({height: "100px"}, "classDesc");
+                        fldClassDesc.startup();
+                        
+                        var fldFieldName = new TextBox({style: "width: 100px;"}, "fieldName");
+                        var fldFieldType = new Select({name: "fieldType", options: [
+                                {label: "String", value: "String"},
+                                {label: "Integer", value: "Integer"},
+                                {label: "Long", value: "Long"},
+                                {label: "ArrayList", value: "ArrayList"},
+                                {label: "Object", value: "Object"},
+                                {label: "DateTime", value: "DateTime"},
+                                {label: "Double", value: "Double"},
+                                {label: "Boolean", value: "Boolean"}
+                            ], style: "width: 100px;"}, "fieldType");
+                        var fldFieldSubType = new TextBox({style: "width: 150px;"}, "fieldSubType");
+                        var fldFieldDesc = new Editor({height: "100px"}, "fieldDesc");
+                        fldFieldDesc.startup();
+                        
+                        var fldFieldMin = new NumberTextBox({}, "fieldMin");
+                        var fldFieldMax = new NumberTextBox({}, "fieldMax");
+                        var fldFieldLength = new NumberTextBox({}, "fieldLength");
+                        var fldStatus = new Select({name: "classStatus", options: [
+                                {label: "Enabled", value: 1},
+                                {label: "Disabled", value: 0},
+                                {label: "Depricated", value: 2}
+                            ], style: "width: 100px;"}, "classStatus");
+                        var fldFieldFormat = new TextBox({style: "width: 100px;"}, "fieldFormat");
+                        var fldFieldDefault = new TextBox({style: "width: 100px;"}, "fieldDefault");
+                        var fldFieldSampleData = new TextBox({style: "width: 100px;"}, "fieldSampleData");
+
+                        var showDialogBtn = new Button({
+                            iconClass: "dijitIconNewTask",
+                            showLabel: true,
+                            label: "Add Class",
+                            onClick: function () {
+                                fldData = [];
+
+                                dijit.byId("name").set("value", "");
+                                dijit.byId("className").set("value", "");
+                                dijit.byId("classDesc").set("value", "");
+
+                                fldStore = new Memory({data: fldData, idProperty: 'name'});
+                                fldGrid.model.setStore(fldStore);
+                                fldGrid.body.refresh();
+
+                                classId = "";
+
+                                apiDialog.show();
+                            }
+                        }, "btnAddClass").startup();
+
+                        var btnDlgFieldOk = new Button({
+                            label: "OK",
+                            onClick: function () {
+                                var fldDescEntry = dijit.byId("fieldDesc").value;
+                                fldDescEntry = fldDescEntry.replace(/^\s+|\s+$/g, '');
+                                
+                                var curFldData = {
+                                    name: dijit.byId("fieldName").value,
+                                    type: dijit.byId("fieldType").value,
+                                    subType: dijit.byId("fieldSubType").value,
+                                    desc: fldDescEntry,
+                                    min: Number(dijit.byId("fieldMin").value),
+                                    max: Number(dijit.byId("fieldMax").value),
+                                    length: Number(dijit.byId("fieldLength").value),
+                                    sampleData: dijit.byId("fieldSampleData").value,
+                                    format: dijit.byId("fieldFormat").value,
+                                    defaultValue: dijit.byId("fieldDefault").value
+                                };
+
+                                if (fldEdit) {
+                                    fldStore.put(curFldData);
+                                } else {
+                                    fldStore.add(curFldData);
+                                }
+
+                                fldStore = new Memory({data: fldData, idProperty: 'name'});
+                                fldGrid.model.setStore(fldStore);
+                                //fldGrid.body.refresh()
+
+                                apiFieldDialog.hide();
+                            }
+                        }, "dlgFieldOk").startup();
+
+                        var btnDlgFieldCancel = new Button({
+                            label: "Cancel",
+                            onClick: function () {
+                                apiFieldDialog.hide();
+                            }
+                        }, "dlgFieldCancel").startup();
+
+                        var btnRefresh2 = new Button({
+                            iconClass: "dijitIconUndo",
+                            showLabel: true,
+                            label: "Refresh",
+                            onClick: function () {
+                                grid.model.setStore(store);
+                            }
+                        }, "btnRefresh").startup();
+
+                        var btnEdit2 = new Button({
+                            iconClass: "dijitIconEditTask",
+                            showLabel: true,
+                            label: "Edit",
+                            onClick: function () {
+                                var dataItem = grid.select.row.getSelected();
+                                store.get(dataItem[0]).then(function (item) {
+                                    classId = dataItem[0];
+
+                                    dijit.byId("name").set("value", item[0].name);
+                                    dijit.byId("className").set("value", item[0].className);
+                                    dijit.byId("classDesc").set("value", item[0].desc);
+
+                                    fldData = item[0].fields;
+
+                                    fldStore = new Memory({data: fldData, idProperty: 'name'});
+                                    fldGrid.model.setStore(fldStore);
+                                    //fldGrid.body.refresh();
+
+                                    apiDialog.show();
+                                });
+                            }
+                        }, "btnEdit").startup();
+
+                        var btnDelete2 = new Button({
+                            iconClass: "dijitIconDelete",
+                            showLabel: true,
+                            label: "Delete",
+                            onClick: function () {
+                                var dataItem = grid.select.row.getSelected();
+                                grid.store.remove(dataItem[0]);
+                            }
+                        }, "btnDelete").startup();
+
+                        var btnDlgOk = new Button({
+                            label: "OK",
+                            onClick: function () {
+                                var curDate = new Date();
+
+                                var classDescEntry = fldClassDesc.get("value");
+                                classDescEntry = classDescEntry.replace(/^\s+|\s+$/g, '');
+                                
+                                var classEntry = {
+                                    name: dijit.byId("name").value,
+                                    className: dijit.byId("className").value,
+                                    desc: classDescEntry,
+                                    lastUpdated: curDate.toISOString(),
+                                    fields: fldData
+                                };
+
+                                if (!classId || !classId.length) {
+                                    grid.store.add(classEntry);
+                                } else {
+                                    classEntry._id = classId;
+                                    grid.store.put(classEntry);
+                                }
+
+                                grid.model.clearCache();
+
+                                setTimeout(function () {
+                                    grid.model.setStore(store);
+                                }, 4000);
+
+                                apiDialog.hide();
+                            }
+                        }, "dlgOk").startup();
+
+                        var btnDlgCancel = new Button({
+                            label: "Cancel",
+                            onClick: function () {
+                                apiDialog.hide();
+                            }
+                        }, "dlgCancel").startup();
+
+                        var grid = new Grid({
+                            store: store,
+                            style: "height: 450px;",
+                            cacheClass: Cache,
+                            selectRowMultiple: false,
+                            structure: [
+                                {id: "column_1", field: "name", name: "Name"},
+                                {id: "column_2", field: "className", name: "Class Name"},
+                                {id: "column_3", field: "desc", name: "Description"}
+                            ],
+                            selectRowTriggerOnCell: true,
+                            modules: ['gridx/modules/select/Row',
+                                'gridx/modules/SingleSort',
+                                'gridx/modules/RowHeader',
+                                'gridx/modules/IndirectSelect',
+                                'gridx/modules/Pagination',
+                                'gridx/modules/pagination/PaginationBar',
+                                'gridx/modules/Filter',
+                                'gridx/modules/filter/FilterBar']
+                        });
+
+                        var fldGrid = new Grid({
+                            store: fldStore,
+                            style: "width: 750px;",
+                            cacheClass: Cache,
+                            selectRowMultiple: false,
+                            structure: [
+                                {id: "fldcolumn_1", field: "name", name: "Name"},
+                                {id: "fldcolumn_2", field: "type", name: "Type"},
+                                {id: "fldcolumn_3", field: "subType", name: "Sub Type"},
+                                {id: "fldcolumn_4", field: "desc", name: "Description"}
+                            ],
+                            selectRowTriggerOnCell: true,
+                            modules: ['gridx/modules/select/Row',
+                                'gridx/modules/SingleSort',
+                                'gridx/modules/RowHeader',
+                                'gridx/modules/IndirectSelect',
+                                "gridx/modules/move/Row", "gridx/modules/dnd/Row",
+                                "gridx/modules/SingleSort"]
+                        });
+
+                        grid.placeAt("gridContainer");
+                        grid.startup();
+
+                        fldGrid.placeAt("fldGrid");
+                        fldGrid.startup();
+                    });
+
+            function findByName(source, name) {
+                for (var i = 0; i < source.length; i++) {
+                    if (source[i].name == name) {
+                        return source[i];
+                    }
+                }
+                throw "Couldn't find object with id: " + id;
+            }
+
+            function deleteByName(source, name) {
+                for (var i = 0; i < source.length; i++) {
+                    if (source[i].name == name) {
+                        source.splice(i, i);
+                        return;
+                    }
+                }
+                throw "Couldn't find object with name: " + name;
+            }
+        </script>
+    </div>
+</main>
+
+<!-- end content -->
+[#include "*/footer.html"]

@@ -1,0 +1,82 @@
+[#if noframe == false]
+[#include "*/header.html"]
+[#else]
+[#include "*/header_noframe.html"]
+[/#if]
+
+<!-- content -->
+
+<script type="text/javascript" src="/jsjq/aceeditor/ace.js"></script>
+
+<main>
+	<div class="innertube">
+
+		<h1>Api Mapping</h1>
+
+		<table id="headerTbl" style="width:100%;">
+			<tr>
+				<td><h1>Models</h1></td>
+				<td style="width:30%;">
+					<table style="width:100%">
+						<tr style="vertical-align: middle;"><td style="width: 30%"><label for="selEnv">Environment:</label></td>
+							<td><select class="form-control" id="selEnv">
+									[#list Environments as Env]
+									<option>${Env}</option>
+									[/#list]
+								</select>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+
+		<div id="displayMainTable">
+			<table id="mainTable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Source Model</th>
+						<th>Target Model</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+
+
+		<div id="apiDialog">
+			<form>
+				<div class="form-group">
+					<label for="name">Name</label>
+					<input type="text" title="The Name for This Map" class="form-control" id="name" placeholder="Map Name">
+				</div>
+				<div class="form-group">
+					<label for="sourceClass">Source Class</label>
+					<input type="text" class="form-control" id="sourceClass" placeholder="Source for Map">
+				</div>
+				<div class="form-group">
+					<label for="targetClass">Target Class</label>
+					<input type="text" class="form-control" id="targetClass" placeholder="Target for Map">
+				</div>
+				<div class="form-group">
+					<label for="editor">Editor</label>
+					<div class="form-control" style="height: 400px; "id="editor" id="editor" ></div>
+				</div>
+
+			</form>
+		</div>
+
+		<script type="text/javascript">
+			[#include "mapping.js"]
+		</script>
+	</div>
+</main>
+
+<!-- end content -->
+[#if noframe == false]
+[#include "*/footer.html"]
+[#else]
+[#include "*/footer_noframe.html"]
+[/#if]

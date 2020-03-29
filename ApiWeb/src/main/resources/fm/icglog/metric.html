@@ -1,0 +1,58 @@
+[#include "*/header.html"]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <h1>ICG Metric</h1>
+
+        <div>
+            <div id="gridContainer"></div>
+        </div>
+
+        <script type="text/javascript">
+			var fldData = [];
+
+			require(["gridx/Grid", "gridx/core/model/cache/Async", "dojo/store/Memory",
+				"dijit/form/Button", "dijit/Dialog", "dijit/form/TextBox", "dojo/store/JsonRest",
+				"gridx/modules/Pagination", "gridx/modules/pagination/PaginationBar",
+				"gridx/modules/Filter", "gridx/modules/filter/FilterBar"],
+					function (Grid, Cache, Memory, Button, Dialog, TextBox, JsonRest) {
+
+						var store = new JsonRest({
+							target: "/apiweb/es/icgmetric*/",
+							idAttribute: "_id"
+						});
+
+						var grid = new Grid({
+							store: store,
+							cacheClass: Cache,
+							height: "500px",
+							structure: [
+								{id: "column_1", field: "@timestamp", name: "Date Time"},
+								{id: "column_2", field: "@Trans_RequestorId", name: "Requestor ID"},
+								{id: "column_3", field: "@Trans_ConsumerId", name: "Consumer ID"},
+								{id: "column_4", field: "host", name: "Host"},
+								{id: "column_5", field: "compName", name: "Component Name"},
+								{id: "column_6", field: "TransId", name: "Transaction ID"},
+								{id: "column_6", field: "Status", name: "Status"},
+								{id: "column_6", field: "Duration", name: "Duration"}
+
+							],
+							selectRowTriggerOnCell: true,
+							modules: ["gridx/modules/Pagination",
+								"gridx/modules/pagination/PaginationBar",
+								"gridx/modules/Filter", "gridx/modules/filter/FilterBar"]
+						});
+
+						grid.placeAt("gridContainer");
+						grid.startup();
+
+					});
+        </script>
+    </div>
+</main>
+
+<!-- end content -->
+[#include "*/footer.html"]

@@ -1,0 +1,44 @@
+{
+    "template": "apimodels",
+     "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "_doc": {
+            "properties": {
+                "className": {
+                    "type": "keyword"
+                },
+                "desc": {
+                    "type": "text"
+                },
+                "fields": {
+                    "properties": {
+                        "desc": {
+                            "type": "text"
+                        },
+                        "max": {
+                            "type": "text"
+                        },
+                        "min": {
+                            "type": "text"
+                        },
+                        "name": {
+                            "type": "text"
+                        },
+                        "subType": {
+                            "type": "text"
+                        },
+                        "type": {
+                            "type": "text"
+                        }
+                    }
+                },
+                "name": {
+                    "type": "keyword"
+                }
+            }
+        }
+    }
+}

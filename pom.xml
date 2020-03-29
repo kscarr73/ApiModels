@@ -14,6 +14,7 @@
         <module>ApiUtils</module>
         <module>ApiMappingGraalVM</module>
         <module>GraalVMJSOsgi</module>
+        <module>ApiWeb</module>
     </modules>
 
 </project>

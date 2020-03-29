@@ -1,0 +1,47 @@
+[#include "*/header.html"]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <h1>Service Promote</h1>
+
+        <form method="POST" action="#">
+            <table style="width: 100%;">
+                <tr>
+                    <td><label for="name">Service Name:</label></td>
+                    <td><input id="serviceName" name="serviceName" type="text" ></td>
+                </tr>
+
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><input id="submit" name="promote" type="submit" value="Promote Service" ></td>
+                </tr>
+            </table>
+        </form>
+
+        [#if objRet??]
+
+        <h3>Status: &nbsp;${objRet.getBoolean("status")?string("Success", "Failure")}</h3>
+
+        <table style="width: 100%">
+            <tr>
+            <th>Service Name</th>
+            <th>From Last Updated</th>
+            <th>To Last Updated</th>
+            </tr>
+            
+            <tr>
+                <td>${objRet.getString("name")}</td>
+                <td>${objRet.getString("fromLastUpdated")}</td>
+                <td>${objRet.getString("toLastUpdated")}</td>
+            </tr>
+            
+        </table>
+        [/#if]
+    </div>
+</main>
+
+<!-- end content -->
+[#include "*/footer.html"]

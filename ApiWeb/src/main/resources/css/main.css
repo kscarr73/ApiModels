@@ -1,0 +1,14 @@
+table.dataTable thead th {
+    padding: 10px 18px;
+    border-bottom: 2px solid #48b0f7;
+    border-right: 1px solid grey;
+}
+
+table.dataTable {
+    border-color: grey;
+}
+
+table.dataTable tbody td {
+    border-right: 1px solid grey;
+    border-bottom: 1px solid grey;
+}

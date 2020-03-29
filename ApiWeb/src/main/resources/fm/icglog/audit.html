@@ -1,0 +1,55 @@
+[#include "*/header.html"]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <h1>ICG Logs</h1>
+
+        <div>
+            <div id="gridContainer"></div>
+        </div>
+
+        <script type="text/javascript">
+			var fldData = [];
+
+			require(["gridx/Grid", "gridx/core/model/cache/Async", "dojo/store/Memory",
+				"dijit/form/Button", "dijit/Dialog", "dijit/form/TextBox", "dojo/store/JsonRest",
+				"gridx/modules/Pagination", "gridx/modules/pagination/PaginationBar",
+				"gridx/modules/Filter", "gridx/modules/filter/FilterBar"],
+					function (Grid, Cache, Memory, Button, Dialog, TextBox, JsonRest) {
+
+						var store = new JsonRest({
+							target: "/apiweb/es/icglog*/",
+							idAttribute: "_id"
+						});
+
+						var grid = new Grid({
+							store: store,
+							cacheClass: Cache,
+							height: "500px",
+							structure: [
+								{id: "column_1", field: "@timestamp", name: "Date Time"},
+								{id: "column_2", field: "@Trans_appName", name: "App Name"},
+								{id: "column_3", field: "compName", name: "Component Name"},
+								{id: "column_4", field: "host", name: "Host"},
+								{id: "column_5", field: "LogLevel", name: "LogLevel"},
+								{id: "column_6", field: "message", name: "Message"}
+							],
+							selectRowTriggerOnCell: true,
+							modules: ["gridx/modules/Pagination",
+								"gridx/modules/pagination/PaginationBar",
+								"gridx/modules/Filter", "gridx/modules/filter/FilterBar"]
+						});
+
+						grid.placeAt("gridContainer");
+						grid.startup();
+
+					});
+        </script>
+    </div>
+</main>
+
+<!-- end content -->
+[#include "*/footer.html"]

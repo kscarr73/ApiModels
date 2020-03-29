@@ -16,6 +16,14 @@
 		<maven.compiler.target>10</maven.compiler.target>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>internal.repo</id>
+			<name>Internal Repo</name>
+			<url>${mvnRepo}</url>
+		</repository>
+	</distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -36,7 +44,7 @@
 		<dependency>
 			<groupId>com.progbits.api.elastic</groupId>
 			<artifactId>ElasticUtils</artifactId>
-			<version>1.0.0</version>
+			<version>[1.0.1,2)</version>
 		</dependency>
 	</dependencies>
 

@@ -4,7 +4,7 @@
 
     <groupId>com.progbits.api.transforms</groupId>
     <artifactId>ApiTransforms</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <packaging>bundle</packaging>
 
     <url>http://maven.apache.org</url>
@@ -12,9 +12,9 @@
     <description>
         install -s mvn:org.glassfish/javax.json/1.1.4
         install -s mvn:org.javolution/javolution-core-java/6.0.0
-        install -s mvn:org.apache.commons/commons-csv/1.6
-        install -s mvn:com.progbits.api/ApiCore/1.0.0
-        install -s mvn:com.progbits.api.transforms/ApiTransforms/1.0.0
+        install -s mvn:org.apache.commons/commons-csv/1.8
+        install -s mvn:com.progbits.api/ApiCore/1.1.0
+        install -s mvn:com.progbits.api.transforms/ApiTransforms/1.1.0
     </description>
     
     <properties>
@@ -25,8 +25,9 @@
 
     <distributionManagement>
         <repository>
-            <id>nexus.release</id>
-            <url>${nexusMavenRelease}</url>
+            <id>internal.repo</id>
+            <name>Internal Repo</name>
+            <url>${mvnRepo}</url>
         </repository>
     </distributionManagement>
 
@@ -34,7 +35,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>1.7.30</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -65,7 +66,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.6</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>com.progbits.api</groupId>
@@ -85,7 +86,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>4.1.0</version>
+                <version>4.2.1</version>
 
                 <extensions>true</extensions>
 
@@ -99,7 +100,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>

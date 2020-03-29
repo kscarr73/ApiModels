@@ -1,0 +1,50 @@
+[#include "*/header.html"]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <h1>Api Promote</h1>
+
+        <form method="POST" action="#">
+            <table style="width: 100%;">
+                <tr>
+                    <td><label for="name">Package:</label></td>
+                    <td><input id="packageName" name="packageName" type="text" ></td>
+                </tr>
+
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><input id="submit" name="promote" type="submit" value="Promote Package" ></td>
+                </tr>
+            </table>
+        </form>
+
+        [#if objRet??]
+
+        <h2>Package Name: ${objRet.getString("packageName")}</h2>
+        <h3>Status: &nbsp;${objRet.getBoolean("status")?string("Success", "Failure")}</h3>
+
+        <table style="width: 100%">
+            <tr>
+            <th>Class Name</th>
+            <th>From Last Updated</th>
+            <th>To Last Updated</th>
+            </tr>
+            
+            [#list objRet.getList("rows") as row]
+            <tr>
+                <td>${row.getString("className")}</td>
+                <td>${row.getString("fromLastUpdated")}</td>
+                <td>${row.getString("toLastUpdated")}</td>
+            </tr>
+            [/#list]
+
+        </table>
+        [/#if]
+    </div>
+</main>
+
+<!-- end content -->
+[#include "*/footer.html"]

@@ -5,6 +5,7 @@ import com.progbits.api.WriterService;
 import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiException;
 import com.progbits.api.ApiMapping;
+import com.progbits.api.elastic.ElasticUtils;
 import com.progbits.api.model.ApiClass;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
@@ -12,6 +13,7 @@ import com.progbits.api.transforms.Transform;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,12 +27,19 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     private ParserService _parser;
     private WriterService _writer;
     private ApiMapping mappingFactory = null;
+	private ElasticUtils elasticUtils = null;
 
     public ApiUtilsLoader(ClassLoader loader, ParserService parser,
             WriterService writer) {
         _loader = loader;
         _parser = parser;
         _writer = writer;
+		
+		elasticUtils = new ElasticUtils();
+		
+		Map<String, String> props = new HashMap<>();
+		
+		elasticUtils.setup(props);
     }
 
     @Override
@@ -193,5 +202,9 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     public Boolean saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+	public ElasticUtils getElasticUtils() {
+		return elasticUtils;
+	}
 
 }

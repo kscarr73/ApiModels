@@ -7,6 +7,7 @@ import com.progbits.api.model.ApiObject;
 import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiException;
 import com.progbits.api.ApiMapping;
+import com.progbits.api.elastic.ElasticUtils;
 import java.util.Map;
 
 /**
@@ -79,4 +80,6 @@ public interface ApiUtilsInterface {
 	public Boolean saveApiModel(ApiObject obj) throws ApiException, ApiClassNotFoundException;
 
 	public Boolean saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException;
+	
+	public ElasticUtils getElasticUtils();
 }

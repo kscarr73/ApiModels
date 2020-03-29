@@ -1,0 +1,174 @@
+[#if noframe == false]
+[#include "*/header.html"]
+[#else]
+[#include "*/header_noframe.html"]
+[/#if]
+
+<!-- content -->
+<script type="text/javascript" src="/jsjq/aceeditor/ace.js"></script>
+
+<main>
+	<div class="innertube">
+
+		<h1>Monitors</h1>
+
+		<div>
+			<table id="mainTable">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Host</th>
+						<th>Name</th>
+						<th>Group</th>
+						<th>Server</th>
+						<th>Status</th>
+						<th>Failure Mode</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+		<div id="apiDialog">
+			<form>
+				<div class="form-group">
+					<label for="monitorName">Name</label>
+					<input type="text" class="form-control" id="monitorName" placeholder="Monitor Name">
+				</div>
+				<div class="form-group">
+					<label for="monitorGroup">Group</label>
+					<input type="text" class="form-control" id="monitorGroup" placeholder="Blank for Default Group.">
+				</div>
+				<div class="form-group">
+					<label for="monitorHost">Monitor Host</label>
+					<input type="text" title="This is the monitor host that will run this monitor.  Use all for all availabe hosts, or the hostname of the server that this monitor will run on." class="form-control" id="monitorHost" placeholder="Host for this monitor">
+				</div>
+				<div class="form-group">
+					<label for="monitorSchedule">Schedule</label>
+					<input type="text" title="Use 30s for 30 seconds, 30m for 30 minutes, or 2h for 2 hours.
+							 Any number can be used for each type.
+							 You can also use Cron syntax." class="form-control" id="monitorSchedule" placeholder="Schedule for monitor">
+				</div>
+				<div class="form-group">
+					<label for="monitorServer">Server</label>
+					<input type="text" title="This is the monitor the server is testing." class="form-control" id="monitorServer" placeholder="Server">
+				</div>
+				<div class="form-group">
+					<label for="monitorStatus">Status</label>
+					<select id="monitorStatus" class="form-control">
+						<option value="1">Active</option>
+						<option value="0">Off</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="failureMode">Failure Mode</label>
+					<select id="failureMode" class="form-control">
+						<option value="Singleton">Singleton - First</option>
+						<option value="All">All - Each</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="notificationMode">Notification Mode</label>
+					<select id="notificationMode" class="form-control">
+						<option value="Combined">Combined</option>
+						<option value="Each">Each - Individual</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<button type="button" id="btnAddAction" onclick="editAction(-1);" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span>Add Action</button>
+
+					<table id="fieldList" class="table table-striped">
+						<thead>
+						<th>Actions</th>
+						<th>Name</th>
+						<th>Component Id</th>
+						<th>Type</th>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+
+				</div>
+
+			</form>
+		</div>
+
+		<div id="monitorActionDialog">
+			<form>
+				<div class="form-group">
+					<label for="actionName">Action Name</label>
+					<input type="text" class="form-control" id="actionName" placeholder="Action Name">
+				</div>
+				<div class="form-group">
+					<label for="alertEvent">Alert Event</label>
+					<input type="text" class="form-control" id="alertEvent" placeholder="Resource Name for Alert. DEFAULT: SERVICE_DOWN">
+				</div>
+
+				<div class="form-group">
+					<label for="alertError">Component ID</label>
+					<input type="text" class="form-control" id="actionCompId" placeholder="Component ID">
+				</div>
+				<div class="form-group">
+					<label for="actionType">Action Type</label>
+					<select id="actionType" class="form-control">
+						<option value="HTTP">HTTP</option>
+						<option value="ELASTIC">ElasticSearch</option>
+						<option value="COMPONENT">Karaf Components</option>
+						<option value="BUNDLE">Karaf Bundles</option>
+						<option value="LSIFEED">LSI FEED</option>
+						<option value="SQL">SQL</option>
+						<option value="FILE">FILE</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<button type="button" id="btnAddActionOption" onclick="editActionOptions(-1);" class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span>Add Option</button>
+
+					<table id="actionOptions" class="table table-striped">
+						<thead>
+						<th>Actions</th>
+						<th>Name</th>
+						<th>Value</th>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+
+				</div>
+
+			</form>
+		</div>
+
+		<div id="monitorActionOptionDialog">
+			<form>
+				<div class="form-group">
+					<label for="optionName">Option Name</label>
+					<input type="text" class="form-control" id="optionName" placeholder="Option Name">
+				</div>
+				<div class="form-group">
+					<label for="optionValue">Option Value</label>
+					<div class="form-control" style="height: 300px;" id="optionValue" ></div>
+				</div>
+			</form>
+		</div>
+
+		<script type="text/javascript">
+			[#include "monitors.js"]
+		</script>
+
+
+
+		[#include "monitors_actionrow.tpl"]
+
+		[#include "monitors_optionrow.tpl"]
+	</div>
+</main>
+
+<!-- end content -->
+[#if noframe == false]
+[#include "*/footer.html"]
+[#else]
+[#include "*/footer_noframe.html"]
+[/#if]

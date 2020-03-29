@@ -1,0 +1,25 @@
+[#if noframe == false]
+[#include "*/header.html"]
+[#else]
+[#include "*/header_noframe.html"]
+[/#if]
+
+<!-- content -->
+
+<main>
+    <div class="innertube">
+
+        <div class="apiModel">
+            <h1>${className}</h1>
+
+            <div>${classHtml}</div>
+        </div> 
+    </div>
+</main>
+
+<!-- end content -->
+[#if noframe == false]
+[#include "*/footer.html"]
+[#else]
+[#include "*/footer_noframe.html"]
+[/#if]
