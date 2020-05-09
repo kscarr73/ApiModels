@@ -42,8 +42,24 @@ public class FddFormatter {
 		text.append(STANDARD_SPACE).append("data:\n");
 		
 		mainClass.getList("fields").forEach(field -> {
+			
+			StringBuilder sbField = new StringBuilder();
+			
+			sbField.append("- { idRef: '").append(field.getString("name")).append("'");
+			
+			switch (field.getString("type")) {
+				case "ArrayList": 
+					sbField.append(" , count: '>1' ");
+					break;
+					
+				default:
+					break;
+			}
+			
+			sbField.append(" }\n");
+			
 			text.append(STANDARD_SPACE);
-			text.append("- { idRef: '").append(field.getString("name")).append("' }\n");
+			
 		});
 		
 	}
@@ -64,6 +80,16 @@ public class FddFormatter {
 				default:
 					text.append(" type: ").append(field.getString("type")).append(", ");
 					break;
+			}
+			
+			if (field.getString("format") != null && !field.getString("format").isEmpty()) {
+				text.append(" format: ").append(field.getString("format")).append(" , ");
+			}
+			
+			if (field.getLong("min") != null && field.getLong("min") > 0) {
+				text.append(" usage: M").append(" , ");
+			} else {
+				text.append(" usage: O").append(" , ");
 			}
 			
 			text.append(" length: ").append(field.getLong("length")).append(" }\n");

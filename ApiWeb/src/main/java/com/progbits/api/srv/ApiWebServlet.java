@@ -19,20 +19,16 @@ import com.progbits.util.http.HttpUtils;
 import com.progbits.web.UrlEntry;
 import com.progbits.web.WebUtils;
 import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -99,11 +95,11 @@ public class ApiWebServlet extends HttpServlet {
 		_fm.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
 
 		try {
-//			_fm.setTemplateLoader(
-//					  new ClassTemplateLoader(this.getClass(), "/fm"));
 			_fm.setTemplateLoader(
-					new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
-					));
+					  new ClassTemplateLoader(this.getClass(), "/fm"));
+//			_fm.setTemplateLoader(
+//					new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
+//					));
 
 			jsonParser = _apiUtils.getParser().getParser("JSON");
 			jsonParser.init(null, null, null, null);
@@ -350,7 +346,7 @@ public class ApiWebServlet extends HttpServlet {
 				
 				resp.setHeader("Content-Disposition", 
 						String.format("Content-Disposition: attachment; filename=%s", 
-								intClasses.getClass(strClassName).getString("name") + ".fdd")
+								intClasses.getClass(strClassName).getString("name") + ".ffd")
 				);
 				resp.setContentType("application/fdd");
 				resp.setContentLength(strFddResponse.length());

@@ -348,7 +348,11 @@ function saveField() {
 	}
 
 
-	if (currFieldId == -1) {
+	if (currFieldId === -1) {
+		if (fldData === undefined) {
+			fldData = []
+		}
+		
 		fldData.push(nf);
 	} else {
 		fldData[currFieldId] = nf;
