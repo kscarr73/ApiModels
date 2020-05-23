@@ -61,9 +61,9 @@ public class RamlFormatter {
 					break;
 			}
 			
-			if (!lastField) {
-				fieldLine += ",";
-			}
+//			if (!lastField) {
+//				fieldLine += ",";
+//			}
 			
 			addLine(fieldList, 3, fieldLine);
 		}
