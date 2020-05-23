@@ -59,7 +59,7 @@ public class FddFormatter {
 			sbField.append(" }\n");
 			
 			text.append(STANDARD_SPACE);
-			
+			text.append(sbField);
 		});
 		
 	}

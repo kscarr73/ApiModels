@@ -178,11 +178,19 @@ var table = $('#mainTable').DataTable({
 					}
 				},
 				{
-					text: 'FDD Mulesoft',
+					text: 'FFD Mulesoft',
 					action: function () {
 						className = table.row('.selected').data().className;
 
-						window.open("/apiweb/view/" + className + "?environment=" + $("#selEnv").val() + "&format=fddMulesoft", "");
+						window.open("/apiweb/view/" + className + "?environment=" + $("#selEnv").val() + "&format=ffdMulesoft", "");
+					}
+				},
+				{
+					text: 'RAML',
+					action: function () {
+						className = table.row('.selected').data().className;
+
+						window.open("/apiweb/view/" + className + "?environment=" + $("#selEnv").val() + "&format=raml", "");
 					}
 				}
 			]

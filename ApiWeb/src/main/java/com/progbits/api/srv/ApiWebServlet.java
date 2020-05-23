@@ -11,6 +11,7 @@ import com.progbits.api.srv.formatter.DocTransform;
 import com.progbits.api.srv.formatter.ElasticSearchV5Formatter;
 import com.progbits.api.srv.formatter.FddFormatter;
 import com.progbits.api.srv.formatter.PlantUmlFormatter;
+import com.progbits.api.srv.formatter.RamlFormatter;
 import com.progbits.api.transforms.Transform;
 import com.progbits.api.transforms.XsdTransform;
 import com.progbits.api.utils.ApiUtils;
@@ -247,7 +248,7 @@ public class ApiWebServlet extends HttpServlet {
 
 		ApiClasses intClasses = new ApiClasses();
 		_apiUtils.retrieveClasses(strClassName, intClasses);
-
+		
 		if (intClasses.getClasses().size() > -1) {
 			if ("xsd".equalsIgnoreCase(req.getParameter("format"))) {
 				String strPackage = strClassName.substring(0, strClassName.
@@ -336,7 +337,7 @@ public class ApiWebServlet extends HttpServlet {
 				resp.setContentType("image/svg+xml");
 				resp.setContentLength(out.size());
 				resp.getOutputStream().write(out.toByteArray());
-			} else if ("fddMulesoft".equalsIgnoreCase(req.getParameter(
+			} else if ("ffdMulesoft".equalsIgnoreCase(req.getParameter(
 					"format"))) {
 				String strPackage = strClassName.substring(0, strClassName.
 						lastIndexOf(
@@ -345,10 +346,25 @@ public class ApiWebServlet extends HttpServlet {
 				String strFddResponse = FddFormatter.convertToFdd(strClass, intClasses);
 				
 				resp.setHeader("Content-Disposition", 
-						String.format("Content-Disposition: attachment; filename=%s", 
+						String.format("attachment; filename=\"%s\"", 
 								intClasses.getClass(strClassName).getString("name") + ".ffd")
 				);
-				resp.setContentType("application/fdd");
+				resp.setContentType("application/text");
+				resp.setContentLength(strFddResponse.length());
+				resp.getWriter().write(strFddResponse);
+			} else if ("raml".equalsIgnoreCase(req.getParameter(
+					"format"))) {
+				String strPackage = strClassName.substring(0, strClassName.
+						lastIndexOf(
+								"."));
+
+				String strFddResponse = RamlFormatter.convertToRaml(strClass, intClasses);
+				
+				resp.setHeader("Content-Disposition", 
+						String.format("attachment; filename=\"%s\"", 
+								intClasses.getClass(strClassName).getString("name") + ".raml")
+				);
+				resp.setContentType("application/text");
 				resp.setContentLength(strFddResponse.length());
 				resp.getWriter().write(strFddResponse);
 			} else if ("esmapv5".equalsIgnoreCase(req.getParameter(
@@ -453,6 +469,11 @@ public class ApiWebServlet extends HttpServlet {
 
 		}
 
+		if (req.getHeader("Origin") != null) {
+			resp.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+			resp.setHeader("Vary", "Origin");
+		}
+		
 		if ("GET".equals(method) && tableUrl.getString("id") == null) {
 			Map<String, String[]> params = new HashMap<>();
 
