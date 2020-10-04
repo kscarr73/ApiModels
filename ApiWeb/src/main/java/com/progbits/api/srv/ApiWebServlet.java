@@ -607,6 +607,7 @@ public class ApiWebServlet extends HttpServlet {
 			_apiUtils.getElasticUtils().
 					deleteRecord(tableUrl.getString("table"),
 							tableUrl.getString("id"));
+			resp.setStatus(200);
 		} else if ("PUT".equals(method)) {
 			ApiObject saveObject = Transform.toApiObject(_apiUtils.getParser().
 					getParser("JSON"), ApiObject.returnClassDef(), tableUrl.
@@ -622,6 +623,7 @@ public class ApiWebServlet extends HttpServlet {
 
 			_apiUtils.getElasticUtils().saveRecord(tableUrl.getString("table"),
 					saveid, saveObject);
+			resp.setStatus(200);
 		}
 	}
 
