@@ -152,6 +152,8 @@ public class ApiWebServlet extends HttpServlet {
 			url.setCurrUrl(req.getRequestURI());
 			url.chompUrl();
 
+			resp.setHeader("Access-Control-Allow-Origin", "*");
+			
 			SimpleHash hash = getHash(req);
 			if (req.getRequestURI().endsWith("/apiclasses")) {
 				Template tmp = _fm.getTemplate("classes/list.html");
@@ -183,7 +185,11 @@ public class ApiWebServlet extends HttpServlet {
 
 				tmp.process(hash, resp.getWriter());
 			} else if (req.getRequestURI().contains("/view")) {
-				processClassView(req, resp);
+				if ("OPTIONS".equals(req.getMethod())) {
+					processOptions("GET, OPTIONS", req, resp);
+				} else {
+					processClassView(req, resp);
+				}
 			} else if ("esget".equals(url.getCurrEntry())) {
 				url.chompUrl();
 				String strIndex = url.getCurrEntry();
@@ -220,6 +226,7 @@ public class ApiWebServlet extends HttpServlet {
 							// Do Nothing
 						} else {
 							parseDataTableRestElastic(method, req, resp);
+							Thread.sleep(2000);
 						}
 					} else {
 						parseDataTableRestElastic(method, req, resp);
@@ -637,6 +644,8 @@ public class ApiWebServlet extends HttpServlet {
 
 					ApiClasses apiRetClasses = new ApiClasses();
 
+					Thread.sleep(2000);
+					
 					_apiUtils.retrieveClasses(saveObject.getString("className"), apiRetClasses);
 
 					resp.getWriter().append(Transform.toString(
