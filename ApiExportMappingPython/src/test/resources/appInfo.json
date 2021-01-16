@@ -1,0 +1,54 @@
+{
+	"name": "appInfo",
+	"className": "com.icg.isg.log.ws.ApplicationInfo",
+	"desc": "Application Information for use in Logger Functions.",
+	"lastUpdated": "2016-03-21T19:07:30.447Z",
+	"fields": [
+		{
+			"name": "componentId",
+			"type": "Integer",
+			"subType": "",
+			"desc": "The component id to be used by the Logger service.",
+			"min": 1,
+			"max": 1,
+			"length": 0,
+			"sampleData": "51351",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "className",
+			"type": "String",
+			"subType": "",
+			"desc": "The Class for this Information structure",
+			"min": 0,
+			"max": 1,
+			"sampleData": "com.icg.isg.common.Test",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "host",
+			"type": "String",
+			"subType": "",
+			"desc": "The Host where the log is coming from.",
+			"min": 1,
+			"max": 1,
+			"sampleData": "uslvisgkard01.ingramcontent.com",
+			"format": "",
+			"defaultValue": ""
+		},
+		{
+			"name": "version",
+			"type": "String",
+			"subType": "",
+			"desc": "Version of XSD",
+			"min": 1,
+			"max": 1,
+			"length": 0,
+			"sampleData": "",
+			"format": "",
+			"defaultValue": ""
+		}
+	]
+}
