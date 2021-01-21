@@ -2,6 +2,7 @@ package com.progbits.api.srv;
 
 import com.progbits.api.ObjectParser;
 import com.progbits.api.ObjectWriter;
+import com.progbits.api.auth.Authenticate;
 import com.progbits.api.elastic.query.BoolQuery;
 import com.progbits.api.elastic.query.EsSearch;
 import com.progbits.api.elastic.query.RegExpQuery;
@@ -28,6 +29,7 @@ import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -80,6 +82,8 @@ public class ApiWebServlet extends HttpServlet {
 
 	public FastMap<String, ImportParser> importParsers = new FastMap<>();
 
+	private Authenticate authenticate;
+
 	DefaultObjectWrapperBuilder objWrap = new DefaultObjectWrapperBuilder(
 			Configuration.VERSION_2_3_30);
 
@@ -92,6 +96,11 @@ public class ApiWebServlet extends HttpServlet {
 
 	public ApiUtilsInterface getApiUtils() {
 		return _apiUtils;
+	}
+
+	@Reference
+	public void setAuthenticate(Authenticate authenticate) {
+		this.authenticate = authenticate;
 	}
 
 	@Reference
@@ -147,13 +156,19 @@ public class ApiWebServlet extends HttpServlet {
 				return;
 			}
 
+			resp.setHeader("Access-Control-Allow-Origin", "*");
+
+			if (req.getRequestURI().contains("/auth/")) {
+				handleAuth(method, req, resp);
+				return;
+			}
+
+			// TODO:  Authenticate the token
 			UrlEntry url = new UrlEntry();
 
 			url.setCurrUrl(req.getRequestURI());
 			url.chompUrl();
 
-			resp.setHeader("Access-Control-Allow-Origin", "*");
-			
 			SimpleHash hash = getHash(req);
 			if (req.getRequestURI().endsWith("/apiclasses")) {
 				Template tmp = _fm.getTemplate("classes/list.html");
@@ -254,6 +269,46 @@ public class ApiWebServlet extends HttpServlet {
 			resp.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 			resp.setHeader("Access-Control-Max-Age", "600");
 			resp.setStatus(200);
+		}
+	}
+
+	private void handleAuth(String method, HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		ApiObject objReq = jsonParser.parseSingle(new InputStreamReader(req.getInputStream()));
+		ApiObject objRet = null;
+
+		if (req.getRequestURI().endsWith("/login")) {
+			objRet = authenticate.login(objReq);
+
+			if (objRet != null && objRet.containsKey("message")) {
+				resp.setStatus(401);
+			}
+		} else if (req.getRequestURI().endsWith("/validateEmail")) {
+			objRet = authenticate.validateEmail(objReq);
+
+			if (objRet != null) {
+				if (objRet.getInteger("status") == 1) {
+					resp.setStatus(409);
+				} else if (objRet.containsKey("message")) {
+					resp.setStatus(500);
+				}
+			}
+		} else if (req.getRequestURI().endsWith("/user")) {
+			objRet = authenticate.storeUser(objReq);
+
+			if (objRet != null) {
+				if (objRet.containsKey("message")) {
+					if (objRet.getString("message").equals("Email Address Already Exists")) {
+						resp.setStatus(409);
+					} else {
+						resp.setStatus(500);
+					}
+				}
+			}
+		}
+
+		if (objRet != null) {
+			resp.setContentType("application/json");
+			resp.getWriter().append(jsonWriter.writeSingle(objRet));
 		}
 	}
 
@@ -645,7 +700,7 @@ public class ApiWebServlet extends HttpServlet {
 					ApiClasses apiRetClasses = new ApiClasses();
 
 					Thread.sleep(2000);
-					
+
 					_apiUtils.retrieveClasses(saveObject.getString("className"), apiRetClasses);
 
 					resp.getWriter().append(Transform.toString(
