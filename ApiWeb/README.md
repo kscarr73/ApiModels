@@ -13,6 +13,7 @@ install -s mvn:com.fasterxml.jackson.core/jackson-annotations/2.12.1
 install -s mvn:com.fasterxml.jackson.core/jackson-databind/2.12.1
 install -s mvn:commons-codec/commons-codec/1.15
 install -s wrap:mvn:com.auth0/java-jwt/3.12.0
+install -s mvn:com.progbits.db/SsDbUtils/2.3.0
 install -s mvn:com.progbits.api.web/ApiWeb/2.1.0
 ```
 

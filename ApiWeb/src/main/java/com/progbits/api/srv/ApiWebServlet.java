@@ -159,8 +159,12 @@ public class ApiWebServlet extends HttpServlet {
 			resp.setHeader("Access-Control-Allow-Origin", "*");
 
 			if (req.getRequestURI().contains("/auth/")) {
-				handleAuth(method, req, resp);
-				return;
+				if ("OPTIONS".equals(req.getMethod())) {
+					processOptions("GET, PUT, POST, OPTIONS", req, resp);
+				} else {
+					handleAuth(method, req, resp);
+					return;
+				}
 			}
 
 			// TODO:  Authenticate the token
