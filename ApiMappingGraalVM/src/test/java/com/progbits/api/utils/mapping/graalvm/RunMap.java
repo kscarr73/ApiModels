@@ -2,7 +2,6 @@ package com.progbits.api.utils.mapping.graalvm;
 
 import com.progbits.api.ApiMapping;
 import com.progbits.api.model.ApiObject;
-import com.progbits.api.testing.ReturnServices;
 import com.progbits.api.transforms.Transform;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
 import java.nio.file.Files;
@@ -38,8 +37,8 @@ public class RunMap {
 
         
         
-        _api = ReturnServices.returnApiUtils(
-                "http://lvicisgnosd01.ingramcontent.com:9200");
+        //_api = ReturnServices.returnApiUtils(
+        //        "http://lvicisgnosd01.ingramcontent.com:9200");
 
         
         String strJson = Transform.toString(_api.getWriter().getWriter("JSON"), null, objNew);

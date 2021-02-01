@@ -36,12 +36,6 @@
 			<version>1.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.progbits.api.util</groupId>
-			<artifactId>ApiUtilsTest</artifactId>
-			<version>1.0.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.graalvm.sdk</groupId>
 			<artifactId>graal-sdk</artifactId>
 			<version>20.0.0</version>
