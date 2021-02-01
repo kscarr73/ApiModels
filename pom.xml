@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     <modules>
         <!-- <module>ApiCxfProxy</module> -->
+        <module>WebUtils</module>
         <module>ApiTransforms</module>
         <module>ApiCore</module>
         <module>ApiUtils</module>
