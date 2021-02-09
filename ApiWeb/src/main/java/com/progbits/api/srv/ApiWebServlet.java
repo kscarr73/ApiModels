@@ -286,6 +286,10 @@ public class ApiWebServlet extends HttpServlet {
 			if (objRet != null && objRet.containsKey("message")) {
 				resp.setStatus(401);
 			}
+		} else if (req.getRequestURI().endsWith("/verifyEmail")) {
+			objRet = authenticate.verifyEmail(objReq);
+			
+			resp.setStatus(200);
 		} else if (req.getRequestURI().endsWith("/validateEmail")) {
 			objRet = authenticate.validateEmail(objReq);
 

@@ -11,4 +11,5 @@ public interface Authenticate {
 	ApiObject validateEmail(ApiObject subject);
 	ApiObject storeUser(ApiObject subject);
 	ApiObject validateToken(String token);
+	ApiObject verifyEmail(ApiObject subject);
 }

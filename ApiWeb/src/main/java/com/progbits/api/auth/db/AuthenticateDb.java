@@ -29,7 +29,7 @@ public class AuthenticateDb implements Authenticate {
 
 	private DataSource dataSource;
 
-	private static final String SQL_USER_LOGIN = "SELECT id, firstName, lastName FROM sm_users WHERE company=? AND emailAddress=? AND password=?";
+	private static final String SQL_USER_LOGIN = "SELECT id, firstName, lastName, emailAddress, companyRole FROM sm_users WHERE company=? AND emailAddress=? AND password=?";
 	private static final String SQL_USER_EMAILVALIDATION = "SELECT id FROM sm_users WHERE company=? AND emailAddress=?";
 	private static final String SQL_ACTIVE_LOGINS = "SELECT id, userId, createdDate, bearerToken FROM sm_logins WHERE userId=? AND status=1 ORDER BY createdDate";
 	private static final String SQL_INSERT_LOGINS = "INSERT INTO sm_logins (userId, bearerToken, createdDate, status) VALUES (?,?,?,?)";
@@ -68,6 +68,12 @@ public class AuthenticateDb implements Authenticate {
 					insertLogin(conn, (Integer) objRow.get(0).get("id"), strToken);
 				}
 
+				objRet.put("emailAddress", objRow.get(0).get("emailAddress"));
+				objRet.put("companyRole", objRow.get(0).get("companyRole"));
+				objRet.put("firstName", objRow.get(0).get("firstName"));
+				objRet.put("lastName", objRow.get(0).get("lastName"));
+				objRet.put("company", objRow.get(0).get("company"));
+				
 				objRet.setString("access_key", strToken);
 			}
 		} catch (SQLException sqx) {
@@ -154,6 +160,17 @@ public class AuthenticateDb implements Authenticate {
 		}
 
 		return objRet;
+	}
+
+	@Override
+	public ApiObject verifyEmail(ApiObject subject) {
+		ApiObject retObj = new ApiObject();
+		
+		// TODO:  Send Email with Response Token
+		
+		retObj.put("responseToken", 145613);
+		
+		return retObj;
 	}
 
 	@Override
