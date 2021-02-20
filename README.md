@@ -4,6 +4,10 @@ Purpose
 Installation
 ============
 
+# Install
+
+* This package uses a modified Karaf installation.  Reference <./docs/Karaf.md>
+
 ```
 feature:install http-whiteboard
 feature:install scr

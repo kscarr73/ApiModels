@@ -2,9 +2,9 @@
 
 Implements a Web Site for creating and maintaining an ApiModel environment.
 
-# Install
+# Karaf Install
 
-* This package uses a modified Karaf installation.  Reference <./docs/Karaf.md>
+* Copy and Paste this section into your running karaf environment
 
 ```
 install -s mvn:org.freemarker/freemarker/2.3.30
