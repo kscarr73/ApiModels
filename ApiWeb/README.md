@@ -4,6 +4,8 @@ Implements a Web Site for creating and maintaining an ApiModel environment.
 
 # Install
 
+* This package uses a modified Karaf installation.  Reference <./docs/Karaf.md>
+
 ```
 install -s mvn:org.freemarker/freemarker/2.3.30
 install -s mvn:com.progbits.web/JQueryServlet/3.3.2
@@ -17,9 +19,3 @@ install -s mvn:com.progbits.db/SsDbUtils/2.3.0
 install -s mvn:com.progbits.api.web/ApiWeb/2.1.0
 ```
 
-<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-core</artifactId>
-    <version>2.12.1</version>
-</dependency>

@@ -29,6 +29,7 @@ These will be loaded as jdk9+ modules.
 
 * cd karaf/etc
 * Open jre.properties
+* Locate the `jre-9=` \ Line
 * Add the following above the javax.accessibility, \ line:
 ```
  org.graalvm.polyglot, \
