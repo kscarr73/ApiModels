@@ -6,7 +6,11 @@ Installation
 
 # Install
 
-* This package uses a modified Karaf installation.  Reference <https://github.com/kscarr73/ApiModels/blob/master/docs/Karaf.md>
+* This package uses a modified Karaf installation.  
+You can download this version from here.  <https://github.com/kscarr73/ApiModels/blob/master/docs/progbits-karaf-4.3.0.7z>
+
+The changes are listed here. <https://github.com/kscarr73/ApiModels/blob/master/docs/Karaf.md>
+
 * Start Karaf
 * Make sure you have configured your ElasticSearch Environment. Reference <https://github.com/kscarr73/ElasticUtils/blob/main/README.md>
 

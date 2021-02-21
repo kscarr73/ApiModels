@@ -37,3 +37,10 @@ These will be loaded as jdk9+ modules.
  sun.nio.ch, \
 ```
 * Save the file
+
+* Open karaf/etc/org.ops4j.pax.url.mvn.cfg
+* Locate the line `org.ops4j.pax.url.mvn.repositories= \`
+* Add the following line, directly below this one:
+```
+http://archiva.progbits.com/repository/internal/@id=progbits, \
+```
