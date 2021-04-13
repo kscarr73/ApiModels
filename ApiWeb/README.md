@@ -47,7 +47,7 @@ install -s wrap:mvn:com.auth0/java-jwt/3.12.0
 install -s mvn:com.progbits.utils.http/HttpUtils/3.0.0
 install -s mvn:com.progbits.web/WebUtils/1.1.0
 install -s mvn:com.progbits.db/SsDbUtils/2.3.0
-install -s mvn:com.progbits.api.web/ApiWeb/2.1.2
+install -s mvn:com.progbits.api.web/ApiWeb/2.1.3
 ```
 
 If everything is successful, you can type `http:list` to see the following:
