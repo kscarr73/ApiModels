@@ -19,3 +19,5 @@ CREATE TABLE sm_logins (
 	status INTEGER,
 	PRIMARY KEY (id)
 );
+
+SELECT * FROM sm_users;
