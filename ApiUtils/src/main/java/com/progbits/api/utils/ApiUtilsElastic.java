@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javolution.text.Text;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -297,8 +296,8 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 
 		if (obj != null) {
 			try {
-				String strSource = replaceImports(new Text(obj.
-						getString("mapScript")));
+				String strSource = replaceImports(obj.
+						getString("mapScript"));
 
 				resp = getApiMapping(obj.getString("sourceClass"),
 						obj.getString("targetClass"),
@@ -410,7 +409,7 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 		return obj;
 	}
 
-	public String replaceImports(Text txtSource) throws ApiException, ApiElasticException {
+	public String replaceImports(String txtSource) throws ApiException, ApiElasticException {
 		String strRet = null;
 
 		boolean bContinue = true;
@@ -422,8 +421,8 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 				int iEnd = txtSource.indexOf(";", iStart);
 
 				if (iEnd > -1) {
-					Text tImport = txtSource.subtext(iStart, iEnd + 1);
-					Text tName = tImport.subtext(8, tImport.length() - 2);
+					String tImport = txtSource.substring(iStart, iEnd + 1);
+					String tName = tImport.substring(8, tImport.length() - 2);
 
 					ApiObject objMap = getApiMappingElastic(tName.toString());
 

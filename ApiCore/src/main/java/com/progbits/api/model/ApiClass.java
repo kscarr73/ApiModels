@@ -12,6 +12,7 @@ public class ApiClass extends ApiObject {
 
 	}
 
+	@Override
 	public void setApiClasses(ApiClasses classes) {
 		_classes = classes;
 	}

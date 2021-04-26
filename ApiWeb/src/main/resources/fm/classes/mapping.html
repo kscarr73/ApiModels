@@ -32,7 +32,7 @@
 		</table>
 
 		<div id="displayMainTable">
-			<table id="mainTable">
+			<table id="mainTable" style="width:100%">
 				<thead>
 					<tr>
 						<th>ID</th>
@@ -54,11 +54,13 @@
 				</div>
 				<div class="form-group">
 					<label for="sourceClass">Source Class</label>
-					<input type="text" class="form-control" id="sourceClass" placeholder="Source for Map">
+					<input type="text" class="form-control" id="sourceClass" list="sourceClasses" placeholder="Source for Map">
+					<datalist id="sourceClasses"></datalist>
 				</div>
 				<div class="form-group">
 					<label for="targetClass">Target Class</label>
-					<input type="text" class="form-control" id="targetClass" placeholder="Target for Map">
+					<input type="text" class="form-control" list="targetClasses" id="targetClass" placeholder="Target for Map">
+					<datalist id="targetClasses"></datalist>
 				</div>
 				<div class="form-group">
 					<label for="editor">Editor</label>

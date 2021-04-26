@@ -12,12 +12,11 @@ import com.progbits.api.transforms.XsdTransform;
 import com.progbits.api.writer.JsonObjectWriter;
 import com.progbits.api.writer.WriterServiceImpl;
 import com.progbits.api.writer.XmlObjectWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javolution.xml.internal.stream.XMLInputFactoryImpl;
-import javolution.xml.internal.stream.XMLOutputFactoryImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,7 +34,7 @@ public class TestTransform {
 		_parser = new ParserServiceImpl();
 
 		XmlObjectParser xml = new XmlObjectParser();
-		xml.setFactory(new XMLInputFactoryImpl());
+		//xml.setFactory(new XMLInputFactoryImpl());
 		Map<String, String> xmlProps = new HashMap<>();
 		xmlProps.put("type", "XML");
 
@@ -53,7 +52,7 @@ public class TestTransform {
 
 		XmlObjectWriter xmlWrite = new XmlObjectWriter();
 
-		xmlWrite.setFactory(new XMLOutputFactoryImpl());
+		//xmlWrite.setFactory(new XMLOutputFactoryImpl());
 
 		_writer.addParser(xmlWrite, xmlProps);
 	}
@@ -64,7 +63,7 @@ public class TestTransform {
 				getClassByName("apiClass"));
 		rtnAuth.setString("name", "returnAuthentication");
 		rtnAuth.setString("className",
-				"com.icg.isg.security.ws.ReturnAuthentication");
+				"com.progbits.security.ws.ReturnAuthentication");
 		rtnAuth.createList("fields");
 
 		rtnAuth.getList("fields").add(ApiObject.returnClassDef().getClassByName(
@@ -98,7 +97,7 @@ public class TestTransform {
 		classes.addClass(rtnAuth);
 
 		ApiObject objRoot = classes.getInstance(
-				"com.icg.isg.security.ws.ReturnAuthentication");
+				"com.progbits.security.ws.ReturnAuthentication");
 		objRoot.setString("partnerId", "H818");
 		objRoot.setString("applicationId", "UsedBook");
 		objRoot.setString("password", "ThisIsATest");
@@ -112,12 +111,12 @@ public class TestTransform {
 				objRoot);
 
 		ApiObject retObj = JsonTransform.jsonToApiObject(_parser, classes,
-				"com.icg.isg.security.ws.ReturnAuthentication", jsonString);
+				"com.progbits.security.ws.ReturnAuthentication", jsonString);
 
 		String xmlString = XmlTransform.convertToXml(_writer, classes, objRoot);
 
 		ApiObject retXml = XmlTransform.xmlToApiObject(_parser, classes,
-				"com.icg.isg.security.ws.ReturnAuthentication", xmlString);
+				"com.progbits.security.ws.ReturnAuthentication", xmlString);
 
 		retXml.getString("partnerId");
 		retXml.getString("applicationId");
@@ -242,7 +241,7 @@ public class TestTransform {
 				+ "</xs:schema>";
 
 		ApiObject xsdRet = XsdTransform.convertFromXsd(xsdTest,
-				"com.icg.isg.testing");
+				"com.progbits.testing");
 
 		String json = JsonTransform.convertToJson(_writer, null, xsdRet);
 
@@ -254,7 +253,7 @@ public class TestTransform {
 				"apiService");
 
 		apiService.setString("name", "IsgSecurity");
-		apiService.setString("packageName", "com.icg.isg.security.ws");
+		apiService.setString("packageName", "com.progbits.security.ws");
 		apiService.setString("url", "/security");
 		apiService.setString("desc", "Authentication methods for Ingram APIs");
 
@@ -271,7 +270,7 @@ public class TestTransform {
 				getClassByName("apiClass"));
 		rtnAuth.setString("name", "returnAuthentication");
 		rtnAuth.setString("className",
-				"com.icg.isg.security.ws.ReturnAuthentication");
+				"com.progbits.security.ws.ReturnAuthentication");
 		rtnAuth.createList("fields");
 
 		rtnAuth.getList("fields").add(ApiObject.returnClassDef().getClassByName(
@@ -305,7 +304,7 @@ public class TestTransform {
 				getClassByName("apiClass"));
 		rtnAuthResp.setString("name", "returnAuthenticationResponse");
 		rtnAuthResp.setString("className",
-				"com.icg.isg.security.ws.ReturnAuthenticationResponse");
+				"com.progbits.security.ws.ReturnAuthenticationResponse");
 		rtnAuthResp.setString("desc", "AuthKey from a Valid Login");
 		rtnAuthResp.createList("fields");
 
@@ -321,7 +320,7 @@ public class TestTransform {
 		ApiClass rtnExcep = new ApiClass(ApiObject.returnClassDef().
 				getClassByName("apiClass"));
 		rtnExcep.setString("name", "Exception");
-		rtnExcep.setString("className", "com.icg.isg.web.Exception");
+		rtnExcep.setString("className", "com.progbits.web.Exception");
 		rtnExcep.setString("desc", "Default Exception for Errors");
 		rtnExcep.createList("fields");
 
@@ -390,5 +389,70 @@ public class TestTransform {
 		action.setObject("index", obj);
 
 		String strJson = JsonTransform.convertToJson(_writer, null, action);
+	}
+	
+	@Test
+	public void testRootObjWrite() throws Exception {
+		ApiObject obj = new ApiObject();
+		
+		obj.createList("root");
+		
+		obj.getListAdd("root")
+				.setString("myfield", "Other")
+				.setString("this", "that");
+		
+		obj.getListAdd("root")
+				.setString("this", "that")
+				.setString("mywonder", "test");
+		
+		JsonObjectWriter writer = new JsonObjectWriter(true);
+		
+		String strResp = writer.writeSingle(obj);
+		
+		assert strResp != null;
+	}
+	
+	@Test
+	public void testRootObjWriteWithSubObject() throws Exception {
+		ApiObject obj = new ApiObject();
+		
+		obj.createList("root");
+		
+		ApiObject obj1 = obj.getListAdd("root");
+		
+		obj1.setString("myfield", "Other")
+				.setString("this", "that");
+		
+		ApiObject obj2 = obj.getListAdd("root");
+		
+		obj2.setString("this", "that")
+				.setString("mywonder", "test");
+		
+		obj2.createObject("testing");
+		obj2.getObject("testing")
+				.setString("inside", "outside");
+		
+		JsonObjectParser parser = new JsonObjectParser(true);
+		JsonObjectWriter writer = new JsonObjectWriter(true);
+		
+		String strResp = writer.writeSingle(obj);
+		
+		assert strResp != null;
+		assert strResp.contains("\"inside\":\"outside\"");
+		ApiObject parsedObj = parser.parseSingle(new StringReader(strResp));
+		
+	}
+	
+	@Test
+	public void testRootObjParse() throws Exception {
+		String strToParse = "[ { \"start\": \"This\", \"field2\": \"value\" }, "
+				+ "{ \"start\": \"other3\", \"field2\": \"other3\" } ]";
+		
+		JsonObjectParser parser = new JsonObjectParser(true);
+		
+		ApiObject obj = parser.parseSingle(new StringReader(strToParse));
+				
+		assert obj != null;
+		assert obj.getString("root[1].field2").equals("other3");
 	}
 }

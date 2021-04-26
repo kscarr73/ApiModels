@@ -1,120 +1,112 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.progbits.api.transforms</groupId>
-    <artifactId>ApiTransforms</artifactId>
-    <version>1.1.0</version>
-    <packaging>bundle</packaging>
+	<groupId>com.progbits.api.transforms</groupId>
+	<artifactId>ApiTransforms</artifactId>
+	<version>1.2.2</version>
+	<packaging>bundle</packaging>
 
-    <url>http://maven.apache.org</url>
+	<url>http://maven.apache.org</url>
 
-    <description>
-        install -s mvn:org.glassfish/javax.json/1.1.4
-        install -s mvn:org.javolution/javolution-core-java/6.0.0
-        install -s mvn:org.apache.commons/commons-csv/1.8
-        install -s mvn:com.progbits.api/ApiCore/1.1.0
-        install -s mvn:com.progbits.api.transforms/ApiTransforms/1.1.0
-    </description>
+	<description>
+		install -s mvn:org.glassfish/javax.json/1.1.4
+		install -s mvn:org.javolution/javolution-core-java/6.0.0
+		install -s mvn:org.apache.commons/commons-csv/1.8
+		install -s mvn:com.progbits.api/ApiCore/1.1.0
+		install -s mvn:com.progbits.api.transforms/ApiTransforms/1.1.0
+	</description>
     
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+	</properties>
 
-    <distributionManagement>
-        <repository>
-            <id>internal.repo</id>
-            <name>Internal Repo</name>
-            <url>${mvnRepo}</url>
-        </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>internal.repo</id>
+			<name>Internal Repo</name>
+			<url>${mvnRepo}</url>
+		</repository>
+	</distributionManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.javolution</groupId>
-            <artifactId>javolution-core-java</artifactId>
-            <version>6.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.compendium</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-            <version>1.8</version>
-        </dependency>
-        <dependency>
-            <groupId>com.progbits.api</groupId>
-            <artifactId>ApiCore</artifactId>
-            <version>[1.0.0,2)</version>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.30</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.progbits.api</groupId>
+			<artifactId>ApiCore</artifactId>
+			<version>[1.2.0,2)</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml</groupId>
+			<artifactId>aalto-xml</artifactId>
+			<version>1.2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.12.3</version>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
+	<build>
+		<plugins>
 
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.1</version>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.1</version>
 
-                <extensions>true</extensions>
+				<extensions>true</extensions>
 
-                <configuration>
-                    <instructions>
-                        <Service-Component>*</Service-Component>
-                    </instructions>
-                </configuration>
-            </plugin>
+				<configuration>
+					<instructions>
+						<Service-Component>*</Service-Component>
+					</instructions>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <additionalOptions>-html5</additionalOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalOptions>-html5</additionalOptions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 
-    </build>
+	</build>
 
 </project>

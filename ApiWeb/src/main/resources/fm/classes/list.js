@@ -22,7 +22,7 @@ $("#apiDialog").dialog({
 			var rec = {};
 			rec.name = $("#name").val();
 			rec.className = $("#className").val();
-			rec.desc = classDescEditor.getData();
+			rec.desc = classDescEditor.root.innerHTML;
 			rec.classType = $("#classType").val();
 			rec.lastUpdated = new Date().toISOString();
 			rec.fields = fldData;
@@ -102,7 +102,12 @@ var table = $('#mainTable').DataTable({
 						$("#classType").val("Model");
 					}
 
-					classDescEditor.setData(data[0].desc);
+					if (data[0].desc) {
+						classDescEditor.root.innerHTML = data[0].desc + "\n";
+					} else {
+						classDescEditor.root.innerHTML = "\n";
+					}
+
 					fldData = data[0].fields;
 					reloadFieldData();
 					$("#apiDialog").dialog("open");
@@ -253,41 +258,31 @@ var table = $('#mainTable').DataTable({
 		}]
 });
 
-ClassicEditor.create(document.querySelector("#classDesc"))
-		.then(newEditor => {
-			classDescEditor = newEditor;
-		})
-		.catch(error => {
-			console.error(error);
-		});
-;
-//CKEDITOR.replace('classDesc',
-//		  {
-//			  toolbar:
-//						 [
-//							 {name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript']},
-//							 {name: 'paragraph', items: ['NumberedList', 'BulletedList']}
-//						 ],
-//			  height: '100px'
-//		  });
+var toolbarOptions = [
+	['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+	[{ 'header': 1 }, { 'header': 2 }],               // custom button values
+	[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+	[{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+	[{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+	[{ 'direction': 'rtl' }],                         // text direction
+  
+	[{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+	[{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+  
+	[{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+	[{ 'font': [] }],
+	[{ 'align': [] }],
+  
+	['clean']                                         // remove formatting button
+  ];
 
-ClassicEditor.create(document.querySelector("#fieldDesc"))
-		.then(newEditor => {
-			fieldDescEditor = newEditor;
-		})
-		.catch(error => {
-			console.error(error);
-		});
-;
-//CKEDITOR.replace('fieldDesc',
-//		  {
-//			  toolbar:
-//						 [
-//							 {name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript']},
-//							 {name: 'paragraph', items: ['NumberedList', 'BulletedList']}
-//						 ],
-//			  height: '100px'
-//		  });
+var classDescEditor = new Quill('#classDesc', {
+	theme: 'snow'
+});
+
+var fieldDescEditor = new Quill('#fieldDesc', {
+	theme: 'snow'
+});
 
 table.on('select deselect', function () {
 	var selectedRows = table.rows({
@@ -315,7 +310,13 @@ function editField(fieldId) {
 	$('#displayName').val(fld.DisplayName);
 	$('#fieldType').val(fld.type);
 	$('#subType').val(fld.subType);
-	fieldDescEditor.setData(fld.desc);
+
+	if (fld.desc) {
+		fieldDescEditor.root.innerHTML = fld.desc + "\n";
+	} else {
+		fieldDescEditor.root.innerHTML = "\n";
+	}
+
 	$('#minField').val(fld.min);
 	$('#maxField').val(fld.max);
 	$('#sampleData').val(fld.sampleData);
@@ -342,7 +343,7 @@ function saveField() {
 	nf.DisplayName = $('#displayName').val();
 	nf.type = $('#fieldType').val();
 	nf.subType = $('#subType').val();
-	nf.desc = fieldDescEditor.getData();
+	nf.desc = fieldDescEditor.root.innerHTML;
 	nf.min = parseInt($('#minField').val(), 10);
 	nf.max = parseInt($('#maxField').val(), 10);
 	nf.sampleData = $('#sampleData').val();

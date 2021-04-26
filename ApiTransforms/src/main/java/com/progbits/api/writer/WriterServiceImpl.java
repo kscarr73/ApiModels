@@ -3,8 +3,8 @@ package com.progbits.api.writer;
 import com.progbits.api.ObjectWriter;
 import com.progbits.api.WriterService;
 import com.progbits.api.exception.ApiException;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import javolution.util.FastMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 )
 public class WriterServiceImpl implements WriterService {
 
-	public FastMap<String, ObjectWriter> _writers = new FastMap<>();
+	public LinkedHashMap<String, ObjectWriter> _writers = new LinkedHashMap<>();
 
 	@Reference(policy = ReferencePolicy.DYNAMIC,
 			  policyOption = ReferencePolicyOption.RELUCTANT,

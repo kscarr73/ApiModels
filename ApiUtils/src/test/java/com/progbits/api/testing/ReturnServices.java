@@ -18,8 +18,6 @@ import com.progbits.api.writer.WriterServiceImpl;
 import com.progbits.api.writer.XmlObjectWriter;
 import java.util.HashMap;
 import java.util.Map;
-import javolution.xml.internal.stream.XMLInputFactoryImpl;
-import javolution.xml.internal.stream.XMLOutputFactoryImpl;
 
 /**
  *
@@ -31,7 +29,6 @@ public class ReturnServices {
         ParserServiceImpl _parser = new ParserServiceImpl();
 
         XmlObjectParser xml = new XmlObjectParser();
-        xml.setFactory(new XMLInputFactoryImpl());
         Map<String, String> xmlProps = new HashMap<>();
         xmlProps.put("type", "XML");
 
@@ -75,7 +72,6 @@ public class ReturnServices {
 
         XmlObjectWriter xmlWrite = new XmlObjectWriter();
 
-        xmlWrite.setFactory(new XMLOutputFactoryImpl());
         _writer.addParser(xmlWrite, xmlProps);
 
         CsvObjectWriter csvWrite = new CsvObjectWriter();

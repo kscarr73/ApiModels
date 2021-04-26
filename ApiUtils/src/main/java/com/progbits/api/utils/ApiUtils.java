@@ -27,12 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import javolution.text.Text;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +60,10 @@ public class ApiUtils implements ApiUtilsInterface {
         return _esVersion;
     }
 
-	@Reference
 	public void setElasticUtils(ElasticUtils elasticUtils) {
 		this.elasticUtils = elasticUtils;
 	}
 	
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     @Override
     public void setMappingFactory(ApiMapping mapping) {
         this.mappingFactory = mapping;
@@ -81,7 +73,6 @@ public class ApiUtils implements ApiUtilsInterface {
         this.mappingFactory = null;
     }
     
-    @Activate
     public void setup() {
         if (configs != null) {
             try {
@@ -125,12 +116,10 @@ public class ApiUtils implements ApiUtilsInterface {
         _esVersion = ver;
     }
 
-    @Reference
     public void setParser(ParserService parser) {
         _parser = parser;
     }
 
-    @Reference
     public void setWriter(WriterService writer) {
         _writer = writer;
     }
@@ -419,8 +408,8 @@ public class ApiUtils implements ApiUtilsInterface {
         ApiObject obj = getApiFile(mapName, "apimappings");
 
         if (obj != null) {
-            String strSource = replaceImports(new Text(obj.
-                    getString("mapScript")));
+            String strSource = replaceImports(obj.
+                    getString("mapScript"));
 
             resp = getApiMapping(obj.getString("sourceClass"),
                     obj.getString("targetClass"),
@@ -430,7 +419,7 @@ public class ApiUtils implements ApiUtilsInterface {
         return resp;
     }
 
-    public String replaceImports(Text txtSource) throws ApiException,ApiClassNotFoundException {
+    public String replaceImports(String txtSource) throws ApiException,ApiClassNotFoundException {
         String strRet = null;
 
         boolean bContinue = true;
@@ -442,8 +431,8 @@ public class ApiUtils implements ApiUtilsInterface {
                 int iEnd = txtSource.indexOf(";", iStart);
 
                 if (iEnd > -1) {
-                    Text tImport = txtSource.subtext(iStart, iEnd + 1);
-                    Text tName = tImport.subtext(8, tImport.length() - 2);
+                    String tImport = txtSource.substring(iStart, iEnd + 1);
+                    String tName = tImport.substring(8, tImport.length() - 2);
 
                     ApiObject objMap = getApiFile(tName.toString(),
                             "apimappings");

@@ -1,6 +1,7 @@
 
 package com.progbits.api.writer;
 
+import com.fasterxml.aalto.stax.OutputFactoryImpl;
 import com.progbits.api.ObjectWriter;
 import com.progbits.api.exception.ApiException;
 import com.progbits.api.formaters.TransformDate;
@@ -20,11 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javolution.xml.stream.XMLOutputFactory;
-import javolution.xml.stream.XMLStreamException;
-import javolution.xml.stream.XMLStreamWriter;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import org.codehaus.stax2.XMLStreamWriter2;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 /**
  *
@@ -39,7 +39,7 @@ import org.osgi.service.component.annotations.Reference;
 public class XmlObjectWriter implements ObjectWriter {
 
     private ApiClasses _classes;
-    private XMLOutputFactory _fact;
+	private OutputFactoryImpl _fact = new OutputFactoryImpl();
     private XMLStreamWriter _xml;
     private Map<String, String> _props;
     private List<String> writeErrors = new ArrayList<>();
@@ -57,14 +57,8 @@ public class XmlObjectWriter implements ObjectWriter {
     @Override
     public ObjectWriter getWriter() {
         XmlObjectWriter xml = new XmlObjectWriter();
-        xml.setFactory(_fact);
-
+        
         return xml;
-    }
-
-    @Reference
-    public void setFactory(XMLOutputFactory factory) {
-        this._fact = factory;
     }
 
     @Override
@@ -72,7 +66,7 @@ public class XmlObjectWriter implements ObjectWriter {
             Writer out) throws ApiException {
         try {
             if (out != null) {
-                _xml = _fact.createXMLStreamWriter(out);
+                _xml = _fact.createXMLStreamWriter(out, "UTF-8");
             }
 
             _classes = classes;
@@ -104,7 +98,7 @@ public class XmlObjectWriter implements ObjectWriter {
                     bout = new BufferedOutputStream(out);
                 }
 
-                _xml = _fact.createXMLStreamWriter(bout);
+                _xml = _fact.createXMLStreamWriter(bout , "UTF-8");
             }
 
             _classes = classes;

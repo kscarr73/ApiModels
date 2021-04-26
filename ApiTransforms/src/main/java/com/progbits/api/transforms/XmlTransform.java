@@ -14,7 +14,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-import javolution.text.TextBuilder;
 
 /**
  * @deprecated Please use Transform instead
@@ -78,8 +77,8 @@ public class XmlTransform {
 	 */
 	public static String skipToSoapFunction(Reader reader) throws IOException {
 		String strFunc = null;
-		TextBuilder curStream = new TextBuilder();
-		TextBuilder curTag = new TextBuilder();
+		StringBuilder curStream = new StringBuilder();
+		StringBuilder curTag = new StringBuilder();
 		char[] cb = new char[1];
 		boolean bSoapBody = false;
 		int iCnt = 0;
@@ -107,7 +106,7 @@ public class XmlTransform {
 					bSoapBody = true;
 				}
 
-				curTag.clear();
+				curTag = new StringBuilder();
 			} else if (cb[0] == '<') {
 				bStart = true;
 			} else if (cb[0] == ' ') {

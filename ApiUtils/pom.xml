@@ -4,7 +4,7 @@
 
 	<groupId>com.progbits.api.util</groupId>
 	<artifactId>ApiUtils</artifactId>
-	<version>1.1.2</version>
+	<version>1.2.0</version>
 	<packaging>bundle</packaging>
 
 	<name>Api Services Utilities</name>
@@ -45,6 +45,12 @@
 			<groupId>com.progbits.api.elastic</groupId>
 			<artifactId>ElasticUtils</artifactId>
 			<version>[1.0.1,2)</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

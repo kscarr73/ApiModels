@@ -1,5 +1,6 @@
 package com.progbits.api.parser;
 
+import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.progbits.api.ObjectParser;
 import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiException;
@@ -16,10 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javolution.text.CharArray;
-import javolution.xml.stream.XMLInputFactory;
-import javolution.xml.stream.XMLStreamException;
-import javolution.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -34,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
 public class XmlObjectParser implements ObjectParser {
 
    private ApiObject _obj;
-   private XMLInputFactory _factory;
+   private InputFactoryImpl _factory = new InputFactoryImpl();
    private XMLStreamReader _in;
    private String _mainClass;
    private Map<String, String> _props;
@@ -48,14 +47,7 @@ public class XmlObjectParser implements ObjectParser {
    public ObjectParser getParser() {
       XmlObjectParser xml = new XmlObjectParser();
 
-      xml.setFactory(_factory);
-
       return xml;
-   }
-
-   @Reference
-   public void setFactory(XMLInputFactory factory) {
-      _factory = factory;
    }
 
    @Override
@@ -169,7 +161,7 @@ public class XmlObjectParser implements ObjectParser {
                            Boolean bAttr = fld.getBoolean("attribute");
 
                            if (bAttr != null && bAttr) {
-                              CharArray attrValue = xmlRead.
+                              String attrValue = xmlRead.
                                       getAttributeValue(
                                               null, fld.
                                                       getString("name"));
@@ -280,29 +272,29 @@ public class XmlObjectParser implements ObjectParser {
    }
 
    private void populateObject(String type, ApiObject fld, ApiObject obj,
-           String name, CharArray value) throws ApiException {
+           String name, String value) throws ApiException {
       if (type != null) {
          switch (type.toLowerCase()) {
             case "string":
-               obj.setString(name, value.toString());
+               obj.setString(name, value);
                break;
             case "stringarray":
                if (obj.isNull(name)) {
                   obj.createStringArray(name);
                }
 
-               obj.getStringArray(name).add(value.toString());
+               obj.getStringArray(name).add(value);
                break;
 
             case "long":
                if (value.length() > 0) {
-                  obj.setLong(name, value.toLong());
+                  obj.setLong(name, Long.parseLong(value));
                }
                break;
 
             case "integer":
                if (value.length() > 0) {
-                  obj.setInteger(name, value.toInt());
+                  obj.setInteger(name, Integer.parseInt(value));
                }
                break;
 
@@ -311,11 +303,11 @@ public class XmlObjectParser implements ObjectParser {
                   obj.createIntegerArray(name);
                }
 
-               obj.getIntegerArray(name).add(value.toInt());
+               obj.getIntegerArray(name).add(Integer.valueOf(value));
                break;
             case "double":
                if (value.length() > 0) {
-                  obj.setDouble(name, value.toDouble());
+                  obj.setDouble(name, Double.parseDouble(value));
                }
                break;
             case "date":
@@ -342,7 +334,7 @@ public class XmlObjectParser implements ObjectParser {
                if (value.length() == 0) {
                   obj.setBoolean(name, false);
                } else {
-                  obj.setBoolean(name, value.toBoolean());
+                  obj.setBoolean(name, Boolean.parseBoolean(value));
                }
 
                break;

@@ -22,11 +22,13 @@ import com.progbits.util.http.HttpUtils;
 import com.progbits.web.UrlEntry;
 import com.progbits.web.WebUtils;
 import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -117,9 +119,9 @@ public class ApiWebServlet extends HttpServlet {
 		try {
 			_fm.setTemplateLoader(
 					new ClassTemplateLoader(this.getClass(), "/fm"));
-//			_fm.setTemplateLoader(
-//					new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
-//					));
+			// _fm.setTemplateLoader(
+			// 		new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
+			// 		));
 
 			jsonParser = _apiUtils.getParser().getParser("JSON");
 			jsonParser.init(null, null, null, null);
@@ -873,7 +875,7 @@ public class ApiWebServlet extends HttpServlet {
 								+ ".*"
 						)
 				);
-			} else if (req.getRequestURI().contains("es/apiclasses")) {
+			} else if (req.getRequestURI().contains("es/apimodels")) {
 				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
 						"search[value]")[0] + ".*"));
 				bq.getShould().add(new RegExpQuery("className", ".*" + params.

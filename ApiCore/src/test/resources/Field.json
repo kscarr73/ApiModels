@@ -1,6 +1,6 @@
 {
 	"name": "Field",
-	"className": "com.icg.isg.log.CustomField",
+	"className": "com.progbits.log.CustomField",
 	"desc": "Field entry",
 	"lastUpdated": "2016-03-30T15:03:54.231Z",
 	"fields": [

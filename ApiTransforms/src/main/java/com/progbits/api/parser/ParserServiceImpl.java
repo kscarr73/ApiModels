@@ -3,8 +3,8 @@ package com.progbits.api.parser;
 import com.progbits.api.ObjectParser;
 import com.progbits.api.ParserService;
 import com.progbits.api.exception.ApiException;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import javolution.util.FastMap;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -21,7 +21,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 		  })
 public class ParserServiceImpl implements ParserService {
 
-	public FastMap<String, ObjectParser> _parsers = new FastMap<>();
+	public LinkedHashMap<String, ObjectParser> _parsers = new LinkedHashMap<>();
 
 	@Reference(policy = ReferencePolicy.DYNAMIC,
 			  policyOption = ReferencePolicyOption.RELUCTANT,

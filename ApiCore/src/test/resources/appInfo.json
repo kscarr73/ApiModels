@@ -1,6 +1,6 @@
 {
 	"name": "appInfo",
-	"className": "com.icg.isg.log.ws.ApplicationInfo",
+	"className": "com.progbits.log.ws.ApplicationInfo",
 	"desc": "Application Information for use in Logger Functions.",
 	"lastUpdated": "2016-03-21T19:07:30.447Z",
 	"fields": [
@@ -23,7 +23,7 @@
 			"desc": "The Class for this Information structure",
 			"min": 0,
 			"max": 1,
-			"sampleData": "com.icg.isg.common.Test",
+			"sampleData": "com.progbits.common.Test",
 			"format": "",
 			"defaultValue": ""
 		},

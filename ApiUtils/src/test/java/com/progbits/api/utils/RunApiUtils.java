@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javolution.text.Text;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -54,7 +53,7 @@ public class RunApiUtils {
 	public void testApi() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrieveClasses("com.icg.isg.security.ws.ReturnAuthentication",
+		api.retrieveClasses("com.progbits.security.ws.ReturnAuthentication",
 				  classes);
 
 		ApiObject rtnAuth = classes.getInstanceByName("returnAuthentication");
@@ -65,13 +64,13 @@ public class RunApiUtils {
 	public void sendBookInstanceJson() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrieveClasses("com.icg.isg.usedbook.ws.SendBookInstance", classes);
+		api.retrieveClasses("com.progbits.usedbook.ws.SendBookInstance", classes);
 
 		String strXsd = XsdTransform.convertToXsd(classes,
 				  "http://www.ingramcontent.com/usedbook");
 
 		ApiObject bie = classes.getInstance(
-				  "com.icg.isg.usedbook.ws.SendBookInstance");
+				  "com.progbits.usedbook.ws.SendBookInstance");
 
 		bie.setName("sendBookInstance");
 
@@ -99,13 +98,13 @@ public class RunApiUtils {
 
 		api.
 				  retrieveClasses(
-							 "com.icg.isg.usedbook.bi.bookinstancereport.Message",
+							 "com.progbits.usedbook.bi.bookinstancereport.Message",
 							 classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.icg.isg.3pl.bi.bookInstanceReport.message", null, classes);
+				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -140,12 +139,12 @@ public class RunApiUtils {
 	public void testLegacy() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.icg.isg.usedbook.bi.legacy", classes);
+		api.retrievePackage("com.progbits.usedbook.bi.legacy", classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.icg.isg.3pl.bi.bookInstanceReport.message", null, classes);
+				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -154,12 +153,12 @@ public class RunApiUtils {
 	public void testUsedBook() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.icg.isg.usedbook", classes);
+		api.retrievePackage("com.progbits.usedbook", classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.icg.isg.3pl.bi.bookInstanceReport.message", null, classes);
+				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -168,9 +167,9 @@ public class RunApiUtils {
 	public void testLogData() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.icg.isg.log.LogData", classes);
+		api.retrievePackage("com.progbits.log.LogData", classes);
 
-		ApiObject apiProfile = classes.getInstance("com.icg.isg.log.LogProfile");
+		ApiObject apiProfile = classes.getInstance("com.progbits.log.LogProfile");
 
 	}
 
@@ -181,12 +180,12 @@ public class RunApiUtils {
 
 	@Test(enabled = false)
 	public void testImportStatement() throws Exception {
-		String strSource = "import 'com.icg.test.Testing';\n"
-				  + "import 'com.icg.second.Test';\n"
+		String strSource = "import 'com.progbits.test.Testing';\n"
+				  + "import 'com.progbits.second.Test';\n"
 				  + "\n"
 				  + "// This is a test;\n"
 				  + "Something = else;";
-		String strReturn = api.replaceImports(new Text(strSource));
+		String strReturn = api.replaceImports(strSource);
 	}
 
 }

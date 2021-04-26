@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import javolution.text.TextBuilder;
 
 /**
  *
@@ -18,7 +17,7 @@ import javolution.text.TextBuilder;
  */
 public class XsdTransform {
 
-    public static String DEFAULT_EXCEPTION = "com.icg.isg.web.Exception";
+    public static String DEFAULT_EXCEPTION = "com.progbits.web.Exception";
 
     public static ApiObject convertFromXsd(String xsd, String pkgName) throws Exception {
         ApiObject retObject = new ApiObject();
@@ -117,7 +116,7 @@ public class XsdTransform {
 
     /**
      *
-     * @param clsObjects Should be the class com.icg.isg.xsd.Input
+     * @param clsObjects Should be the class com.progbits.xsd.Input
      * @param targetNamespace
      * @return
      */
@@ -611,7 +610,7 @@ public class XsdTransform {
 
     public static String reversePackageName(String packageName) {
         String[] sEntries = packageName.split("\\.");
-        TextBuilder tb = new TextBuilder(1000);
+        StringBuilder tb = new StringBuilder(1000);
 
         for (int x = sEntries.length - 1; x >= 0; x--) {
             if (x < sEntries.length - 1) {

@@ -1,13 +1,13 @@
 {
 	"name": "Fields",
-	"className": "com.icg.isg.log.CustomFields",
+	"className": "com.progbits.log.CustomFields",
 	"desc": "List of Fields",
 	"lastUpdated": "2016-03-30T15:54:31.508Z",
 	"fields": [
 		{
 			"name": "Field",
 			"type": "ArrayList",
-			"subType": "com.icg.isg.log.CustomField",
+			"subType": "com.progbits.log.CustomField",
 			"desc": "List of the Fields for this Object",
 			"min": 0,
 			"max": 0,
