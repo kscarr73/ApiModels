@@ -1,0 +1,54 @@
+{
+    "template": "apiservices",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+    "mappings": {
+        "service": {
+            "properties": {
+                "desc": {
+                    "type": "text"
+                },
+                "functions": {
+                    "properties": {
+                        "desc": {
+                            "type": "text"
+                        },
+                        "exceptionClass": {
+                            "type": "keyword"
+                        },
+                        "inboundClass": {
+                            "type": "keyword"
+                        },
+                        "name": {
+                            "type": "keyword"
+                        },
+                        "outboundClass": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "lastUpdated": {
+                    "type": "date",
+                    "format": "dateOptionalTime"
+                },
+                "name": {
+                    "type": "keyword"
+                },
+                "namespace": {
+                    "type": "text"
+                },
+                "packageName": {
+                    "type": "text"
+                },
+                "status": {
+                    "type": "keyword"
+                },
+                "url": {
+                    "type": "text"
+                }
+            }
+        }
+    }
+}

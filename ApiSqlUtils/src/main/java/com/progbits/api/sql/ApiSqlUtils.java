@@ -23,7 +23,7 @@ public class ApiSqlUtils {
 	 * @param conn Connection to run the SQL Against
 	 * @param sql SQL Statement to run
 	 * @param args Arguments to use in the SQL Statement
-	 * @return ApiObject with the column names as field Names
+	 * @return ApiObject with the column names as field Names in a list named "root"
 	 * 
 	 * @throws ApiException 
 	 */

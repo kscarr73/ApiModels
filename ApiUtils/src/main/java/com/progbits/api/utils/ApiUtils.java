@@ -14,7 +14,6 @@ import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import com.progbits.api.transforms.Transform;
 import com.progbits.api.transforms.XsdTransform;
-import com.progbits.api.elastic.ElasticUtils;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
 import java.io.IOException;
 import java.io.StringReader;
@@ -48,8 +47,6 @@ public class ApiUtils implements ApiUtilsInterface {
     private Path _workLocation;
     private ApiMapping mappingFactory = null;
 
-	private ElasticUtils elasticUtils;
-	
     private Map<String, String> configs = new HashMap<>();
 
     public String getLocation() {
@@ -60,10 +57,6 @@ public class ApiUtils implements ApiUtilsInterface {
         return _esVersion;
     }
 
-	public void setElasticUtils(ElasticUtils elasticUtils) {
-		this.elasticUtils = elasticUtils;
-	}
-	
     @Override
     public void setMappingFactory(ApiMapping mapping) {
         this.mappingFactory = mapping;
@@ -536,10 +529,5 @@ public class ApiUtils implements ApiUtilsInterface {
     public Boolean saveApiService(ApiObject obj) throws ApiException,ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-	@Override
-	public ElasticUtils getElasticUtils() {
-		return elasticUtils;
-	}
 
 }

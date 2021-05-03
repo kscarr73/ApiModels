@@ -3,7 +3,6 @@ package com.progbits.api.srv.formatter;
 import com.progbits.api.model.ApiClass;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
-import javolution.text.TextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +15,9 @@ public class PlantUmlFormatter {
 	private Logger LOG = LoggerFactory.getLogger(PlantUmlFormatter.class);
 
 	public String format(ApiClasses classes) throws Exception {
-		TextBuilder tb = new TextBuilder();
-		TextBuilder tbClasses = new TextBuilder();
-		TextBuilder tbLinks = new TextBuilder();
+		StringBuilder tb = new StringBuilder();
+		StringBuilder tbClasses = new StringBuilder();
+		StringBuilder tbLinks = new StringBuilder();
 
 		tb.append("@startuml\n");
 		tb.append("scale 1.2\n");
@@ -38,8 +37,8 @@ public class PlantUmlFormatter {
 		return tb.toString();
 	}
 
-	private void formatClasses(ApiClasses classes, TextBuilder tbClasses,
-			TextBuilder tbLinks) throws Exception {
+	private void formatClasses(ApiClasses classes, StringBuilder tbClasses,
+			StringBuilder tbLinks) throws Exception {
 		classes.getClassList().forEach((cls) -> {
 			try {
 				formatClass(classes, cls, tbClasses, tbLinks);
@@ -50,7 +49,7 @@ public class PlantUmlFormatter {
 	}
 
 	private void formatClass(ApiClasses classes, ApiClass cls,
-			TextBuilder tbClasses, TextBuilder tbLinks) throws Exception {
+			StringBuilder tbClasses, StringBuilder tbLinks) throws Exception {
 		String strCurrName = returnClassName(cls);
 		tbClasses.append("class ").append(strCurrName);
 

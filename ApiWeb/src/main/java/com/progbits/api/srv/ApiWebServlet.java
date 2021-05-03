@@ -3,6 +3,7 @@ package com.progbits.api.srv;
 import com.progbits.api.ObjectParser;
 import com.progbits.api.ObjectWriter;
 import com.progbits.api.auth.Authenticate;
+import com.progbits.api.elastic.ElasticUtils;
 import com.progbits.api.elastic.query.BoolQuery;
 import com.progbits.api.elastic.query.EsSearch;
 import com.progbits.api.elastic.query.RegExpQuery;
@@ -22,13 +23,11 @@ import com.progbits.util.http.HttpUtils;
 import com.progbits.web.UrlEntry;
 import com.progbits.web.WebUtils;
 import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,14 +36,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javolution.text.TextBuilder;
-import javolution.util.FastMap;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
@@ -77,12 +75,14 @@ public class ApiWebServlet extends HttpServlet {
 	private static Configuration _fm = null;
 	private static ApiUtilsInterface _apiUtils = null;
 
-	private static Map<String, ApiUtils> mapUtils = new FastMap<>();
+	private static Map<String, ApiUtils> mapUtils = new LinkedHashMap<>();
 
+	private ElasticUtils _elasticUtils;
+	
 	private ObjectParser jsonParser = null;
 	private ObjectWriter jsonWriter = null;
 
-	public FastMap<String, ImportParser> importParsers = new FastMap<>();
+	public LinkedHashMap<String, ImportParser> importParsers = new LinkedHashMap<>();
 
 	private Authenticate authenticate;
 
@@ -110,6 +110,10 @@ public class ApiWebServlet extends HttpServlet {
 		_apiUtils = api;
 	}
 
+	@Reference
+	public void setElasticUtils(ElasticUtils elasticUtils) {
+		_elasticUtils = elasticUtils;
+	}
 	@Override
 	public void init() throws ServletException {
 		_fm = new Configuration(Configuration.VERSION_2_3_25);
@@ -219,7 +223,7 @@ public class ApiWebServlet extends HttpServlet {
 				url.chompUrl();
 				String strId = url.getCurrEntry();
 
-				ApiObject objRet = _apiUtils.getElasticUtils().getRecord(
+				ApiObject objRet = _elasticUtils.getRecord(
 						strIndex,
 						strId);
 
@@ -390,7 +394,7 @@ public class ApiWebServlet extends HttpServlet {
 								"."));
 
 				hash.put("className", strPackage);
-				TextBuilder tbImg = new TextBuilder();
+				StringBuilder tbImg = new StringBuilder();
 				tbImg.append("<img src=\"");
 				tbImg.append(req.getRequestURI());
 				tbImg.append("?format=plantumlembedpackage");
@@ -426,7 +430,7 @@ public class ApiWebServlet extends HttpServlet {
 				SimpleHash hash = getHash(req);
 
 				hash.put("className", strClassName);
-				TextBuilder tbImg = new TextBuilder();
+				StringBuilder tbImg = new StringBuilder();
 				tbImg.append("<img src=\"");
 				tbImg.append(req.getRequestURI());
 				tbImg.append("?format=plantumlembed");
@@ -599,7 +603,7 @@ public class ApiWebServlet extends HttpServlet {
 			ApiObject obj = null;
 
 			try {
-				obj = _apiUtils.getElasticUtils().getSearchRecords(
+				obj = _elasticUtils.getSearchRecords(
 						tableUrl.
 								getString("table"), null,
 						search);
@@ -680,7 +684,7 @@ public class ApiWebServlet extends HttpServlet {
 				log.error("Write", ex);
 			}
 		} else if ("GET".equals(method) && tableUrl.getString("id") != null) {
-			ApiObject idObject = _apiUtils.getElasticUtils().getRecord(tableUrl.
+			ApiObject idObject = _elasticUtils.getRecord(tableUrl.
 					getString("table"),
 					tableUrl.getString("id"));
 			resp.setStatus(200);
@@ -731,8 +735,7 @@ public class ApiWebServlet extends HttpServlet {
 
 			resp.setStatus(200);
 		} else if ("DELETE".equals(method)) {
-			_apiUtils.getElasticUtils().
-					deleteRecord(tableUrl.getString("table"),
+			_elasticUtils.deleteRecord(tableUrl.getString("table"),
 							tableUrl.getString("id"));
 			resp.setStatus(200);
 		} else if ("PUT".equals(method)) {
@@ -748,7 +751,7 @@ public class ApiWebServlet extends HttpServlet {
 				saveid = null;
 			}
 
-			_apiUtils.getElasticUtils().saveRecord(tableUrl.getString("table"),
+			_elasticUtils.saveRecord(tableUrl.getString("table"),
 					saveid, saveObject);
 			resp.setStatus(200);
 		}

@@ -2,7 +2,7 @@ package com.progbits.api.srv.formatter;
 
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
-import javolution.text.TextBuilder;
+
 
 /**
  *
@@ -12,7 +12,7 @@ public class FddFormatter {
 	private static final String STANDARD_SPACE = "  ";
 	
 	public static String convertToFdd(String mainClass, ApiClasses classes) {
-		TextBuilder text = new TextBuilder();
+		StringBuilder text = new StringBuilder();
 		
 		text.append("form: FLATFILE\n");
 		
@@ -36,7 +36,7 @@ public class FddFormatter {
 		return text.toString();
 	}
 	
-	public static void convertMainData(ApiObject mainClass, TextBuilder text) {
+	public static void convertMainData(ApiObject mainClass, StringBuilder text) {
 		text.append("- id: '").append(mainClass.getString("name")).append("'\n");
 		text.append(STANDARD_SPACE).append("name: ").append(removeTags(mainClass.getString("desc"))).append("\n");
 		text.append(STANDARD_SPACE).append("data:\n");
@@ -64,7 +64,7 @@ public class FddFormatter {
 		
 	}
 	
-	public static void convertSegment(ApiObject mainClass, TextBuilder text) {
+	public static void convertSegment(ApiObject mainClass, StringBuilder text) {
 		text.append("- id: '").append(mainClass.getString("name")).append("'\n");
 		text.append(STANDARD_SPACE).append("name: ").append(removeTags(mainClass.getString("desc"))).append("\n");
 		text.append(STANDARD_SPACE).append("values:\n");

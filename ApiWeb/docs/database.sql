@@ -28,4 +28,4 @@ INSERT INTO sm_logins (userId, bearerToken, createdDate, status) VALUES
 (4, 'eyJraWQiOiIxIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJpc3MiOiJhcGl3ZWIiLCJleHAiOjE2MTExMzgxNTR9.pZVKLRraSPu_9hW_SmIGaWxX7n6gZ_7n1DQ3Zpe4hp0', NOW(), 1),
 (2, 'eyJraWQiOiIxIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJpc3MiOiJhcGl3ZWIiLCJleHAiOjE2MTExMzgxNTR9.pZVKLRraSPu_9hW_SmIGaWxX7n6gZ_7n1DQ3Zpe4hp0', NOW(), 1),
 (6, 'eyJraWQiOiIxIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJpc3MiOiJhcGl3ZWIiLCJleHAiOjE2MTExMzgxNTR9.pZVKLRraSPu_9hW_SmIGaWxX7n6gZ_7n1DQ3Zpe4hp0', NOW(), 1),
-(3, 'eyJraWQiOiIxIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJpc3MiOiJhcGl3ZWIiLCJleHAiOjE2MTExMzgxNTR9.pZVKLRraSPu_9hW_SmIGaWxX7n6gZ_7n1DQ3Zpe4hp0', NOW(), 1),
+(3, 'eyJraWQiOiIxIiwidHlwIjoiSldUIiwiYWxnIjoiSFMyNTYifQ.eyJpc3MiOiJhcGl3ZWIiLCJleHAiOjE2MTExMzgxNTR9.pZVKLRraSPu_9hW_SmIGaWxX7n6gZ_7n1DQ3Zpe4hp0', NOW(), 1)

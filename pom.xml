@@ -13,6 +13,7 @@
         <module>ApiTransforms</module>
         <module>ApiCore</module>
         <module>ApiUtils</module>
+        <module>ApiElasticUtils</module>
 	<module>ApiSqlUtils</module>
         <module>ApiMappingGraalVM</module>
         <module>GraalVMJSOsgi</module>

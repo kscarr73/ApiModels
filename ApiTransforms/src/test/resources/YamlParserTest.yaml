@@ -1,0 +1,79 @@
+---
+name: BGN
+className: com.progbits.test.fdd.BGN
+desc: "<p>BGN Segment</p>"
+classType: "Model"
+lastUpdated: '2020-10-07T04:03:19.381Z'
+fields:
+- name: Company
+  DisplayName: Company
+  type: String
+  subType: ''
+  desc: "<p>The company for this transaction</p>"
+  min: 1
+  max: 1
+  sampleData: ''
+  length: 30
+  format: ''
+  defaultValue: ''
+  attribute: false
+- name: InvoiceNumber
+  DisplayName: Invoice Number
+  type: String
+  subType: ''
+  desc: "<p>The invoice for this transaction</p>"
+  min: 1
+  max: 1
+  sampleData: CV0001-0001
+  length: 30
+  format: ''
+  defaultValue: ''
+  attribute: false
+- name: Address
+  DisplayName: Address
+  type: String
+  subType: ''
+  desc: "<p>Address to send</p>"
+  min: 1
+  max: 1
+  sampleData: 1 MyCompany Blvd
+  length: 100
+  format: ''
+  defaultValue: ''
+  attribute: false
+- name: InvoiceDate
+  DisplayName: InvoiceDate
+  type: DateTime
+  subType: ''
+  desc: "<p>Date of the invoice</p>"
+  min: 1
+  max: 1
+  sampleData: ''
+  length: 12
+  format: yyyy-MM-dd
+  defaultValue: ''
+  attribute: false
+- name: NewFieldName
+  DisplayName: Display
+  type: String
+  subType: ''
+  desc: "<p>This is a test</p>"
+  min: 1
+  max: 1
+  sampleData: ''
+  length:
+  format: ''
+  defaultValue: ''
+  attribute: false
+- name: TestingField2
+  DisplayName: Display2
+  type: String
+  subType: ''
+  desc: "<p>This is a test</p>"
+  min: 1
+  max: 1
+  sampleData: ''
+  length:
+  format: ''
+  defaultValue: ''
+  attribute: false

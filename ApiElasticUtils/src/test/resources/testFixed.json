@@ -1,0 +1,613 @@
+{
+	"name": "sales",
+	"className": "com.icg.isg.filemgr.db.Sales",
+	"desc": "",
+	"fields": [
+		{
+			"name": "BP_OWNR_HQ_ID",
+			"type": "String",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "BA_BP_ID",
+			"type": "String",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "BILL_ACCT_XREF_NBR",
+			"type": "String",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "SHIP_LOC_BP_ID",
+			"type": "String",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "SHIP_LOC_XREF_NBR",
+			"type": "String",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "OE_NBR",
+			"type": "String",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "OE_LINE_SEQ",
+			"type": "Long",
+			"length": 4,
+			"format": ""
+		},
+		{
+			"name": "CUST_DISC_PCT",
+			"type": "Decimal",
+			"length": 5,
+			"format": "000V00"
+		},
+		{
+			"name": "CUST_PO_NBR",
+			"type": "String",
+			"length": 22,
+			"format": ""
+		},
+		{
+			"name": "DC_PAIR_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "DC_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "INVC_DSHP_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "INVC_DT",
+			"type": "DateTime",
+			"length": 10,
+			"format": "yyyy-MM-dd"
+		},
+		{
+			"name": "INVC_LINE_SEQ",
+			"type": "Long",
+			"length": 4,
+			"format": ""
+		},
+		{
+			"name": "INVC_NBR",
+			"type": "String",
+			"length": 8,
+			"format": ""
+		},
+		{
+			"name": "ISBN_ID",
+			"type": "String",
+			"length": 10,
+			"format": ""
+		},
+		{
+			"name": "ITEM_DISC_CNT",
+			"type": "Long",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "ITEM_DISC_EXT_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "ITEM_PRT_TO_ORD_CD",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "ITEM_ID",
+			"type": "Long",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "ITEM_INVC_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "ITEM_INVC_CNT",
+			"type": "Long",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "ITEM_LIST_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "ITEM_NM",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "ITEM_ORIG_REQ_CNT",
+			"type": "Long",
+			"length": 7,
+			"format": "0000000"
+		},
+		{
+			"name": "ITEM_RTL_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "ITEM_STAT_CD",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "ITEM_STK_CD",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "ORD_SHIP_DT",
+			"type": "DateTime",
+			"length": 10,
+			"format": "yyyy-MM-dd"
+		},
+		{
+			"name": "ORD_SRC_TP_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "ORD_TS",
+			"type": "DateTime",
+			"length": 19,
+			"format": "yyyy-MM-dd-HH.mm.ss"
+		},
+		{
+			"name": "PICK_LIST_FILLER",
+			"type": "String",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "PICK_LIST_RUN_NBR",
+			"type": "String",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "PRIM_DC_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "SCDY_DC_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "PartnerId",
+			"type": "String",
+			"length": 4,
+			"format": ""
+		},
+		{
+			"name": "SPCL_PROJ_CD",
+			"type": "String",
+			"length": 15,
+			"format": ""
+		},
+		{
+			"name": "TTL_ID",
+			"type": "Long",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "IPS_SALE_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "EAN_ID",
+			"type": "String",
+			"length": 13,
+			"format": ""
+		},
+		{
+			"name": "PROD_NBR_ID",
+			"type": "String",
+			"length": 13,
+			"format": ""
+		},
+		{
+			"name": "TRDE_CL_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "ST_CD",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "RETURN_FLAG",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "IPS_PUB_DISC_CD",
+			"type": "String",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "IPS_PUB_ACCT_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_NAME",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_ADDR1",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_ADDR2",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_ADDR3",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_CITY",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_STATE",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_ZIP",
+			"type": "String",
+			"length": 10,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_CTRY_NUM",
+			"type": "String",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "FILLER001",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_SAN",
+			"type": "String",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_NAME",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_ADDR1",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_ADDR2",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_ADDR3",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_CITY",
+			"type": "String",
+			"length": 30,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_STATE",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_ZIP",
+			"type": "String",
+			"length": 10,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_CTRY_NUM",
+			"type": "String",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "IPS_CAN_PRCE_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_SAN",
+			"type": "String",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "ITEM_BKOR_QTY",
+			"type": "Long",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "ITEM_CBO_QTY",
+			"type": "Long",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "FREE_IPS_LINE",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "ITEM_COST_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "DEPT_CODE",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "BINDERY_SHIPMENT",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "CARTON_CNT",
+			"type": "Long",
+			"length": 7,
+			"format": ""
+		},
+		{
+			"name": "CARTON_UNITS",
+			"type": "Long",
+			"length": 6,
+			"format": ""
+		},
+		{
+			"name": "SHIPTO_PROVINCE",
+			"type": "String",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "BILLTO_PROVINCE",
+			"type": "String",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "DEEP_DISC_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "CARR_NBR",
+			"type": "String",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "SHIP_METH_ORIG_CD",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "SHP_SRV_CL_ORG_CD",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "PUB_ALPHA",
+			"type": "String",
+			"length": 4,
+			"format": ""
+		},
+		{
+			"name": "CSOD_CUST_DISC_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "00000V0000"
+		},
+		{
+			"name": "FF_REASON",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "CUST_BP_OWNR_ID",
+			"type": "String",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "CUST_SHIP_LOC_BP",
+			"type": "String",
+			"length": 9,
+			"format": ""
+		},
+		{
+			"name": "CANCEL_DATE",
+			"type": "DateTime",
+			"length": 10,
+			"format": "yyyy-MM-dd"
+		},
+		{
+			"name": "ORDER_TYPE",
+			"type": "String",
+			"length": 2,
+			"format": ""
+		},
+		{
+			"name": "SHIP_WEIGHT_ESTM",
+			"type": "Decimal",
+			"length": 7,
+			"format": "00000V00"
+		},
+		{
+			"name": "ITEM_CANC_QTY",
+			"type": "Long",
+			"length": 5,
+			"format": ""
+		},
+		{
+			"name": "FILE_TYPE",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "IPS_ITEM_IND",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "SKIDS_CNT",
+			"type": "Long",
+			"length": 3,
+			"format": ""
+		},
+		{
+			"name": "SKID_UNITS",
+			"type": "Long",
+			"length": 6,
+			"format": ""
+		},
+		{
+			"name": "CUST_PO_ORIG_NBR",
+			"type": "String",
+			"length": 22,
+			"format": ""
+		},
+		{
+			"name": "UPDATE_PRICE",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "ITEM_WT_MEAS",
+			"type": "Decimal",
+			"length": 5,
+			"format": "000V00"
+		},
+		{
+			"name": "STICKER_TYPE",
+			"type": "String",
+			"length": 1,
+			"format": ""
+		},
+		{
+			"name": "STICKER_AMT",
+			"type": "Decimal",
+			"length": 9,
+			"format": "0000000V00"
+		},
+		{
+			"name": "STICKER_UNITS",
+			"type": "Long",
+			"length": 6,
+			"format": ""
+		},
+		{
+			"name": "SALE_ADJUST_CODE",
+			"type": "String",
+			"length": 4,
+			"format": ""
+		},
+		{
+			"name": "FILLER002",
+			"type": "String",
+			"length": 23,
+			"format": ""
+		}
+	]
+}

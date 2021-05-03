@@ -186,6 +186,7 @@ public class JsonObjectWriter implements ObjectWriter {
 							case "stringarray":
 								List<String> arrStrList = (List<String>) fldValue;
 
+								writeOut.writeFieldName(fldKey);
 								writeOut.writeStartArray(fldKey);
 
 								for (String objs : arrStrList) {

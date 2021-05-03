@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import javolution.text.TextBuilder;
 
 /**
  *
@@ -638,7 +637,7 @@ public class DocTransform {
 
 	public static String reversePackageName(String packageName) {
 		String[] sEntries = packageName.split("\\.");
-		TextBuilder tb = new TextBuilder(1000);
+		StringBuilder tb = new StringBuilder(1000);
 
 		for (int x = sEntries.length - 1; x >= 0; x--) {
 			if (x < sEntries.length - 1) {

@@ -25,11 +25,12 @@ install -s mvn:org.apache.commons/commons-csv/1.8
 install -s mvn:org.codehaus.woodstox/stax2-api/4.2
 install -s mvn:com.fasterxml/aalto-xml/1.2.2
 install -s mvn:com.fasterxml.jackson.core/jackson-core/2.12.3
-install -s mvn:com.progbits.api/ApiCore/1.2.0
-install -s mvn:com.progbits.api.transforms/ApiTransforms/1.2.0
+install -s mvn:com.progbits.api/ApiCore/1.2.1
+install -s mvn:com.progbits.api.transforms/ApiTransforms/1.2.2
 install -s mvn:com.progbits.api.util.mapping.graalvm/ApiMappingGraalVM/1.1.0
 install -s mvn:com.progbits.api.elastic/ElasticUtils/1.0.1
 install -s mvn:com.progbits.api.util/ApiUtils/1.1.2
+install -s mvn:com.progbits.api.utils.elastic/ApiUtilsElastic/1.2.1
 ```
 
 * Now that you have the ApiModels base, you can install the ApiWeb.  Reference <https://github.com/kscarr73/ApiModels/blob/master/ApiWeb/README.md>
