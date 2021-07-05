@@ -21,6 +21,7 @@ public class PlantUmlFormatter {
 
 		tb.append("@startuml\n");
 		tb.append("scale 1.2\n");
+		tb.append("!theme spacelab\n");
 		tb.append("set namespaceSeparator ::\n");
 
 		formatClasses(classes, tbClasses, tbLinks);
