@@ -20,7 +20,7 @@ public class PlantUmlFormatter {
 		StringBuilder tbLinks = new StringBuilder();
 
 		tb.append("@startuml\n");
-		tb.append("scale 1.2\n");
+		//tb.append("scale 1.2\n");
 		tb.append("!theme spacelab\n");
 		tb.append("set namespaceSeparator ::\n");
 
@@ -73,7 +73,7 @@ public class PlantUmlFormatter {
 					break;
 
 				default:
-					tbClasses.append(" << (M, #e3e0cc) >> #wheat ");
+					tbClasses.append(" << (M, #e3e0cc) >> #777777 ");
 					break;
 			}
 		} else {
