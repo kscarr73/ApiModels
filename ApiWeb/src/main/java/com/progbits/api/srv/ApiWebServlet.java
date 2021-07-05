@@ -316,6 +316,16 @@ public class ApiWebServlet extends HttpServlet {
 					} else {
 						resp.setStatus(500);
 					}
+				} else {
+					switch (objRet.getInteger("status")) {
+						case 0:
+							resp.setStatus(201);
+							break;
+							
+						case 1:
+							resp.setStatus(409);
+							break;
+					}
 				}
 			}
 		}
@@ -730,6 +740,13 @@ public class ApiWebServlet extends HttpServlet {
 
 				case "apiservices":
 					_apiUtils.saveApiService(saveObject);
+					
+					Thread.sleep(2000);
+					
+					ApiObject objRet = _apiUtils.retrieveServices(saveObject.getString("name"), null);
+					
+					resp.getWriter().append(jsonWriter.writeSingle(objRet));
+					
 					break;
 			}
 

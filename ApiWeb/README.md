@@ -36,18 +36,18 @@ install -s mvn:com.progbits.db/OsgiDbCommands/1.2.0
 * Copy and Paste this section into your running karaf environment
 
 ```
-install -s mvn:org.freemarker/freemarker/2.3.30
-install -s mvn:com.progbits.web/JQueryServlet/3.3.2
-install -s wrap:mvn:net.sourceforge.plantuml/plantuml/1.2020.4
-install -s mvn:com.fasterxml.jackson.core/jackson-core/2.12.1
-install -s mvn:com.fasterxml.jackson.core/jackson-annotations/2.12.1
-install -s mvn:com.fasterxml.jackson.core/jackson-databind/2.12.1
+install -s mvn:org.freemarker/freemarker/2.3.31
+install -s mvn:com.progbits.web/JQueryServlet/3.6.0
+install -s wrap:mvn:net.sourceforge.plantuml/plantuml/1.2021.8
+install -s mvn:com.fasterxml.jackson.core/jackson-core/2.12.3
+install -s mvn:com.fasterxml.jackson.core/jackson-annotations/2.12.3
+install -s mvn:com.fasterxml.jackson.core/jackson-databind/2.12.3
 install -s mvn:commons-codec/commons-codec/1.15
 install -s wrap:mvn:com.auth0/java-jwt/3.12.0
 install -s mvn:com.progbits.utils.http/HttpUtils/3.0.0
 install -s mvn:com.progbits.web/WebUtils/1.1.0
 install -s mvn:com.progbits.db/SsDbUtils/2.3.0
-install -s mvn:com.progbits.api.web/ApiWeb/2.1.3
+install -s mvn:com.progbits.api.web/ApiWeb/2.1.5
 ```
 
 If everything is successful, you can type `http:list` to see the following:

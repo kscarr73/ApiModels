@@ -21,11 +21,21 @@ public class TestJsonObjectWriter {
 		objTest.createList("listTest");
 		objTest.getListAdd("listTest").setString("field1", "value1").setString("field2", "value2");
 		
-		objTest.createStringArray("myStringArray");
+		objTest.createList("listTest2");
+		objTest.getListAdd("listTest2").setString("field1", "value1").setString("field2", "value2");
 		
+		objTest.createObject("objectTest");
+		objTest.getObject("objectTest").setString("objectString", "This");
+		
+		objTest.createStringArray("myStringArray");
 		objTest.getStringArray("myStringArray").add("This");
 		objTest.getStringArray("myStringArray").add("That");
 		objTest.getStringArray("myStringArray").add("Other");
+		
+		objTest.createIntegerArray("myIntegerArray");
+		objTest.getIntegerArray("myIntegerArray").add(42);
+		objTest.getIntegerArray("myIntegerArray").add(13);
+		objTest.getIntegerArray("myIntegerArray").add(7);
 		
 		String strJson = writer.writeSingle(objTest);
 		

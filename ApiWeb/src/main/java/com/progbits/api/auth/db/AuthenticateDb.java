@@ -179,6 +179,8 @@ public class AuthenticateDb implements Authenticate {
 
 		ApiObject retEmailValidate = validateEmail(subject);
 
+		subject.setInteger("status", retEmailValidate.getInteger("status"));
+		
 		switch (retEmailValidate.getInteger("status")) {
 			case 0:
 				List<Object> params = new ArrayList<>();
@@ -208,6 +210,10 @@ public class AuthenticateDb implements Authenticate {
 				break;
 		}
 
+		if (subject.containsKey("password")) {
+			subject.remove("password");
+		}
+		
 		return subject;
 	}
 

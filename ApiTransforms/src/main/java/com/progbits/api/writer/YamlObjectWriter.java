@@ -5,7 +5,6 @@ import com.progbits.api.exception.ApiException;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -18,27 +17,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.emitter.Emitter;
-import org.yaml.snakeyaml.emitter.EmitterException;
-import org.yaml.snakeyaml.events.CollectionStartEvent;
-import org.yaml.snakeyaml.events.DocumentEndEvent;
-import org.yaml.snakeyaml.events.DocumentStartEvent;
-import org.yaml.snakeyaml.events.ImplicitTuple;
-import org.yaml.snakeyaml.events.MappingEndEvent;
-import org.yaml.snakeyaml.events.MappingStartEvent;
-import org.yaml.snakeyaml.events.NodeEvent;
-import org.yaml.snakeyaml.events.ScalarEvent;
-import org.yaml.snakeyaml.events.SequenceEndEvent;
-import org.yaml.snakeyaml.events.SequenceStartEvent;
-import org.yaml.snakeyaml.events.StreamEndEvent;
-import org.yaml.snakeyaml.events.StreamStartEvent;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.serializer.Serializer;
 
 /**
  *
@@ -54,9 +36,8 @@ public class YamlObjectWriter implements ObjectWriter {
 
 	private static final Logger log = LoggerFactory.getLogger(YamlObjectWriter.class);
 
-	private Yaml _factory = new Yaml();
 	private ApiClasses _classes;
-	private Emitter _writer = null;
+	private Writer _writer = null;
 	private Map<String, String> _props = null;
 	private List<String> writeErrors = new ArrayList<>();
 	private Throwable throwException = null;
@@ -80,7 +61,7 @@ public class YamlObjectWriter implements ObjectWriter {
 	}
 
 	private void internalInit(ApiClasses classes, Map<String, String> properties, Writer out) {
-		_writer = new Emitter(out, new DumperOptions());
+		_writer = out;
 		_props = properties;
 		_classes = classes;
 	}
@@ -112,25 +93,32 @@ public class YamlObjectWriter implements ObjectWriter {
 			bout = new BufferedOutputStream(out);
 		}
 
-		_writer = new Emitter(new OutputStreamWriter(bout), new DumperOptions());
+		_writer = new OutputStreamWriter(bout);
 		_props = properties;
 		_classes = classes;
 	}
 
 	@Override
 	public void write(ApiObject obj) throws ApiException {
-		convertObjectToYaml(_writer, obj, null);
+		convertObjectToYaml(_writer, obj, null, 0);
+		try {
+			_writer.flush();
+		} catch (IOException io) {
+
+		}
 	}
 
-	public void convertObjectToYaml(Emitter writeOut, ApiObject apiObj,
-			String name) throws ApiException {
+	public void convertObjectToYaml(Writer writeOut, ApiObject apiObj,
+			String name, Integer indentSpacing) throws ApiException {
 		try {
 			if (name != null) {
-				writeScalar(writeOut, "str", name);
-				writeStartMapping(writeOut);
+				writeStartMapping(writeOut, indentSpacing);
 			} else {
-				writeStartMapping(writeOut);
+				writeStartMapping(writeOut, indentSpacing);
 			}
+
+			final AtomicBoolean bFirst = new AtomicBoolean(true);
+			
 			this.writeErrors.clear();
 			this.throwException = null;
 
@@ -148,7 +136,7 @@ public class YamlObjectWriter implements ObjectWriter {
 						}
 					}
 					if (fldValue instanceof String) {
-						writeScalar(writeOut, "str", (String) fldValue);
+						writeField(writeOut, fldKey, (String) fldValue, indentSpacing, bFirst.get());
 					} else if (fldValue instanceof List) {
 						String fldType = "arraylist";
 
@@ -178,65 +166,87 @@ public class YamlObjectWriter implements ObjectWriter {
 							case "stringarray":
 								List<String> arrStrList = (List<String>) fldValue;
 
-								writeStartArray(writeOut, false);
+								writeStartArrayFlow(writeOut, fldKey, indentSpacing);
+
+								int iCnt = 0;
 
 								for (String objs : arrStrList) {
-									writeScalar(writeOut, "str", objs);
+									if (iCnt > 0) {
+										writeValue(writeOut, ", ", indentSpacing);
+									}
+
+									writeValue(writeOut, objs, indentSpacing);
+
+									iCnt++;
 								}
 
-								writeEndArray(writeOut);
+								writeEndArrayFlow(writeOut, fldKey, indentSpacing);
 								break;
 
 							case "integerarray":
 								List<Integer> arrIntList = (List<Integer>) fldValue;
 
-								writeScalar(writeOut, "int", fldKey);
-								writeStartArray(writeOut, false);
+								writeStartArrayFlow(writeOut, fldKey, indentSpacing);
+
+								int iCnt2 = 0;
 
 								for (Integer objs : arrIntList) {
-									writeScalar(writeOut, "int", String.valueOf(objs));
+									if (iCnt2 > 0) {
+										writeValue(writeOut, ", ", indentSpacing);
+									}
+
+									writeValue(writeOut, String.valueOf(objs), indentSpacing);
+
+									iCnt2++;
 								}
 
-								writeEndArray(writeOut);
+								writeEndArrayFlow(writeOut, fldKey, indentSpacing);
 								break;
 
 							case "doublearray":
 								List<Double> arrDblList = (List<Double>) fldValue;
 
-								writeScalar(writeOut, "int", fldKey);
-								writeStartArray(writeOut, false);
+								writeStartArrayFlow(writeOut, fldKey, indentSpacing);
+
+								int iCnt3 = 0;
 
 								for (Double objs : arrDblList) {
-									writeScalar(writeOut, "int", String.valueOf(objs));
+									if (iCnt3 > 0) {
+										writeValue(writeOut, ", ", indentSpacing);
+									}
+
+									writeValue(writeOut, String.valueOf(objs), indentSpacing);
+
+									iCnt3++;
 								}
 
-								writeEndArray(writeOut);
+								writeEndArrayFlow(writeOut, fldKey, indentSpacing);
 								break;
 
 							default:
 								List<ApiObject> arrList = (List<ApiObject>) fldValue;
 
-								writeArrayList(writeOut, fldKey, arrList);
+								writeArrayList(writeOut, fldKey, arrList, indentSpacing);
 
 								break;
 						}
 					} else if (fldValue instanceof ApiObject) {
 						ApiObject obj = (ApiObject) fldValue;
 						try {
-							convertObjectToYaml(writeOut, obj, fldKey);
+							convertObjectToYaml(writeOut, obj, fldKey, indentSpacing + 4);
 						} catch (ApiException app) {
 							log.error("Internal Error", app);
 						}
 					} else if (fldValue instanceof Double) {
-						writeScalar(writeOut, "str", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, String.valueOf(fldValue), indentSpacing, bFirst.get());
 					} else if (fldValue instanceof BigDecimal) {
-						writeScalar(writeOut, "int", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, String.valueOf(fldValue), indentSpacing, bFirst.get());
 					} else if (fldValue instanceof Integer) {
-						writeScalar(writeOut, "int", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, String.valueOf(fldValue), indentSpacing, bFirst.get());
 					} else if (fldValue instanceof Boolean) {
-						writeScalar(writeOut, "bool", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, String.valueOf(fldValue), indentSpacing, bFirst.get());
 					} else if (fldValue instanceof Long) {
-						writeScalar(writeOut, "int", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, String.valueOf(fldValue), indentSpacing, bFirst.get());
 					} else if (fldValue instanceof OffsetDateTime) {
 						if (!_dtFormats.containsKey(fldKey)) {
 							if (format != null && !format.isEmpty()) {
@@ -250,15 +260,17 @@ public class YamlObjectWriter implements ObjectWriter {
 
 						OffsetDateTime dtValue = (OffsetDateTime) fldValue;
 
-						writeScalar(writeOut, "timestamp", dtValue.format(_dtFormats.get(fldKey)));
-					} else if (fldValue instanceof Boolean) {
-						writeScalar(writeOut, "timestamp", String.valueOf(fldValue));
+						writeField(writeOut, fldKey, dtValue.format(_dtFormats.get(fldKey)), indentSpacing, bFirst.get());
 					}
-				} catch (Exception ex) {
+				} catch (IOException ex) {
 					if (!this.writeErrors.contains(ex.getMessage())) {
 						this.writeErrors.add(ex.getMessage());
 					}
 					this.throwException = ex;
+				}
+				
+				if (bFirst.get()) {
+					bFirst.set(false);
 				}
 			});
 
@@ -267,59 +279,93 @@ public class YamlObjectWriter implements ObjectWriter {
 			} else {
 				writeEndMapping(writeOut);
 			}
-		} catch (EmitterException | IOException io) {
+		} catch (IOException io) {
 			throw new ApiException(io.getMessage(), io);
 		}
 	}
 
-	private void writeScalar(Emitter writeOut, String type, String subject) throws IOException {
-		writeOut.emit(new ScalarEvent(null, type, new ImplicitTuple(true, false), subject, null, null, DumperOptions.ScalarStyle.PLAIN));
+	private void createSpacing(Writer writeOut, Integer indentSpacing) throws IOException {
+		for (int x = 0; x < indentSpacing; x++) {
+			writeOut.append(" ");
+		}
 	}
 
-	private void writeStartDocument(Emitter writeOut) throws IOException {
-		writeOut.emit(new DocumentStartEvent(null, null, true, DumperOptions.Version.V1_1, null));
-	}
-	
-	private void writeEndDocument(Emitter writeOut) throws IOException {
-		writeOut.emit(new DocumentEndEvent(null, null, true));
-	}
-	
-	private void writeStartMapping(Emitter writeOut) throws IOException {
-		writeOut.emit(new MappingStartEvent(null, null, true, null, null, DumperOptions.FlowStyle.FLOW));
-	}
-	
-	private void writeEndMapping(Emitter writeOut) throws IOException {
-		writeOut.emit(new MappingEndEvent(null, null));
-	}
-	
-	private void writeStartArray(Emitter writeOut, Boolean blockStyle) throws IOException {
-		writeOut.emit(new SequenceStartEvent(null, null, true, null, null, blockStyle ? DumperOptions.FlowStyle.BLOCK : DumperOptions.FlowStyle.FLOW));
-	}
-	
-	private void writeEndArray(Emitter writeOut) throws IOException {
-		writeOut.emit(new SequenceEndEvent(null, null));
+	private void writeField(Writer writeOut, String fieldName, String fieldValue, Integer indentSpacing, boolean bFirst) throws IOException {
+		if (!bFirst) {
+			createSpacing(writeOut, indentSpacing);
+		}
+		writeOut.append(fieldName).append(": ").append(fieldValue).append("\n");
 	}
 
-	private void writeStreamStart(Emitter writeOut) throws IOException {
-		writeOut.emit(new StreamStartEvent(null, null));
+	private void writeValue(Writer writeOut, String fieldValue, Integer indentSpacing) throws IOException {
+		createSpacing(writeOut, indentSpacing);
+		writeOut.append(fieldValue);
 	}
 
-	private void writeStreamEnd(Emitter writeOut) throws IOException {
-		writeOut.emit(new StreamEndEvent(null, null));
+	private void writeStartDocument(Writer writeOut) throws IOException {
+		writeOut.append("---").append("\n");
 	}
 
-	private void writeArrayList(Emitter writeOut, String fldKey, List<ApiObject> arrList) {
+	private void writeEndDocument(Writer writeOut) throws IOException {
+		writeOut.append("...").append("\n");
+	}
+
+	private void writeStartMapping(Writer writeOut, Integer indentSpacing) throws IOException {
+		if (indentSpacing >= 4) {
+			createSpacing(writeOut, indentSpacing - 2);
+			writeOut.append("- ");
+		}
+	}
+
+	private void writeEndMapping(Writer writeOut) throws IOException {
+		// Nothing really to do here
+	}
+
+	private void writeStartArray(Writer writeOut, String fieldName, Integer indentSpacing) throws IOException {
+		if (indentSpacing > 0) {
+			createSpacing(writeOut, indentSpacing);
+		}
+
+		writeOut.append(fieldName).append(": \n");
+	}
+
+	private void writeStartArrayFlow(Writer writeOut, String fieldName, Integer indentSpacing) throws IOException {
+		if (indentSpacing > 0) {
+			createSpacing(writeOut, indentSpacing);
+		}
+
+		writeOut.append(fieldName).append(": [ ");
+	}
+
+	private void writeEndArrayFlow(Writer writeOut, String fieldName, Integer indentSpacing) throws IOException {
+		if (indentSpacing > 0) {
+			createSpacing(writeOut, indentSpacing);
+		}
+
+		writeOut.append(" ] \n");
+	}
+
+	private void writeEndArray(Writer writeOut) throws IOException {
+		// Nothing really to do here
+	}
+
+	private void writeStreamStart(Writer writeOut) throws IOException {
+		// Nothing really to do here
+	}
+
+	private void writeStreamEnd(Writer writeOut) throws IOException {
+		// Nothing really to do here
+	}
+
+	private void writeArrayList(Writer writeOut, String fldKey, List<ApiObject> arrList, Integer indentSpacing) {
 		try {
 			if (null != fldKey) {
-				writeScalar(writeOut, "str", fldKey);
-				writeStartArray(writeOut, true);
-			} else {
-				writeStartArray(writeOut, true);
+				writeStartArray(writeOut, fldKey, indentSpacing);
 			}
 
 			for (ApiObject objs : arrList) {
 				try {
-					convertObjectToYaml(writeOut, objs, null);
+					convertObjectToYaml(writeOut, objs, null, indentSpacing + 4);
 				} catch (ApiException app) {
 					log.error("writeArrayList", app);
 				}
@@ -333,35 +379,32 @@ public class YamlObjectWriter implements ObjectWriter {
 
 	@Override
 	public String writeSingle(ApiObject obj) throws ApiException {
-		StringWriter retStr = new StringWriter(10000);
-
-		Emitter writeOut = new Emitter(retStr, new DumperOptions());
+		StringWriter writeOut = new StringWriter(10000);
 
 		try {
 			writeStreamStart(writeOut);
 			writeStartDocument(writeOut);
 
 			if (obj.size() == 1 && obj.containsKey("root")) {
-				writeArrayList(writeOut, null, obj.getList("root"));
+				writeArrayList(writeOut, null, obj.getList("root"), 0);
 			} else {
-				convertObjectToYaml(writeOut, obj, null);
+				convertObjectToYaml(writeOut, obj, null, 0);
 			}
 
 			writeEndDocument(writeOut);
 			writeStreamEnd(writeOut);
-			retStr.flush();
+			writeOut.flush();
 		} catch (IOException io) {
-			return retStr.toString();
-			//throw new ApiException(io.getMessage());
+			throw new ApiException(io.getMessage());
 		}
 
-		return retStr.toString();
+		return writeOut.toString();
 	}
 
 	@Override
 	public void writeHeader() throws ApiException {
 		try {
-			writeStartArray(_writer, true);
+			writeStartArray(_writer, null, 0);
 		} catch (IOException io) {
 			throw new ApiException(io.getMessage(), io);
 		}

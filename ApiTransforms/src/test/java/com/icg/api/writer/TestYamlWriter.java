@@ -1,7 +1,9 @@
 package com.icg.api.writer;
 
 import com.progbits.api.model.ApiObject;
+import com.progbits.api.parser.YamlObjectParser;
 import com.progbits.api.writer.YamlObjectWriter;
+import java.io.StringReader;
 import java.util.List;
 import org.testng.annotations.Test;
 
@@ -13,6 +15,7 @@ public class TestYamlWriter {
 	@Test
 	public void testWriteSingle() throws Exception {
 		YamlObjectWriter objectWriter = new YamlObjectWriter(true);
+		YamlObjectParser objectParser = new YamlObjectParser(true);
 		
 		ApiObject objTest = new ApiObject();
 		
@@ -22,14 +25,28 @@ public class TestYamlWriter {
 		objTest.createList("listTest");
 		objTest.getListAdd("listTest").setString("field1", "value1").setString("field2", "value2");
 		
-//		objTest.createList("listTest2");
-//		objTest.getListAdd("listTest2").setString("field1", "value1").setString("field2", "value2");
-//		
-//		objTest.createObject("objectTest");
-//		objTest.getObject("objectTest").setString("objectString", "This");
-//		
+		objTest.createList("listTest2");
+		objTest.getListAdd("listTest2").setString("field1", "value1").setString("field2", "value2");
+		
+		objTest.createObject("objectTest");
+		objTest.getObject("objectTest").setString("objectString", "This");
+		
+		objTest.createStringArray("myStringArray");
+		objTest.getStringArray("myStringArray").add("This");
+		objTest.getStringArray("myStringArray").add("That");
+		objTest.getStringArray("myStringArray").add("Other");
+		
+		objTest.createIntegerArray("myIntegerArray");
+		objTest.getIntegerArray("myIntegerArray").add(42);
+		objTest.getIntegerArray("myIntegerArray").add(13);
+		objTest.getIntegerArray("myIntegerArray").add(7);
+		
 		String strTest = objectWriter.writeSingle(objTest);
 		
 		assert strTest != null;
+		
+		ApiObject objParse = objectParser.parseSingle(new StringReader(strTest));
+		
+		assert objParse != null;
 	}
 }
