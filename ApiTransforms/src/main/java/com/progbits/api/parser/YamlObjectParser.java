@@ -40,280 +40,312 @@ import org.yaml.snakeyaml.tokens.TagToken;
  * @author scarr
  */
 @Component(name = "YamlObjectParser", immediate = true, property
-		= {
-			"type=YAML", "name=YamlObjectParser"
-		})
+        = {
+            "type=YAML", "name=YamlObjectParser"
+        })
 public class YamlObjectParser implements ObjectParser {
 
-	private ApiObject _obj = null;
+    private ApiObject _obj = null;
 
-	private String _mainClass;
-	private ApiClasses _classes;
-	private Iterable<Event> _parser;
-	private Yaml _factory = new Yaml(new Constructor(), new Representer(), new DumperOptions(),
-			new Resolver());
-	private Resolver resolver = new Resolver();
-	private Map<String, String> _props;
-	private List<String> parseErrors;
-	private Throwable throwException;
+    private String _mainClass;
+    private ApiClasses _classes;
+    private Iterable<Event> _parser;
+    private Yaml _factory = new Yaml(new Constructor(), new Representer(), new DumperOptions(),
+            new Resolver());
+    private Resolver resolver = new Resolver();
+    private Map<String, String> _props;
+    private List<String> parseErrors;
+    private Throwable throwException;
 
-	private Map<String, DateTimeFormatter> _dtFormats = new HashMap<>();
+    private Map<String, DateTimeFormatter> _dtFormats = new HashMap<>();
 
-	public YamlObjectParser() {
+    public YamlObjectParser() {
 
-	}
+    }
 
-	public YamlObjectParser(boolean genericProcessor) {
-		if (genericProcessor) {
-			internalInit(null, null, null, null);
-		}
-	}
+    public YamlObjectParser(boolean genericProcessor) {
+        if (genericProcessor) {
+            internalInit(null, null, null, null);
+        }
+    }
 
-	private void internalInit(ApiClasses classes, String mainClass,
-			Map<String, String> properties, Reader in) {
-		if (in != null) {
-			_parser = _factory.parse(in);
-		}
-		_props = properties;
-		_classes = classes;
-		_mainClass = mainClass;
-		this.parseErrors = new ArrayList<>();
-	}
+    private void internalInit(ApiClasses classes, String mainClass,
+            Map<String, String> properties, Reader in) {
+        if (in != null) {
+            _parser = _factory.parse(in);
+        }
+        _props = properties;
+        _classes = classes;
+        _mainClass = mainClass;
+        this.parseErrors = new ArrayList<>();
+    }
 
-	@Override
-	public ObjectParser getParser() {
-		return new YamlObjectParser();
-	}
+    @Override
+    public ObjectParser getParser() {
+        return new YamlObjectParser();
+    }
 
-	@Override
-	public void initStream(ApiClasses classes, String mainClass,
-			Map<String, String> properties, InputStream in) throws ApiException {
-		init(classes, mainClass, properties, new BufferedReader(new InputStreamReader(in)));
-	}
+    @Override
+    public void initStream(ApiClasses classes, String mainClass,
+            Map<String, String> properties, InputStream in) throws ApiException {
+        init(classes, mainClass, properties, new BufferedReader(new InputStreamReader(in)));
+    }
 
-	@Override
-	public void init(ApiClasses classes, String mainClass,
-			Map<String, String> properties, Reader in) throws ApiException {
-		internalInit(classes, mainClass, properties, in);
-	}
+    @Override
+    public void init(ApiClasses classes, String mainClass,
+            Map<String, String> properties, Reader in) throws ApiException {
+        internalInit(classes, mainClass, properties, in);
+    }
 
-	@Override
-	public boolean next() throws ApiException, ApiClassNotFoundException {
-		this.parseErrors.clear();
-		this.throwException = null;
+    @Override
+    public boolean next() throws ApiException, ApiClassNotFoundException {
+        this.parseErrors.clear();
+        this.throwException = null;
 
-		if (_classes != null) {
-			_obj = _classes.getInstance(_mainClass);
-		} else {
-			_obj = new ApiObject();
-		}
-		try {
-			parseYamltoObject(_classes, _mainClass, _parser, _obj, true);
+        if (_classes != null) {
+            _obj = _classes.getInstance(_mainClass);
+        } else {
+            _obj = new ApiObject();
+        }
+        try {
+            parseYamltoObject(_classes, _mainClass, _parser, _obj, true);
 
-		} catch (Exception ex) {
-			if (!this.parseErrors.contains(ex.getMessage())) {
-				this.parseErrors.add(ex.getMessage());
-			}
-			this.throwException = ex;
-		}
+        } catch (Exception ex) {
+            if (!this.parseErrors.contains(ex.getMessage())) {
+                this.parseErrors.add(ex.getMessage());
+            }
+            this.throwException = ex;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public ApiObject getObject() {
-		return _obj;
-	}
+    @Override
+    public ApiObject getObject() {
+        return _obj;
+    }
 
-	public void parseYamltoObject(ApiClasses apiClasses, String curClass,
-			Iterable<Event> parser, ApiObject obj, boolean bFirst) throws ApiException, ApiClassNotFoundException {
-		boolean iFirstObj = bFirst;
+    public void parseYamltoObject(ApiClasses apiClasses, String curClass,
+            Iterable<Event> parser, ApiObject obj, boolean bFirst) throws ApiException, ApiClassNotFoundException {
+        boolean iFirstObj = bFirst;
 
-		ApiClass apiClass = null;
+        ApiClass apiClass = null;
 
-		if (apiClasses != null) {
-			if (curClass != null) {
-				if (curClass.contains(".")) {
-					apiClass = apiClasses.getClass(curClass);
-				} else {
-					apiClass = apiClasses.getClassByName(curClass);
-				}
-			} else {
-				throw new ApiException(
-						"Field Name is Null. Main Class: " + _mainClass, null);
-			}
-		}
+        if (apiClasses != null) {
+            if (curClass != null) {
+                if (curClass.contains(".")) {
+                    apiClass = apiClasses.getClass(curClass);
+                } else {
+                    apiClass = apiClasses.getClassByName(curClass);
+                }
+            } else {
+                throw new ApiException(
+                        "Field Name is Null. Main Class: " + _mainClass, null);
+            }
+        }
 
-		String key = null;
-		ApiObject nObj = null;
-		ApiObject curField = null;
-		boolean inArray = false;
-		int arrayType = ApiObject.TYPE_ARRAYLIST;
+        String key = null;
+        ApiObject nObj = null;
+        ApiObject curField = null;
+        boolean inArray = false;
+        int arrayType = ApiObject.TYPE_ARRAYLIST;
 
-		try {
-			OUTER:
-			while (parser.iterator().hasNext()) {
-				Event event = parser.iterator().next();
+        try {
+            OUTER:
+            while (parser.iterator().hasNext()) {
+                Event event = parser.iterator().next();
 
-				if (event instanceof DocumentEndEvent) {
-					break;
-				}
+                if (event instanceof DocumentEndEvent) {
+                    break;
+                }
 
-				if (event instanceof MappingStartEvent) {
-					if (iFirstObj) {
-						iFirstObj = false;
-					} else {
-						if (apiClasses != null) {
-							if (curField != null) {
-								if (curField.getString("subType") != null) {
-									nObj = apiClasses.getInstance(curField.
-											getString("subType"));
-								} else {
-									try {
-										nObj = apiClasses.getInstanceByName(key);
-									} catch (Exception ex) {
-										nObj = new ApiObject();
-										nObj.setName(key);
-									}
-								}
-							} else {
-								try {
-									nObj = apiClasses.getInstanceByName(key);
-								} catch (Exception ex) {
-									nObj = new ApiObject();
-									nObj.setName(key);
-								}
-							}
-						} else {
-							nObj = new ApiObject();
-							nObj.setName(key);
-						}
+                if (event instanceof MappingStartEvent) {
+                    if (iFirstObj) {
+                        iFirstObj = false;
+                    } else {
+                        if (apiClasses != null) {
+                            if (curField != null) {
+                                if (curField.getString("subType") != null) {
+                                    nObj = apiClasses.getInstance(curField.
+                                            getString("subType"));
+                                } else {
+                                    try {
+                                        nObj = apiClasses.getInstanceByName(key);
+                                    } catch (Exception ex) {
+                                        nObj = new ApiObject();
+                                        nObj.setName(key);
+                                    }
+                                }
+                            } else {
+                                try {
+                                    nObj = apiClasses.getInstanceByName(key);
+                                } catch (Exception ex) {
+                                    nObj = new ApiObject();
+                                    nObj.setName(key);
+                                }
+                            }
+                        } else {
+                            nObj = new ApiObject();
+                            nObj.setName(key);
+                        }
 
-						parseYamltoObject(apiClasses, nObj.getName(), parser, nObj,
-								false);
+                        parseYamltoObject(apiClasses, nObj.getName(), parser, nObj,
+                                false);
 
-						if (inArray) {
-							if (obj.getList(key) == null) {
-								obj.createList(key);
-							}
+                        if (inArray) {
+                            if (obj.getList(key) == null) {
+                                obj.createList(key);
+                            }
 
-							obj.getList(key).add(nObj);
-						} else {
-							obj.setObject(key, nObj);
-						}
-					}
-				} else if (event instanceof MappingEndEvent) {
-					return;
-				} else if (event instanceof CollectionStartEvent) {
-					if (key == null) {
-						key = "root";
-						iFirstObj = false;
-					}
-					inArray = true;
-				} else if (event instanceof CollectionEndEvent) {
-					inArray = false;
-				} else if (event instanceof ScalarEvent) {
-					ScalarEvent se = (ScalarEvent) event;
+                            obj.getList(key).add(nObj);
+                        } else {
+                            obj.setObject(key, nObj);
+                            key = null;
+                        }
+                    }
+                } else if (event instanceof MappingEndEvent) {
+                    return;
+                } else if (event instanceof CollectionStartEvent) {
+                    if (key == null) {
+                        key = "root";
+                        iFirstObj = false;
+                    }
+                    inArray = true;
+                } else if (event instanceof CollectionEndEvent) {
+                    key = null;
+                    inArray = false;
+                } else if (event instanceof ScalarEvent) {
+                    ScalarEvent se = (ScalarEvent) event;
 
-					if (key == null) {
-						key = se.getValue();
+                    if (key == null) {
+                        key = se.getValue();
 
-						if (apiClass != null) {
-							curField = apiClass.getListSearch("fields", "name", key);
-						} else {
-							curField = null;
-						}
-					} else {
-						Tag t = resolver.resolve(NodeId.scalar, se.getValue(), true);
+                        if (apiClass != null) {
+                            curField = apiClass.getListSearch("fields", "name", key);
+                        } else {
+                            curField = null;
+                        }
+                    } else {
+                        Tag t = resolver.resolve(NodeId.scalar, se.getValue(), true);
 
-						processScalar(obj, key, curField, t.getValue(), se.getValue());
+                        processScalar(obj, key, curField, t.getValue(), se.getValue(), inArray);
 
-						key = null;
-					}
-				}
-			}
-		} catch (ApiClassNotFoundException | ApiException ex) {
+                        if (!inArray) {
+                            key = null;
+                        }
+                    }
+                }
+            }
+        } catch (ApiClassNotFoundException | ApiException ex) {
 
-		}
-	}
+        }
+    }
 
-	private void processScalar(ApiObject obj, String key, ApiObject curField, String resolvedType, String subject) {
+    private void processScalar(ApiObject obj, String key, ApiObject curField, String resolvedType, String subject, boolean inArray) {
 
-		switch (resolvedType) {
-			case "tag:yaml.org,2002:str":
-				obj.setString(key, subject);
-				break;
+        switch (resolvedType) {
+            case "tag:yaml.org,2002:str":
+                if (inArray) {
+                    if (!obj.containsKey(key)) {
+                        obj.createStringArray(key);
+                    }
+                    
+                    obj.getStringArray(key).add(subject);
+                } else {
+                    obj.setString(key, subject);
+                }
+                break;
 
-			case "tag:yaml.org,2002:timestamp":
-				if (curField != null) {
-					if ("Date".equals(curField.getString("type"))
-							|| "DateTime".equals(curField.getString("type"))) {
-						if (!_dtFormats.containsKey(key)) {
-							String format = curField.getString("format");
+            case "tag:yaml.org,2002:timestamp":
+                if (curField != null) {
+                    if ("Date".equals(curField.getString("type"))
+                            || "DateTime".equals(curField.getString("type"))) {
+                        if (!_dtFormats.containsKey(key)) {
+                            String format = curField.getString("format");
 
-							if (format != null && !format.isEmpty()) {
-								DateTimeFormatter dtFormat = DateTimeFormatter.
-										ofPattern(format);
+                            if (format != null && !format.isEmpty()) {
+                                DateTimeFormatter dtFormat = DateTimeFormatter.
+                                        ofPattern(format);
 
-								_dtFormats.put(key, dtFormat);
-							} else {
-								_dtFormats.put(key, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-							}
-						}
+                                _dtFormats.put(key, dtFormat);
+                            } else {
+                                _dtFormats.put(key, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                            }
+                        }
 
-						if (subject.length() > 0) {
-							obj.setDateTime(key, OffsetDateTime.parse(subject, _dtFormats.get(key)));
-						}
-					}
-				} else {
-					DateTimeFormatter dtFormat = _dtFormats.get(key);
-					
-					if (null == dtFormat) {
-						dtFormat = _dtFormats.put(key, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-					}
-				
-					obj.setDateTime(key, OffsetDateTime.parse(subject, _dtFormats.get(key)));
-				}
-				break;
+                        if (subject.length() > 0) {
+                            obj.setDateTime(key, OffsetDateTime.parse(subject, _dtFormats.get(key)));
+                        }
+                    }
+                } else {
+                    DateTimeFormatter dtFormat = _dtFormats.get(key);
 
-			case "tag:yaml.org,2002:null":
-				break;
+                    if (null == dtFormat) {
+                        dtFormat = _dtFormats.put(key, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    }
 
-			case "tag:yaml.org,2002:int":
-				obj.setLong(key, Long.parseLong(subject));
-				break;
+                    obj.setDateTime(key, OffsetDateTime.parse(subject, _dtFormats.get(key)));
+                }
+                break;
 
-			case "tag:yaml.org,2002:bool":
-				obj.setBoolean(key, Boolean.parseBoolean(subject));
-				break;
+            case "tag:yaml.org,2002:null":
+                break;
 
-		}
-	}
+            case "tag:yaml.org,2002:int":
+                if (inArray) {
+                    if (!obj.containsKey(key)) {
+                        obj.createIntegerArray(key);
+                    }
+                    
+                    obj.getIntegerArray(key).add(Integer.parseInt(subject));
+                } else {
+                    obj.setLong(key, Long.parseLong(subject));
+                }
+                break;
+                
+            case "tag:yaml.org,2002:float":
+                if (inArray) {
+                    if (!obj.containsKey(key)) {
+                        obj.createDoubleArray(key);
+                    }
+                    
+                    obj.getDoubleArray(key).add(Double.parseDouble(subject));
+                } else {
+                    obj.setDouble(key, Double.parseDouble(subject));
+                }
+                break;
 
-	@Override
-	public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
-		ApiObject retObj;
+            case "tag:yaml.org,2002:bool":
+                obj.setBoolean(key, Boolean.parseBoolean(subject));
+                break;
 
-		Iterable<Event> parse = _factory.parse(in);
+        }
+    }
 
-		if (_classes != null) {
-			retObj = _classes.getInstance(_mainClass);
-		} else {
-			retObj = new ApiObject();
-		}
+    @Override
+    public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
+        ApiObject retObj;
 
-		parseYamltoObject(_classes, _mainClass, parse, retObj, true);
+        Iterable<Event> parse = _factory.parse(in);
 
-		return retObj;
-	}
+        if (_classes != null) {
+            retObj = _classes.getInstance(_mainClass);
+        } else {
+            retObj = new ApiObject();
+        }
 
-	@Override
-	public List<String> getParseErrors() {
-		return this.parseErrors;
-	}
+        parseYamltoObject(_classes, _mainClass, parse, retObj, true);
 
-	@Override
-	public Throwable getThrowException() {
-		return throwException;
-	}
+        return retObj;
+    }
+
+    @Override
+    public List<String> getParseErrors() {
+        return this.parseErrors;
+    }
+
+    @Override
+    public Throwable getThrowException() {
+        return throwException;
+    }
 }
