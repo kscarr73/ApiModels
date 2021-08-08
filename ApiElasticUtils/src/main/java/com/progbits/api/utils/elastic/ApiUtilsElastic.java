@@ -8,6 +8,7 @@ import com.progbits.api.elastic.ElasticUtils;
 import com.progbits.api.elastic.query.BoolQuery;
 import com.progbits.api.elastic.query.EsSearch;
 import com.progbits.api.elastic.query.MainQuery;
+import com.progbits.api.elastic.query.MatchQuery;
 import com.progbits.api.elastic.query.RegExpQuery;
 import com.progbits.api.elastic.query.TermQuery;
 import com.progbits.api.exception.ApiClassNotFoundException;
@@ -217,7 +218,7 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 		try {
 			retMap = getApiServicesElastic(serviceName, access);
 		} catch (Exception ex) {
-
+			LOG.error(ex.getMessage(), ex);
 		}
 
 		if (retMap != null) {
@@ -347,11 +348,11 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 
 		search.setQuery(mq);
 
-		if (service != null || access != null) {
+		if (service != null) {
 			BoolQuery bool = new BoolQuery();
 
 			if (service != null) {
-				bool.getMust().add(new RegExpQuery("name", service));
+				bool.getMust().add(new MatchQuery("info.title", service));
 			}
 
 			if (access != null) {
@@ -372,11 +373,11 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 
 			String url = aoObj.getString("url");
 
-			if (!url.startsWith("/")) {
+			if (url != null && !url.startsWith("/")) {
 				url = "/" + url;
 			}
 
-			retMap.put(aoObj.getString("name"), aoObj);
+			retMap.put(aoObj.getString("info.title"), aoObj);
 		}
 
 		return retMap;
@@ -535,6 +536,10 @@ public class ApiUtilsElastic implements ApiUtilsInterface {
 
 		if (id != null) {
 			obj.remove("_id");
+		}
+		
+		if (obj.containsKey("_type")) {
+			obj.remove("_type");
 		}
 
 		try {

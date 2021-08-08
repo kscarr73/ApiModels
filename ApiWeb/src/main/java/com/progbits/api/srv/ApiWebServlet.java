@@ -78,7 +78,7 @@ public class ApiWebServlet extends HttpServlet {
 	private static Map<String, ApiUtils> mapUtils = new LinkedHashMap<>();
 
 	private ElasticUtils _elasticUtils;
-	
+
 	private ObjectParser jsonParser = null;
 	private ObjectWriter jsonWriter = null;
 
@@ -114,6 +114,7 @@ public class ApiWebServlet extends HttpServlet {
 	public void setElasticUtils(ElasticUtils elasticUtils) {
 		_elasticUtils = elasticUtils;
 	}
+
 	@Override
 	public void init() throws ServletException {
 		_fm = new Configuration(Configuration.VERSION_2_3_25);
@@ -174,6 +175,8 @@ public class ApiWebServlet extends HttpServlet {
 			}
 
 			// TODO:  Authenticate the token
+			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"));
+
 			UrlEntry url = new UrlEntry();
 
 			url.setCurrUrl(req.getRequestURI());
@@ -267,8 +270,19 @@ public class ApiWebServlet extends HttpServlet {
 				tmp.process(hash, resp.getWriter());
 			}
 		} catch (Exception ex) {
-			log.error("handleRequest", ex);
-			throw new ServletException("Error in Page", ex);
+			if (ex instanceof ApplicationException) {
+				resp.setStatus(((ApplicationException) ex).getStatus());
+
+				if (req.getContentType().contains("application/json")) {
+					resp.getWriter().append("{ \"message\": \"" + ex.getMessage() + "\" }");
+				} else {
+					log.error("handleRequest", ex);
+					throw new ServletException("Error in Page", ex);
+				}
+			} else {
+				log.error("handleRequest", ex);
+				throw new ServletException("Error in Page", ex);
+			}
 		}
 	}
 
@@ -292,9 +306,19 @@ public class ApiWebServlet extends HttpServlet {
 			if (objRet != null && objRet.containsKey("message")) {
 				resp.setStatus(401);
 			}
+		} else if (req.getRequestURI().endsWith("/logout")) {
+			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"));
+
+			objReq.setInteger("userId", authUser.getInteger("id"));
+
+			objRet = authenticate.logout(objReq);
+
+			if (objRet != null && objRet.containsKey("message")) {
+				resp.setStatus(401);
+			}
 		} else if (req.getRequestURI().endsWith("/verifyEmail")) {
 			objRet = authenticate.verifyEmail(objReq);
-			
+
 			resp.setStatus(200);
 		} else if (req.getRequestURI().endsWith("/validateEmail")) {
 			objRet = authenticate.validateEmail(objReq);
@@ -321,7 +345,7 @@ public class ApiWebServlet extends HttpServlet {
 						case 0:
 							resp.setStatus(201);
 							break;
-							
+
 						case 1:
 							resp.setStatus(409);
 							break;
@@ -740,20 +764,20 @@ public class ApiWebServlet extends HttpServlet {
 
 				case "apiservices":
 					_apiUtils.saveApiService(saveObject);
-					
+
 					Thread.sleep(2000);
-					
-					ApiObject objRet = _apiUtils.retrieveServices(saveObject.getString("name"), null);
-					
-					resp.getWriter().append(jsonWriter.writeSingle(objRet));
-					
+
+					ApiObject objRet = _apiUtils.retrieveServices(saveObject.getString("info.title"), null);
+
+					resp.getWriter().append(jsonWriter.writeSingle(objRet.getObject(saveObject.getString("info.title"))));
+
 					break;
 			}
 
 			resp.setStatus(200);
 		} else if ("DELETE".equals(method)) {
 			_elasticUtils.deleteRecord(tableUrl.getString("table"),
-							tableUrl.getString("id"));
+					tableUrl.getString("id"));
 			resp.setStatus(200);
 		} else if ("PUT".equals(method)) {
 			ApiObject saveObject = Transform.toApiObject(_apiUtils.getParser().

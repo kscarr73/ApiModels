@@ -21,7 +21,7 @@ public class PlantUmlFormatter {
 
 		tb.append("@startuml\n");
 		//tb.append("scale 1.2\n");
-		tb.append("!theme spacelab\n");
+		tb.append("!theme materia\n");
 		tb.append("set namespaceSeparator ::\n");
 
 		formatClasses(classes, tbClasses, tbLinks);
@@ -73,7 +73,7 @@ public class PlantUmlFormatter {
 					break;
 
 				default:
-					tbClasses.append(" << (M, #e3e0cc) >> #777777 ");
+					tbClasses.append(" << (M, #947C6B) >> #6b8394 ");
 					break;
 			}
 		} else {
