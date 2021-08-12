@@ -466,14 +466,36 @@ public class ApiObject implements Bindings {
                 String arrKey = key.substring(0, iLoc);
                 String arrInt = key.substring(iLoc + 1, iLoc2);
 
-                List lstSubject = (List) getCoreObject(arrKey);
-
+                List<ApiObject> lstSubject = (List) getCoreObject(arrKey);
+                ApiObject objSub = null;
+                
                 if (lstSubject == null) {
-                    resp = null;
+                    objSub = null;
                 } else {
-                    resp = lstSubject.get(Integer.parseInt(arrInt));
-                }
+                    char firstChar = arrInt.toLowerCase().charAt(0);
 
+                    if ("0123456789".indexOf(firstChar) == -1) {
+                        // Is Not Digits, should have =
+                        String[] splKey = arrInt.split("=");
+
+                        for (ApiObject obj : lstSubject) {
+                            Object otst = obj.getFields().get(
+                                    splKey[0]);
+
+                            if (otst instanceof String) {
+                                if (((String) otst).
+                                        equals(splKey[1])) {
+                                    objSub = obj;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        objSub = lstSubject.get(Integer.parseInt(arrInt));
+                    }
+                }
+                
+                resp = objSub;
             } else {
                 resp = _fields.get(key);
             }
