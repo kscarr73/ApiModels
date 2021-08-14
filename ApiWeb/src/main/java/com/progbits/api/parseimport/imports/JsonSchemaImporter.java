@@ -5,6 +5,7 @@ import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiException;
 import com.progbits.api.model.ApiObject;
 import com.progbits.api.parseimport.ImportParser;
+import com.progbits.api.parser.JsonObjectParser;
 import com.progbits.api.srv.ApiWebServlet;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
 import java.io.InputStream;
@@ -18,152 +19,144 @@ import org.osgi.service.component.annotations.Reference;
  * @author scarr
  */
 @Component(name = "JsonSchemaImporter", immediate = true, property
-        = {
-            "type=JSONSCHEMA", "name=JsonSchemaImporter"
-        })
+		= {
+			"type=JSONSCHEMA", "name=JsonSchemaImporter"
+		})
 public class JsonSchemaImporter implements ImportParser {
 
-    private ApiUtilsInterface _apiUtils;
-    private ObjectParser _parseJson;
+	private ApiUtilsInterface _apiUtils;
+	private ObjectParser _parseJson;
 
-    @Reference
-    public void setApiUtils(ApiUtilsInterface api) {
-        _apiUtils = api;
+	@Reference
+	public void setApiUtils(ApiUtilsInterface api) {
+		_apiUtils = api;
 
-        try {
-            _parseJson = _apiUtils.getParser().getParser("JSON");
+		_parseJson = new JsonObjectParser(true);
+	}
 
-            _parseJson.initStream(null, null, null, null);
-        } catch (ApiException apiEx) {
+	@Override
+	public ApiObject parseImport(String packagePrefix, ApiWebServlet apiSrv, InputStream is) throws ApiException {
+		ApiObject retObj = new ApiObject();
 
-        }
-    }
+		retObj.createList("rows");
 
-    @Override
-    public ApiObject parseImport(String packagePrefix, ApiWebServlet apiSrv, InputStream is) throws ApiException {
-        ApiObject retObj = new ApiObject();
+		try {
+			ApiObject objReq = _parseJson.parseSingle(new InputStreamReader(is));
 
-        retObj.createList("rows");
+			ApiObject objCls = new ApiObject();
 
-        ObjectParser objParser;
+			String strTitle = objReq.getString("title");
 
-        try {
-            ApiObject objReq = _parseJson.parseSingle(new InputStreamReader(is));
+			objCls.setString("name", strTitle);
+			objCls.setString("desc", objReq.getString("description"));
+			objCls.setString("className", packagePrefix + "." + strTitle);
+			objCls.setString("classType", "Model");
 
-            ApiObject objCls = new ApiObject();
+			processFields(packagePrefix, objCls, objReq.getStringArray("required"), objReq.getObject("properties"));
 
-            String strTitle = objReq.getString("title");
+			retObj.getList("rows").add(objCls);
 
-            objCls.setString("name", strTitle);
-            objCls.setString("desc", objReq.getString("description"));
-            objCls.setString("className", packagePrefix + "." + strTitle);
-            objCls.setString("classType", "Model");
+			if (objReq.containsKey("definitions")) {
+				objReq.getObject("definitions").entrySet().forEach((entry) -> {
+					retObj.getList("rows").add(processObject(packagePrefix, entry.getKey(), (ApiObject) entry.getValue()));
+				});
+			}
 
-            processFields(packagePrefix, objCls, objReq.getStringArray("required"), objReq.getObject("properties"));
+			retObj.getList("rows").forEach((entry) -> {
+				try {
+					_apiUtils.saveApiModel(entry);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
 
-            retObj.getList("rows").add(objCls);
+			return retObj;
+		} catch (ApiClassNotFoundException clsEx) {
+			throw new ApiException("Class Not Found Exception: " + clsEx.getMessage(), clsEx);
+		}
+	}
 
-            if (objReq.containsKey("definitions")) {
-                objReq.getObject("definitions").entrySet().forEach((entry) -> {
-                   retObj.getList("rows").add(processObject(packagePrefix, entry.getKey(), (ApiObject) entry.getValue()));
-                });
-            }
-            
-            retObj.getList("rows").forEach((entry) -> {
-                try {
-                _apiUtils.saveApiModel(entry);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            });
-            
-            return retObj;
-        } catch (ApiClassNotFoundException clsEx) {
-            throw new ApiException("Class Not Found Exception: " + clsEx.getMessage(), clsEx);
-        }
-    }
+	private void processFields(String packagePrefix, ApiObject objSubject, List<String> required, ApiObject lstProps) {
+		if (lstProps != null) {
+			objSubject.createList("fields");
 
-    private void processFields(String packagePrefix, ApiObject objSubject, List<String> required, ApiObject lstProps) {
-        if (lstProps != null) {
-            objSubject.createList("fields");
-            
-            lstProps.entrySet().forEach((entry) -> {
-                ApiObject objNewFld = new ApiObject();
+			lstProps.entrySet().forEach((entry) -> {
+				ApiObject objNewFld = new ApiObject();
 
-                objNewFld.setString("name", entry.getKey());
-                objNewFld.setString("DisplayName", entry.getKey());
+				objNewFld.setString("name", entry.getKey());
+				objNewFld.setString("DisplayName", entry.getKey());
 
-                ApiObject objFldDef = (ApiObject) entry.getValue();
+				ApiObject objFldDef = (ApiObject) entry.getValue();
 
-                if (objFldDef.containsKey("$ref")) {
-                    objNewFld.setString("type", "Object");
+				if (objFldDef.containsKey("$ref")) {
+					objNewFld.setString("type", "Object");
 
-                    objNewFld.setString("subType", packagePrefix + "." + processRef(objFldDef.getString("$ref")));
-                } else {
-                    objNewFld.setString("type", returnFieldType(objFldDef.getString("type")));
-                    objNewFld.setString("desc", objFldDef.getString("description"));
+					objNewFld.setString("subType", packagePrefix + "." + processRef(objFldDef.getString("$ref")));
+				} else {
+					objNewFld.setString("type", returnFieldType(objFldDef.getString("type")));
+					objNewFld.setString("desc", objFldDef.getString("description"));
 
-                    if ("ArrayList".equals(objNewFld.getString("type"))) {
-                        ApiObject itemsObj = objFldDef.getObject("items");
-                        
-                        if (itemsObj != null) {
-                        if (itemsObj.getString("$ref") != null) {
-                            objNewFld.setString("subType", packagePrefix + "." + processRef(itemsObj.getString("$ref")));
-                        } else if ("string".equals(itemsObj.getString("type"))) {
-                            objNewFld.setString("type", "StringArray");
-                        }
-                        }
-                    }
+					if ("ArrayList".equals(objNewFld.getString("type"))) {
+						ApiObject itemsObj = objFldDef.getObject("items");
 
-                    objNewFld.setInteger("min", objFldDef.getInteger("minimum"));
-                }
+						if (itemsObj != null) {
+							if (itemsObj.getString("$ref") != null) {
+								objNewFld.setString("subType", packagePrefix + "." + processRef(itemsObj.getString("$ref")));
+							} else if ("string".equals(itemsObj.getString("type"))) {
+								objNewFld.setString("type", "StringArray");
+							}
+						}
+					}
 
-                if (required != null) {
-                    if (required.contains(entry.getKey())) {
-                        objNewFld.setInteger("min", 1);
-                    }
-                }
+					objNewFld.setInteger("min", objFldDef.getInteger("minimum"));
+				}
 
-                objSubject.getList("fields").add(objNewFld);
-            });
-        }
-    }
+				if (required != null) {
+					if (required.contains(entry.getKey())) {
+						objNewFld.setInteger("min", 1);
+					}
+				}
 
-    private String processRef(String ref) {
-        int iLoc = ref.lastIndexOf("/");
+				objSubject.getList("fields").add(objNewFld);
+			});
+		}
+	}
 
-        return ref.substring(iLoc + 1);
-    }
+	private String processRef(String ref) {
+		int iLoc = ref.lastIndexOf("/");
 
-    private String returnFieldType(String type) {
-        switch (type) {
-            case "string":
-                return "String";
-            case "boolean":
-                return "Boolean";
-            case "integer":
-                return "Integer";
-            case "object":
-                return "Object";
-            case "number":
-                return "Double";
-            case "array":
-                return "ArrayList";
-        }
+		return ref.substring(iLoc + 1);
+	}
 
-        return null;
-    }
+	private String returnFieldType(String type) {
+		switch (type) {
+			case "string":
+				return "String";
+			case "boolean":
+				return "Boolean";
+			case "integer":
+				return "Integer";
+			case "object":
+				return "Object";
+			case "number":
+				return "Double";
+			case "array":
+				return "ArrayList";
+		}
 
-    private ApiObject processObject(String packagePrefix, String strTitle, ApiObject objReq) {
-        ApiObject retCls = new ApiObject();
+		return null;
+	}
 
-        retCls.setString("name", strTitle);
-        retCls.setString("desc", objReq.getString("description"));
-        retCls.setString("className", packagePrefix + "." + strTitle);
-        retCls.setString("classType", "Model");
-        
-        processFields(packagePrefix, retCls, objReq.getStringArray("required"), objReq.getObject("properties"));
+	private ApiObject processObject(String packagePrefix, String strTitle, ApiObject objReq) {
+		ApiObject retCls = new ApiObject();
 
-        return retCls;
-    }
+		retCls.setString("name", strTitle);
+		retCls.setString("desc", objReq.getString("description"));
+		retCls.setString("className", packagePrefix + "." + strTitle);
+		retCls.setString("classType", "Model");
+
+		processFields(packagePrefix, retCls, objReq.getStringArray("required"), objReq.getObject("properties"));
+
+		return retCls;
+	}
 }

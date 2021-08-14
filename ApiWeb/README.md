@@ -35,7 +35,22 @@ install -s mvn:com.progbits.db/OsgiDbCommands/1.2.0
 
 * Copy and Paste this section into your running karaf environment
 
+	<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>javax.mail-api</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+
+
 ```
+install -s mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.1/2.6.0
+install -s mvn:com.sun.mail/javax.mail/1.6.2
 install -s mvn:org.freemarker/freemarker/2.3.31
 install -s mvn:com.progbits.web/JQueryServlet/3.6.0
 install -s wrap:mvn:net.sourceforge.plantuml/plantuml/1.2021.8
@@ -47,7 +62,7 @@ install -s wrap:mvn:com.auth0/java-jwt/3.12.0
 install -s mvn:com.progbits.utils.http/HttpUtils/3.0.0
 install -s mvn:com.progbits.web/WebUtils/1.1.0
 install -s mvn:com.progbits.db/SsDbUtils/2.3.7
-install -s mvn:com.progbits.api.web/ApiWeb/2.1.9
+install -s mvn:com.progbits.api.web/ApiWeb/2.1.11
 ```
 
 If everything is successful, you can type `http:list` to see the following:

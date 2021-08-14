@@ -5,9 +5,11 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.progbits.api.auth.Authenticate;
 import com.progbits.api.model.ApiObject;
+import com.progbits.api.srv.ApiWebServlet;
 import com.progbits.api.srv.ApplicationException;
 import com.progbits.db.SsDbUtils;
 import java.sql.Connection;
@@ -40,6 +42,8 @@ public class AuthenticateDb implements Authenticate {
 			+ ":lastName,:phoneNumber,:companyRole,:termsAndConditions)";
 
 	private static final String SQL_UPDATE_LOGOUT = "UPDATE sm_logins SET status=0 WHERE userId=:userId";
+	
+	private static final String SQL_UPDATE_VALIDEMAIL = "UPDATE sm_users SET emailValidated=1 WHERE id=:id";
 
 	Algorithm algorithm = Algorithm.HMAC256("somethingLong");
 	JWTVerifier jwtVerifier = JWT.require(algorithm).withIssuer("apiweb").build();
@@ -65,15 +69,15 @@ public class AuthenticateDb implements Authenticate {
 				String strToken = checkExistingToken(conn, objRow.getInteger("id"));
 
 				if (strToken == null) {
-					strToken = generateAccessKey(objRow);
+					strToken = generateAccessKey(objRow, false);
 
 					insertLogin(conn, objRow.getInteger("id"), strToken);
 				} else {
-					ApiObject valToken = validateToken(strToken);
+					ApiObject valToken = validateToken(strToken, false);
 					
 					if (valToken.getInteger("status") == 0) {
 						// Invalid Token so update and recreate
-						strToken = generateAccessKey(objRow);
+						strToken = generateAccessKey(objRow, false);
 
 						insertLogin(conn, objRow.getInteger("id"), strToken);
 					}
@@ -111,6 +115,15 @@ public class AuthenticateDb implements Authenticate {
 		return objRet;
 	}
 
+	@Override
+	public void updateUserEmailValidate(ApiObject obj) {
+		try (Connection conn = dataSource.getConnection()) {
+			SsDbUtils.updateObject(conn, SQL_UPDATE_VALIDEMAIL, obj);
+		} catch (Exception ex) {
+			LOG.error("updateUserEmailValidate", ex);
+		}
+	}
+	
 	private String checkExistingToken(Connection conn, Integer userId) {
 		String strRet = null;
 		Object[] params = new Object[1];
@@ -147,16 +160,24 @@ public class AuthenticateDb implements Authenticate {
 		}
 	}
 
-	private String generateAccessKey(ApiObject userRow) {
+	private String generateAccessKey(ApiObject userRow, boolean withValidationKey) {
 		String retStr = null;
 
 		try {
 			OffsetDateTime dt = OffsetDateTime.now().plusHours(4);
 
-			retStr = JWT.create().withIssuer("apiweb")
+			if (withValidationKey) {
+				retStr = JWT.create().withIssuer("apiweb")
+						.withKeyId(Integer.toString(userRow.getInteger("id")))
+						.withExpiresAt(new Date(dt.toInstant().toEpochMilli()))
+						.withClaim("validateEmail", true)
+						.sign(algorithm);
+			} else {
+				retStr = JWT.create().withIssuer("apiweb")
 					.withKeyId(Integer.toString(userRow.getInteger("id")))
 					.withExpiresAt(new Date(dt.toInstant().toEpochMilli()))
 					.sign(algorithm);
+			}
 		} catch (JWTCreationException jce) {
 			LOG.error(jce.getMessage(), jce);
 		}
@@ -209,12 +230,18 @@ public class AuthenticateDb implements Authenticate {
 		switch (retEmailValidate.getInteger("status")) {
 			case 0:
 				try (Connection conn = dataSource.getConnection()) {
-				Integer iVal = SsDbUtils.insertObjectWithKey(conn, SQL_INSERT_USERS, new String[]{"id"}, subject);
+					Integer iVal = SsDbUtils.insertObjectWithKey(conn, SQL_INSERT_USERS, new String[]{"id"}, subject);
 
-				subject.setInteger("id", iVal);
-			} catch (Exception ex) {
-				subject.setString("message", ex.getMessage());
-			}
+					subject.setInteger("id", iVal);
+					
+					String accessKey = generateAccessKey(subject, true);
+					
+					ApiWebServlet.getSendEmails().sendEmail(subject.getString("emailAddress"), "Welcome to SmartMapper!", "Click the following link to validate your account:\n\nhttps://octopus.ideastreamit.com/?bearer="+ accessKey);
+					
+					insertLogin(conn, subject.getInteger("id"), accessKey);
+				} catch (Exception ex) {
+					subject.setString("message", ex.getMessage());
+				}
 			break;
 			case 1:
 				subject.setString("message", "Email Address Already Exists");
@@ -232,9 +259,11 @@ public class AuthenticateDb implements Authenticate {
 	}
 
 	@Override
-	public ApiObject validateToken(String token) throws ApplicationException {
+	public ApiObject validateToken(String token, boolean throwError) throws ApplicationException {
 		ApiObject retObj = new ApiObject();
 
+		retObj.setInteger("status", 0);
+		
 		if (token == null) {
 			throw new ApplicationException(400, "AUTHORIZATION is REQUIRED");
 		}
@@ -250,8 +279,19 @@ public class AuthenticateDb implements Authenticate {
 			DecodedJWT retJwt = jwtVerifier.verify(lclToken);
 			retObj.setInteger("id", Integer.valueOf(retJwt.getKeyId()));
 			retObj.setInteger("status", 1);
+			
+			Claim claimValidate = retJwt.getClaim("validateEmail");
+			
+			if (claimValidate != null) {
+				retObj.setBoolean("validatedEmail", claimValidate.asBoolean());
+				
+				updateUserEmailValidate(retObj);
+			}
+			
 		} catch (JWTVerificationException ex) {
-			throw new ApplicationException(403, "Forbidden");
+			if (throwError) {
+				throw new ApplicationException(403, "Forbidden");
+			}
 		}
 
 		return retObj;

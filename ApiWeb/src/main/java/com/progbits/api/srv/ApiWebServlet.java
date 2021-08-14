@@ -3,6 +3,7 @@ package com.progbits.api.srv;
 import com.progbits.api.ObjectParser;
 import com.progbits.api.ObjectWriter;
 import com.progbits.api.auth.Authenticate;
+import com.progbits.api.auth.SendEmails;
 import com.progbits.api.elastic.ElasticUtils;
 import com.progbits.api.elastic.query.BoolQuery;
 import com.progbits.api.elastic.query.EsSearch;
@@ -23,11 +24,13 @@ import com.progbits.util.http.HttpUtils;
 import com.progbits.web.UrlEntry;
 import com.progbits.web.WebUtils;
 import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,10 +46,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import jdk.jfr.StackTrace;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -58,18 +65,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author scarr
  */
-@Component(name = "ApiWebServlet", immediate = true, property
-		= {
-			"name=ApiWebServlet", "alias=/apiweb"
-		}, service
-		= {
-			HttpServlet.class
-		})
+@Component(name = "ApiWebServlet", immediate = true,
+		configurationPolicy = ConfigurationPolicy.REQUIRE,
+		property = {"name=ApiWebServlet", "alias=/apiweb"},
+		service = {HttpServlet.class})
 public class ApiWebServlet extends HttpServlet {
 
 	private static Logger log = LoggerFactory.getLogger(ApiWebServlet.class);
 
 	private static String servletRoot = "/apiweb";
+
+	private Map<String, String> _params;
+
+	private static SendEmails _sendEmails = new SendEmails();
 
 	private static Long lastRun = 0L;
 	private static Configuration _fm = null;
@@ -115,18 +123,25 @@ public class ApiWebServlet extends HttpServlet {
 		_elasticUtils = elasticUtils;
 	}
 
-	@Override
-	public void init() throws ServletException {
+	@Activate
+	public void startup(Map<String, String> params) {
+		_params = params;
+		
+		_sendEmails.configure(params);
+		
 		_fm = new Configuration(Configuration.VERSION_2_3_25);
 
 		_fm.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
 
 		try {
-			_fm.setTemplateLoader(
-					new ClassTemplateLoader(this.getClass(), "/fm"));
-			// _fm.setTemplateLoader(
-			// 		new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
-			// 		));
+			if (_params.containsKey("Local_Templates")) {
+				_fm.setTemplateLoader(
+						new FileTemplateLoader(new File("/home/scarr/Projects/ApiModels/ApiWeb/src/main/resources/fm")
+						));
+			} else {
+				_fm.setTemplateLoader(
+						new ClassTemplateLoader(this.getClass(), "/fm"));
+			}
 
 			jsonParser = _apiUtils.getParser().getParser("JSON");
 			jsonParser.init(null, null, null, null);
@@ -136,6 +151,22 @@ public class ApiWebServlet extends HttpServlet {
 		} catch (Exception iex) {
 			log.error("init", iex);
 		}
+	}
+	
+	@Modified
+	public void update(Map<String, String> params) {
+		_params = params;
+
+		_sendEmails.configure(params);
+	}
+
+	public static SendEmails getSendEmails() {
+		return _sendEmails;
+	}
+	
+	@Override
+	public void init() throws ServletException {
+		
 	}
 
 	@Reference(policy = ReferencePolicy.DYNAMIC,
@@ -175,7 +206,7 @@ public class ApiWebServlet extends HttpServlet {
 			}
 
 			// TODO:  Authenticate the token
-			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"));
+			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"), true);
 
 			UrlEntry url = new UrlEntry();
 
@@ -273,7 +304,7 @@ public class ApiWebServlet extends HttpServlet {
 			if (ex instanceof ApplicationException) {
 				resp.setStatus(((ApplicationException) ex).getStatus());
 
-				if (req.getContentType().contains("application/json")) {
+				if (req.getContentType() != null && req.getContentType().contains("application/json")) {
 					resp.getWriter().append("{ \"message\": \"" + ex.getMessage() + "\" }");
 				} else {
 					log.error("handleRequest", ex);
@@ -307,7 +338,7 @@ public class ApiWebServlet extends HttpServlet {
 				resp.setStatus(401);
 			}
 		} else if (req.getRequestURI().endsWith("/logout")) {
-			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"));
+			ApiObject authUser = authenticate.validateToken(req.getHeader("Authorization"), true);
 
 			objReq.setInteger("userId", authUser.getInteger("id"));
 

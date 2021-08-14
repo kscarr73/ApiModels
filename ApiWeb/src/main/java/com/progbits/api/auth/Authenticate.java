@@ -12,6 +12,7 @@ public interface Authenticate {
 	ApiObject logout(ApiObject subject);
 	ApiObject validateEmail(ApiObject subject);
 	ApiObject storeUser(ApiObject subject);
-	ApiObject validateToken(String token) throws ApplicationException;
+	ApiObject validateToken(String token, boolean throwError) throws ApplicationException;
 	ApiObject verifyEmail(ApiObject subject);
+	void updateUserEmailValidate(ApiObject obj);
 }
