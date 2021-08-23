@@ -4,10 +4,7 @@ import com.progbits.api.ObjectParser;
 import com.progbits.api.ObjectWriter;
 import com.progbits.api.auth.Authenticate;
 import com.progbits.api.auth.SendEmails;
-import com.progbits.api.elastic.ElasticUtils;
-import com.progbits.api.elastic.query.BoolQuery;
-import com.progbits.api.elastic.query.EsSearch;
-import com.progbits.api.elastic.query.RegExpQuery;
+import com.progbits.api.exception.ApiException;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import com.progbits.api.parseimport.ImportParser;
@@ -18,9 +15,8 @@ import com.progbits.api.srv.formatter.PlantUmlFormatter;
 import com.progbits.api.srv.formatter.RamlFormatter;
 import com.progbits.api.transforms.Transform;
 import com.progbits.api.transforms.XsdTransform;
-import com.progbits.api.utils.ApiUtils;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
-import com.progbits.util.http.HttpUtils;
+import com.progbits.db.SsDbObjects;
 import com.progbits.web.UrlEntry;
 import com.progbits.web.WebUtils;
 import freemarker.cache.ClassTemplateLoader;
@@ -46,7 +42,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import jdk.jfr.StackTrace;
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
 import net.sourceforge.plantuml.SourceStringReader;
@@ -83,9 +78,7 @@ public class ApiWebServlet extends HttpServlet {
 	private static Configuration _fm = null;
 	private static ApiUtilsInterface _apiUtils = null;
 
-	private static Map<String, ApiUtils> mapUtils = new LinkedHashMap<>();
-
-	private ElasticUtils _elasticUtils;
+	private static Map<String, ApiUtilsInterface> mapUtils = new LinkedHashMap<>();
 
 	private ObjectParser jsonParser = null;
 	private ObjectWriter jsonWriter = null;
@@ -116,11 +109,6 @@ public class ApiWebServlet extends HttpServlet {
 	@Reference
 	public void setApiUtils(ApiUtilsInterface api) {
 		_apiUtils = api;
-	}
-
-	@Reference
-	public void setElasticUtils(ElasticUtils elasticUtils) {
-		_elasticUtils = elasticUtils;
 	}
 
 	@Activate
@@ -196,6 +184,11 @@ public class ApiWebServlet extends HttpServlet {
 
 			resp.setHeader("Access-Control-Allow-Origin", "*");
 
+			if ("OPTIONS".equals(req.getMethod())) {
+				processOptions("GET, PUT, POST, OPTIONS", req, resp);
+				return;
+			}
+			
 			if (req.getRequestURI().contains("/auth/")) {
 				if ("OPTIONS".equals(req.getMethod())) {
 					processOptions("GET, PUT, POST, OPTIONS", req, resp);
@@ -247,7 +240,7 @@ public class ApiWebServlet extends HttpServlet {
 				if ("OPTIONS".equals(req.getMethod())) {
 					processOptions("GET, OPTIONS", req, resp);
 				} else {
-					processClassView(req, resp);
+					processClassView(authUser, req, resp);
 				}
 			} else if ("esget".equals(url.getCurrEntry())) {
 				url.chompUrl();
@@ -257,9 +250,7 @@ public class ApiWebServlet extends HttpServlet {
 				url.chompUrl();
 				String strId = url.getCurrEntry();
 
-				ApiObject objRet = _elasticUtils.getRecord(
-						strIndex,
-						strId);
+				ApiObject objRet = null;  // PULL from something
 
 				if (objRet != null) {
 					String objJson = Transform.toString(_apiUtils.getWriter().
@@ -278,18 +269,7 @@ public class ApiWebServlet extends HttpServlet {
 				if ("OPTIONS".equals(req.getMethod())) {
 					processOptions("GET, PUT, POST, OPTIONS", req, resp);
 				} else {
-					if ("POST".equals(method) || "PUT".equals(method)) {
-						if (req.getRequestURI().contains("webservicesdata")) {
-							// Do Nothing
-						} else if (req.getRequestURI().contains("apiclasses")) {
-							// Do Nothing
-						} else {
-							parseDataTableRestElastic(method, req, resp);
-							Thread.sleep(2000);
-						}
-					} else {
-						parseDataTableRestElastic(method, req, resp);
-					}
+					parseDataTableRestElastic(authUser, method, req, resp);
 				}
 			} else if (req.getRequestURI().contains("/db/")) {
 				log.error("Still calling DB");
@@ -304,7 +284,15 @@ public class ApiWebServlet extends HttpServlet {
 			if (ex instanceof ApplicationException) {
 				resp.setStatus(((ApplicationException) ex).getStatus());
 
-				if (req.getContentType() != null && req.getContentType().contains("application/json")) {
+				if (req.getHeader("Accept") != null && req.getHeader("Accept").contains("application/json")) {
+					resp.getWriter().append("{ \"message\": \"" + ex.getMessage() + "\" }");
+				} else {
+					log.error("handleRequest", ex);
+					throw new ServletException("Error in Page", ex);
+				}
+			} else if (ex instanceof ApiException) {
+				if (req.getHeader("Accept") != null && req.getHeader("Accept").contains("application/json")) {
+					resp.setStatus(400);
 					resp.getWriter().append("{ \"message\": \"" + ex.getMessage() + "\" }");
 				} else {
 					log.error("handleRequest", ex);
@@ -422,7 +410,7 @@ public class ApiWebServlet extends HttpServlet {
 		out.flush();
 	}
 
-	private void processClassView(HttpServletRequest req,
+	private void processClassView(ApiObject user, HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		String strClass = req.getRequestURI().replace("/apiweb/view/", "");
 		List<String> lstEntry = Arrays.asList(strClass.split("/"));
@@ -431,7 +419,7 @@ public class ApiWebServlet extends HttpServlet {
 		String strClassName = lstEntry.get(lstEntry.size() - 1);
 
 		ApiClasses intClasses = new ApiClasses();
-		_apiUtils.retrieveClasses(strClassName, intClasses);
+		_apiUtils.retrieveClasses(user.getString("company"), strClassName, intClasses);
 
 		if (intClasses.getClasses().size() > -1) {
 			if ("xsd".equalsIgnoreCase(req.getParameter("format"))) {
@@ -475,7 +463,7 @@ public class ApiWebServlet extends HttpServlet {
 
 				intClasses.getClassList().clear();
 
-				_apiUtils.retrievePackage(strPackage, intClasses);
+				_apiUtils.retrievePackage(user.getString("company"), strPackage, intClasses);
 
 				PlantUmlFormatter uml = new PlantUmlFormatter();
 				String strUml = uml.format(intClasses);
@@ -637,7 +625,7 @@ public class ApiWebServlet extends HttpServlet {
 		return retObj;
 	}
 
-	private void parseDataTableRestElastic(String method, HttpServletRequest req,
+	private void parseDataTableRestElastic(ApiObject user, String method, HttpServletRequest req,
 			HttpServletResponse resp) throws Exception {
 		ApiObject tableUrl = pullTableUrl(req.getRequestURI().replace(
 				"/apiweb/es/",
@@ -647,7 +635,7 @@ public class ApiWebServlet extends HttpServlet {
 		String reqQuery = req.getQueryString();
 
 		try {
-			reqString = HttpUtils.inputStreamToString(req.getInputStream(),
+			reqString = WebUtils.inputStreamToString(req.getInputStream(),
 					"UTF-8");
 		} catch (Exception ex) {
 
@@ -663,15 +651,24 @@ public class ApiWebServlet extends HttpServlet {
 
 			WebUtils.pullReqParamValues(params, req);
 
-			EsSearch search = processDataTable(params, req);
+			ApiObject search = processDataTable(params, req);
 
 			ApiObject obj = null;
 
 			try {
-				obj = _elasticUtils.getSearchRecords(
-						tableUrl.
-								getString("table"), null,
-						search);
+				switch (tableUrl.getString("table")) {
+					case "apimappings":
+						obj = _apiUtils.searchApiMapping(search);
+						break;
+						
+					case "apiservices":
+						obj = _apiUtils.searchApiService(search);
+						break;
+						
+					case "apimodels":
+						obj = _apiUtils.searchApiModel(search);
+						break;
+				}
 			} catch (Exception ex) {
 				log.error("Elastic Failure: ", ex);
 			}
@@ -679,45 +676,29 @@ public class ApiWebServlet extends HttpServlet {
 			ApiObject retObj = new ApiObject();
 
 			try {
-				if (obj != null && obj.getLong("total.value") != null && obj.getLong(
-						"total.value") > 0L) {
+				if (obj != null && obj.isSet("total")) {
 					retObj.setString("draw", req.getParameter("draw"));
-					retObj.setInteger("iTotalRecords", obj.getList("hits").
+					retObj.setInteger("iTotalRecords", obj.getList("root").
 							size());
 					retObj.setInteger("iTotalDisplayRecords", obj.getLong(
-							"total.value").
+							"total").
 							intValue());
 					retObj.createList("data");
 
-					List<ApiObject> retHits = obj.getList("hits");
+					List<ApiObject> retHits = obj.getList("root");
 
 					int iCnt = 0;
 
 					for (ApiObject o : retHits) {
-						ApiObject source = o.getObject("_source");
-
-						if (tableUrl.getString("type") == null) {
-							source.setString("_id",
-									o.getString("_type") + "/" + o.getString(
-									"_id"));
-						} else {
-							source.setString("_id", o.getString("_id"));
-						}
-
-						source.setString("_type", o.getString("_type"));
-
-						retObj.getList("data").add(source);
+						retObj.getList("data").add(o);
 					}
 
 					resp.setStatus(200);
 					resp.setContentType("application/json");
 
-					String strJson = Transform.toString(_apiUtils.getWriter().
-							getWriter(
-									"JSON"), null, retObj);
+					String strJson = jsonWriter.writeSingle(retObj);
 					//resp.setContentLength(strJson.length());
 					resp.getWriter().append(strJson);
-
 				} else {
 					resp.setStatus(200);
 					resp.setContentType("application/json");
@@ -725,22 +706,18 @@ public class ApiWebServlet extends HttpServlet {
 					retObj.setString("draw", req.getParameter("draw"));
 
 					if (obj != null) {
-						if (obj.isSet("hits")) {
-							retObj.setInteger("iTotalRecords", obj.getList(
-									"hits").
-									size());
+						if (obj.isSet("root")) {
+							retObj.setInteger("iTotalRecords", obj.getList("root").size());
 						} else {
 							retObj.setInteger("iTotalRecords", 0);
 						}
 						retObj.setInteger("iTotalDisplayRecords", obj.getLong(
-								"total.value").
+								"total").
 								intValue());
 					}
 					retObj.createList("data");
 
-					String strJson = Transform.toString(_apiUtils.getWriter().
-							getWriter(
-									"JSON"), null, retObj);
+					String strJson = jsonWriter.writeSingle(retObj);
 					resp.setContentLength(strJson.length());
 					resp.getWriter().append(strJson);
 				}
@@ -749,22 +726,34 @@ public class ApiWebServlet extends HttpServlet {
 				log.error("Write", ex);
 			}
 		} else if ("GET".equals(method) && tableUrl.getString("id") != null) {
-			ApiObject idObject = _elasticUtils.getRecord(tableUrl.
-					getString("table"),
-					tableUrl.getString("id"));
+			ApiObject searchObj = new ApiObject();
+			
+			searchObj.setString("_id", tableUrl.getString("id"));
+			
+			ApiObject idObject = null;
+			
+			switch (tableUrl.getString("table")) {
+				case "apimappings":
+					idObject = _apiUtils.searchApiMapping(searchObj);
+					break;
+					
+				case "apimodels":
+					idObject = _apiUtils.searchApiModel(searchObj);
+					break;
+					
+				case "apiservices":
+					idObject = _apiUtils.searchApiService(searchObj);
+					break;
+			}
+			
 			resp.setStatus(200);
 			resp.setContentType("application/json");
 			try {
-				resp.getWriter().append("[");
-				resp.getWriter().append(Transform.toString(
-						_apiUtils.getWriter().
-								getWriter("JSON"), ApiObject.returnClassDef(),
-						idObject));
-				resp.getWriter().append("]");
+				resp.getWriter().append(jsonWriter.writeSingle(idObject));
 			} catch (Exception ex) {
 				log.error("Sending GET Results", ex);
 			}
-		} else if ("POST".equals(method)) {
+		} else if ("POST".equals(method) || "PUT".equals(method)) {
 			ApiObject saveObject = Transform.toApiObject(_apiUtils.getParser().
 					getParser("JSON"), null, null, reqString);
 
@@ -774,13 +763,13 @@ public class ApiWebServlet extends HttpServlet {
 
 			switch (tableUrl.getString("table")) {
 				case "apimodels":
+					saveObject.setString("company", user.getString("company"));
+					
 					_apiUtils.saveApiModel(saveObject);
 
 					ApiClasses apiRetClasses = new ApiClasses();
 
-					Thread.sleep(2000);
-
-					_apiUtils.retrieveClasses(saveObject.getString("className"), apiRetClasses);
+					_apiUtils.retrieveClasses(user.getString("company"), saveObject.getString("className"), apiRetClasses);
 
 					resp.getWriter().append(Transform.toString(
 							_apiUtils.getWriter().
@@ -790,15 +779,16 @@ public class ApiWebServlet extends HttpServlet {
 					break;
 
 				case "apimappings":
+					saveObject.setString("company", user.getString("company"));
+					
 					_apiUtils.saveApiMapping(saveObject);
 					break;
 
 				case "apiservices":
+					saveObject.setString("company", user.getString("company"));
 					_apiUtils.saveApiService(saveObject);
 
-					Thread.sleep(2000);
-
-					ApiObject objRet = _apiUtils.retrieveServices(saveObject.getString("info.title"), null);
+					ApiObject objRet = _apiUtils.retrieveServices(user.getString("company"), saveObject.getString("info.title"), null);
 
 					resp.getWriter().append(jsonWriter.writeSingle(objRet.getObject(saveObject.getString("info.title"))));
 
@@ -807,24 +797,23 @@ public class ApiWebServlet extends HttpServlet {
 
 			resp.setStatus(200);
 		} else if ("DELETE".equals(method)) {
-			_elasticUtils.deleteRecord(tableUrl.getString("table"),
-					tableUrl.getString("id"));
-			resp.setStatus(200);
-		} else if ("PUT".equals(method)) {
-			ApiObject saveObject = Transform.toApiObject(_apiUtils.getParser().
-					getParser("JSON"), ApiObject.returnClassDef(), tableUrl.
-					getString(
-							"type"), reqString);
-			String saveid = saveObject.getString("_id");
-
-			if (saveid != null && !saveid.isEmpty()) {
-				saveObject.getFields().remove("_id");
-			} else {
-				saveid = null;
+			ApiObject objSearch = new ApiObject();
+			objSearch.setString("_id", tableUrl.getString("id"));
+			
+			switch (tableUrl.getString("table")) {
+				case "apimodels":
+					_apiUtils.deleteApiModel(objSearch);
+					break;
+					
+				case "apimappings":
+					_apiUtils.deleteApiMapping(objSearch);
+					break;
+					
+				case "apiservices":
+					_apiUtils.deleteApiService(objSearch);
+					break;
 			}
-
-			_elasticUtils.saveRecord(tableUrl.getString("table"),
-					saveid, saveObject);
+			
 			resp.setStatus(200);
 		}
 	}
@@ -908,10 +897,9 @@ public class ApiWebServlet extends HttpServlet {
 		return hash;
 	}
 
-	private EsSearch processDataTable(Map<String, String[]> params,
-			HttpServletRequest req) {
-		EsSearch search = new EsSearch();
-
+	private ApiObject processDataTable(Map<String, String[]> params, HttpServletRequest req) {
+		ApiObject searchObj = new ApiObject();
+		
 		Integer iStart = 0;
 		Integer iCount = 0;
 
@@ -923,56 +911,32 @@ public class ApiWebServlet extends HttpServlet {
 			iCount = Integer.parseInt(req.getParameter("length"));
 		}
 
-		search.setStart(iStart);
-		search.setCount(iCount);
+		searchObj.setInteger("start", iStart);
+		searchObj.setInteger("length", iCount);
 
 		if (params.containsKey("search[value]") && !params.get("search[value]")[0].
 				isEmpty()) {
-			BoolQuery bq = new BoolQuery();
-
+			searchObj.setBoolean("or", true);
+			
 			if (req.getRequestURI().contains("es/monitors")) {
-				bq.getShould().add(new RegExpQuery("monitorName", ".*" + params.
-						get(
-								"search[value]")[0] + ".*"));
-				bq.getShould().add(
-						new RegExpQuery(
-								"server",
-								".*"
-								+ params.get("search[value]")[0]
-								+ ".*"
-						)
-				);
-				bq.getShould().add(
-						new RegExpQuery(
-								"actions.action.name",
-								".*"
-								+ params.get("search[value]")[0]
-								+ ".*"
-						)
-				);
+				SsDbObjects.addQueryParam(searchObj, "monitorName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
+				SsDbObjects.addQueryParam(searchObj, "server", "$reg", ".*" + params.get("search[value]")[0] + ".*");
+				SsDbObjects.addQueryParam(searchObj, "actionName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
 			} else if (req.getRequestURI().contains("es/apimodels")) {
-				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
-						"search[value]")[0] + ".*"));
-				bq.getShould().add(new RegExpQuery("className", ".*" + params.
-						get(
-								"search[value]")[0] + ".*"));
-			} else if (req.getRequestURI().contains("es/webservices")) {
-				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
-						"search[value]")[0] + ".*"));
-				bq.getShould().add(new RegExpQuery("packageName", ".*" + params.
-						get(
-								"search[value]")[0] + ".*"));
+				SsDbObjects.addQueryParam(searchObj, "modelName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
+				SsDbObjects.addQueryParam(searchObj, "className", "$reg", ".*" + params.get("search[value]")[0] + ".*");
+			} else if (req.getRequestURI().contains("es/apiservices")) {
+				SsDbObjects.addQueryParam(searchObj, "serviceName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
 			} else {
-				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
-						"search[value]")[0] + ".*"));
+				SsDbObjects.addQueryParam(searchObj, "mapName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
 			}
-
-			search.getQuery().setQuery(bq);
 		}
 
 		if (params.containsKey("order[0][column]") && !params.get(
 				"order[0][column]")[0].
 				isEmpty()) {
+			searchObj.createStringArray("orderBy");
+			
 			String columnId = params.get("order[0][column]")[0];
 
 			if (params.containsKey("columns[" + columnId + "][data]")) {
@@ -988,12 +952,101 @@ public class ApiWebServlet extends HttpServlet {
 				}
 
 				if (!fieldName.contains("_id") && !fieldName.isEmpty()) {
-					search.addSortField(fieldName);
+					searchObj.getStringArray("orderBy").add(fieldName);
 				}
 			}
 
 		}
-
-		return search;
+		
+		return searchObj;
 	}
+	
+//	private EsSearch processDataTableEs(Map<String, String[]> params,
+//			HttpServletRequest req) {
+//		EsSearch search = new EsSearch();
+//
+//		Integer iStart = 0;
+//		Integer iCount = 0;
+//
+//		if (req.getParameter("start") != null) {
+//			iStart = Integer.parseInt(req.getParameter("start"));
+//		}
+//
+//		if (req.getParameter("length") != null) {
+//			iCount = Integer.parseInt(req.getParameter("length"));
+//		}
+//
+//		search.setStart(iStart);
+//		search.setCount(iCount);
+//
+//		if (params.containsKey("search[value]") && !params.get("search[value]")[0].
+//				isEmpty()) {
+//			BoolQuery bq = new BoolQuery();
+//
+//			if (req.getRequestURI().contains("es/monitors")) {
+//				bq.getShould().add(new RegExpQuery("monitorName", ".*" + params.
+//						get(
+//								"search[value]")[0] + ".*"));
+//				bq.getShould().add(
+//						new RegExpQuery(
+//								"server",
+//								".*"
+//								+ params.get("search[value]")[0]
+//								+ ".*"
+//						)
+//				);
+//				bq.getShould().add(
+//						new RegExpQuery(
+//								"actions.action.name",
+//								".*"
+//								+ params.get("search[value]")[0]
+//								+ ".*"
+//						)
+//				);
+//			} else if (req.getRequestURI().contains("es/apimodels")) {
+//				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
+//						"search[value]")[0] + ".*"));
+//				bq.getShould().add(new RegExpQuery("className", ".*" + params.
+//						get(
+//								"search[value]")[0] + ".*"));
+//			} else if (req.getRequestURI().contains("es/webservices")) {
+//				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
+//						"search[value]")[0] + ".*"));
+//				bq.getShould().add(new RegExpQuery("packageName", ".*" + params.
+//						get(
+//								"search[value]")[0] + ".*"));
+//			} else {
+//				bq.getShould().add(new RegExpQuery("name", ".*" + params.get(
+//						"search[value]")[0] + ".*"));
+//			}
+//
+//			search.getQuery().setQuery(bq);
+//		}
+//
+//		if (params.containsKey("order[0][column]") && !params.get(
+//				"order[0][column]")[0].
+//				isEmpty()) {
+//			String columnId = params.get("order[0][column]")[0];
+//
+//			if (params.containsKey("columns[" + columnId + "][data]")) {
+//				String fieldName = params.get("columns[" + columnId + "][data]")[0];
+//
+//				if (fieldName != null && !fieldName.isEmpty()
+//						&& params.containsKey(
+//								"order[0][dir]")
+//						&& "desc".equals(params.get("order[0][dir]")[0])) {
+//					fieldName = "-" + fieldName;
+//				} else {
+//					fieldName = "+" + fieldName;
+//				}
+//
+//				if (!fieldName.contains("_id") && !fieldName.isEmpty()) {
+//					search.addSortField(fieldName);
+//				}
+//			}
+//
+//		}
+//
+//		return search;
+//	}
 }

@@ -47,7 +47,7 @@ public class RunMap {
         
         _api.setMappingFactory(mapping);
         
-        map = _api.getApiMapping("com.progbits.test.CustomField",
+        map = _api.getApiMapping("default", "com.progbits.test.CustomField",
                 "com.progbits.test.mapping.Test", script);
     }
 
@@ -99,7 +99,7 @@ public class RunMap {
     @Test(enabled = false)
     public void returnMap() throws Exception {
 
-        ApiMapping map = _api.getApiMapping("BisacMap");
+        ApiMapping map = _api.getApiMapping("default", "BisacMap");
 
         System.out.println();
     }

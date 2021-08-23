@@ -14,6 +14,7 @@
         <module>ApiCore</module>
         <module>ApiUtils</module>
         <module>ApiElasticUtils</module>
+        <module>ApiDbUtils</module>
 	<module>ApiSqlUtils</module>
         <module>ApiMappingGraalVM</module>
         <module>GraalVMJSOsgi</module>

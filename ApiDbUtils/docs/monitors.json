@@ -1,0 +1,71 @@
+{
+    "template": "monitors",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+    },
+        "mappings": {
+            "all": {
+                "properties": {
+                    "@timestamp": {
+                        "format": "dateOptionalTime",
+                        "type": "date"
+                    },
+                    "status": {
+                        "type": "long"
+                    },
+                    "name": {
+                        "type": "text"
+                    },
+                    "server": {
+                        "type": "text"
+                    },
+                    "props": {
+                        "properties": {
+                            "prop": {
+                                "properties": {
+                                    "fieldValue": {
+                                        "type": "text"
+                                    },
+                                    "name": {
+                                        "type": "text"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "properties": {
+                            "action": {
+                                "properties": {
+                                    "compId": {
+                                        "type": "keyword"
+                                    },
+                                    "name": {
+                                        "type": "keyword"
+                                    },
+                                    "type": {
+                                        "type": "keyword"
+                                    },
+                                    "props": {
+                                        "properties": {
+                                            "prop": {
+                                                "properties": {
+                                                    "fieldValue": {
+                                                        "type": "keyword"
+                                                    },
+                                                    "name": {
+                                                        "type": "keyword"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+}

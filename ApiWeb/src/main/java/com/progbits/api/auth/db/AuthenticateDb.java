@@ -33,7 +33,7 @@ public class AuthenticateDb implements Authenticate {
 
 	private DataSource dataSource;
 
-	private static final String SQL_USER_LOGIN = "SELECT id, firstName, lastName, emailAddress, companyRole FROM sm_users WHERE company=:company AND emailAddress=:userName AND password=:password";
+	private static final String SQL_USER_LOGIN = "SELECT id, company, firstName, lastName, emailAddress, companyRole FROM sm_users WHERE company=:company AND emailAddress=:userName AND password=:password";
 	private static final String SQL_USER_EMAILVALIDATION = "SELECT id FROM sm_users WHERE company=:company AND emailAddress=:emailAddress";
 	private static final String SQL_ACTIVE_LOGINS = "SELECT id, userId, createdDate, bearerToken FROM sm_logins WHERE userId=? AND status=1 ORDER BY createdDate";
 	private static final String SQL_INSERT_LOGINS = "INSERT INTO sm_logins (userId, bearerToken, createdDate, status) VALUES (:userId,:bearerToken,:createdDate,:status)";
@@ -171,11 +171,13 @@ public class AuthenticateDb implements Authenticate {
 						.withKeyId(Integer.toString(userRow.getInteger("id")))
 						.withExpiresAt(new Date(dt.toInstant().toEpochMilli()))
 						.withClaim("validateEmail", true)
+						.withClaim("company", userRow.getString("company"))
 						.sign(algorithm);
 			} else {
 				retStr = JWT.create().withIssuer("apiweb")
 					.withKeyId(Integer.toString(userRow.getInteger("id")))
 					.withExpiresAt(new Date(dt.toInstant().toEpochMilli()))
+					.withClaim("company", userRow.getString("company"))
 					.sign(algorithm);
 			}
 		} catch (JWTCreationException jce) {
@@ -278,11 +280,25 @@ public class AuthenticateDb implements Authenticate {
 
 			DecodedJWT retJwt = jwtVerifier.verify(lclToken);
 			retObj.setInteger("id", Integer.valueOf(retJwt.getKeyId()));
+			
+			Claim companyClaim = retJwt.getClaim("company");
+			
+			if (companyClaim != null && !companyClaim.isNull()) {
+				retObj.setString("company", companyClaim.asString());
+			} else {
+				if (throwError) {
+					throw new ApplicationException(403, "Forbidden");
+				} else {
+					retObj.setInteger("status", 0);
+					return retObj;
+				}
+			}
+			
 			retObj.setInteger("status", 1);
 			
 			Claim claimValidate = retJwt.getClaim("validateEmail");
 			
-			if (claimValidate != null) {
+			if (!claimValidate.isNull()) {
 				retObj.setBoolean("validatedEmail", claimValidate.asBoolean());
 				
 				updateUserEmailValidate(retObj);

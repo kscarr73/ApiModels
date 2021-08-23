@@ -367,6 +367,41 @@ public class ApiObject implements Bindings {
         }
     }
 
+	/**
+	 * Copies fields from a Source Object into this one
+	 * 
+	 * @param fldList Fields to copy from Source Object
+	 * 
+	 * @param src The Source object to copy from
+	 */
+	public void copyInto(String[] fldList, ApiObject src) {
+		for (String fldName : fldList) {
+			if (src.containsKey(fldName)) {
+				this.put(fldName, src.get(fldName));
+			}
+		}
+	}
+	
+	/**
+	 * Given a list of fields, ensure only these fields remain
+	 * 
+	 * @param fldList The list of fields to ensure remain
+	 */
+	public void removeAllExcept(String[] fldList) {
+		List<String> lstFields = Arrays.asList(fldList);
+		List<String> removeFields = new ArrayList<>();
+		
+		for (String fldName : this.keySet()) {
+			if (!lstFields.contains(fldName)) {
+				removeFields.add(fldName);
+			}
+		}
+		
+		for (String rFldName : removeFields) {
+			this.remove(rFldName);
+		}
+	}
+	
     /**
      * Returns the Underlying Object from the Map
      *
@@ -1030,6 +1065,8 @@ public class ApiObject implements Bindings {
 
                             }
                         });
+						
+						retObj.setArrayList(k, newList);
                         break;
 
                     case TYPE_OBJECT:

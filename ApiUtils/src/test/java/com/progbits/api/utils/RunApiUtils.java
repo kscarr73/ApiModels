@@ -34,7 +34,7 @@ public class RunApiUtils {
 	@BeforeClass
 	public void start() throws Exception {
 		api = (ApiUtils) ReturnServices.returnApiUtils(
-				  "http://lvicisgnosq01.ingramcontent.com:9200/");
+				"http://lvicisgnosq01.ingramcontent.com:9200/");
 
 		//api.setup();
 	}
@@ -45,7 +45,7 @@ public class RunApiUtils {
 
 		Map<String, ApiClass> classes = new HashMap<>();
 
-		Map<String, ApiObject> apis = api.getApiServices();
+		Map<String, ApiObject> apis = api.getApiServices("default");
 
 	}
 
@@ -53,8 +53,8 @@ public class RunApiUtils {
 	public void testApi() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrieveClasses("com.progbits.security.ws.ReturnAuthentication",
-				  classes);
+		api.retrieveClasses("default", "com.progbits.security.ws.ReturnAuthentication",
+				classes);
 
 		ApiObject rtnAuth = classes.getInstanceByName("returnAuthentication");
 
@@ -64,13 +64,13 @@ public class RunApiUtils {
 	public void sendBookInstanceJson() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrieveClasses("com.progbits.usedbook.ws.SendBookInstance", classes);
+		api.retrieveClasses("default", "com.progbits.usedbook.ws.SendBookInstance", classes);
 
 		String strXsd = XsdTransform.convertToXsd(classes,
-				  "http://www.ingramcontent.com/usedbook");
+				"http://www.ingramcontent.com/usedbook");
 
 		ApiObject bie = classes.getInstance(
-				  "com.progbits.usedbook.ws.SendBookInstance");
+				"com.progbits.usedbook.ws.SendBookInstance");
 
 		bie.setName("sendBookInstance");
 
@@ -83,7 +83,7 @@ public class RunApiUtils {
 		bie.getListLast("bookInstance").setString("bookInstanceId", "1614164");
 		bie.getListLast("bookInstance").setString("ean", "9781513151");
 		bie.getListLast("bookInstance").setString("facilityOwnedInventory",
-				  "true");
+				"true");
 		bie.getListLast("bookInstance").setString("facilityOwnedType", "H");
 
 		String jsonString = JsonTransform.convertToJson(_writer, classes, bie);
@@ -96,15 +96,13 @@ public class RunApiUtils {
 	public void testBi() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.
-				  retrieveClasses(
-							 "com.progbits.usedbook.bi.bookinstancereport.Message",
-							 classes);
+		api.retrieveClasses("default","com.progbits.usedbook.bi.bookinstancereport.Message",
+				classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
+				"com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -116,18 +114,18 @@ public class RunApiUtils {
 		_apis.clear();
 		_classes.clear();
 
-		_apis = api.getApiServices();
+		_apis = api.getApiServices("default");
 
 		for (Map.Entry<String, ApiObject> service : _apis.entrySet()) {
 			try {
 				ApiClasses funcClasses = new ApiClasses();
 
-				api.getApiClasses(service.getValue(), funcClasses);
+				api.getApiClasses("default", service.getValue(), funcClasses);
 
 				_classes.put(service.getKey(), funcClasses);
 
 				apiFound.add(service.getKey() + " " + service.getValue().
-						  getString("URL"));
+						getString("URL"));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -139,12 +137,12 @@ public class RunApiUtils {
 	public void testLegacy() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.progbits.usedbook.bi.legacy", classes);
+		api.retrievePackage("default", "com.progbits.usedbook.bi.legacy", classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
+				"com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -153,12 +151,12 @@ public class RunApiUtils {
 	public void testUsedBook() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.progbits.usedbook", classes);
+		api.retrievePackage("default", "com.progbits.usedbook", classes);
 
 		System.out.println("Test");
 
 		String strTest = XsdTransform.convertToHtml(
-				  "com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
+				"com.progbits.3pl.bi.bookInstanceReport.message", null, classes);
 
 		System.out.println(strTest);
 	}
@@ -167,7 +165,7 @@ public class RunApiUtils {
 	public void testLogData() throws Exception {
 		ApiClasses classes = new ApiClasses();
 
-		api.retrievePackage("com.progbits.log.LogData", classes);
+		api.retrievePackage("default", "com.progbits.log.LogData", classes);
 
 		ApiObject apiProfile = classes.getInstance("com.progbits.log.LogProfile");
 
@@ -181,10 +179,10 @@ public class RunApiUtils {
 	@Test(enabled = false)
 	public void testImportStatement() throws Exception {
 		String strSource = "import 'com.progbits.test.Testing';\n"
-				  + "import 'com.progbits.second.Test';\n"
-				  + "\n"
-				  + "// This is a test;\n"
-				  + "Something = else;";
+				+ "import 'com.progbits.second.Test';\n"
+				+ "\n"
+				+ "// This is a test;\n"
+				+ "Something = else;";
 		String strReturn = api.replaceImports(strSource);
 	}
 

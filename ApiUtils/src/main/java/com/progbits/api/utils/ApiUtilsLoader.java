@@ -61,12 +61,12 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     }
 
     @Override
-    public void retrieveClasses(String thisClass, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
-        retrieveClasses(thisClass, classes, true);
+    public void retrieveClasses(String company, String thisClass, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
+        retrieveClasses(company, thisClass, classes, true);
     }
 
     @Override
-    public void retrieveClasses(String thisClass, ApiClasses classes,
+    public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
         String strFileName = "classes/" + thisClass + ".json";
 
@@ -80,7 +80,7 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
                         getString("subType").
                         isEmpty()) {
                     if (classes.getClass(fld.getString("subType")) == null) {
-                        retrieveClasses(fld.getString("subType"), classes);
+                        retrieveClasses(company, fld.getString("subType"), classes);
                     }
                 }
             }
@@ -90,43 +90,43 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     }
 
     @Override
-    public void retrievePackage(String thisClass, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
-        retrievePackage(thisClass, classes, true);
+    public void retrievePackage(String company, String thisClass, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
+        retrievePackage(company, thisClass, classes, true);
     }
 
     @Override
-    public void retrievePackage(String thisClass, ApiClasses classes,
+    public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Map<String, ApiObject> getApiServices() throws ApiException, ApiClassNotFoundException {
+    public Map<String, ApiObject> getApiServices(String company) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ApiObject retrieveServices(String serviceName, String access) throws ApiException, ApiClassNotFoundException {
+    public ApiObject retrieveServices(String company, String serviceName, String access) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void getApiClasses(ApiObject apiService, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
+    public void getApiClasses(String company, ApiObject apiService, ApiClasses classes) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ApiObject getApiMappingObject(String mapName) throws ApiException, ApiClassNotFoundException {
+    public ApiObject getApiMappingObject(String company, String mapName) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ApiMapping getApiMapping(String mapName) throws ApiException, ApiClassNotFoundException {
+    public ApiMapping getApiMapping(String company, String mapName) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ApiMapping getApiMapping(String sourceClass, String targetClass,
+    public ApiMapping getApiMapping(String company, String sourceClass, String targetClass,
             String mapScript) throws ApiException, ApiClassNotFoundException {
         if (mappingFactory != null) {
             ApiMapping resp = mappingFactory.getClone();
@@ -137,13 +137,13 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
 
             ApiClasses inClasses = new ApiClasses();
 
-            this.retrieveClasses(resp.getSourceClass(), inClasses);
+            this.retrieveClasses(company, resp.getSourceClass(), inClasses);
 
             resp.setInModels(inClasses);
 
             ApiClasses outClasses = new ApiClasses();
 
-            this.retrieveClasses(resp.getTargetClass(), outClasses);
+            this.retrieveClasses(company, resp.getTargetClass(), outClasses);
 
             resp.setOutModels(outClasses);
 
@@ -171,13 +171,13 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     }
 
     @Override
-    public void retrieveClasses(String thisClass, ApiClasses classes,
+    public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify, boolean localCopy) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void retrievePackage(String thisClass, ApiClasses classes,
+    public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify, boolean localCopy) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -196,5 +196,35 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     public Boolean saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+	@Override
+	public ApiObject searchApiMapping(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public ApiObject searchApiModel(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public ApiObject searchApiService(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean deleteApiMapping(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean deleteApiModel(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public boolean deleteApiService(ApiObject obj) throws ApiException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 }

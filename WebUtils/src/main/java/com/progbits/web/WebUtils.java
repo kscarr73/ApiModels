@@ -1,7 +1,10 @@
 package com.progbits.web;
 
 import com.progbits.api.model.ApiObject;
-import com.progbits.util.http.HttpUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLDecoder;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
@@ -60,7 +63,7 @@ public class WebUtils {
         }
 
         try {
-            return HttpUtils.inputStreamToString(req.getInputStream(), charEnc);
+            return inputStreamToString(req.getInputStream(), charEnc);
         } catch (Exception ex) {
             throw new Exception("getReqBody", ex);
         }
@@ -360,4 +363,54 @@ public class WebUtils {
         formatter.parse(inputData, pos);
         return inputData.length() == pos.getIndex();
     }
+	
+	/**
+	 * Read an Input Stream Completely, and process with the provided Encoding
+	 *
+	 * @param is The input stream to pull a string from
+	 * @param encoding Encoding to set the result to. DEFAULT: UTF-8
+	 *
+	 * @return The inputstream as a String of the specific encoding
+	 * @throws HttpUtilException
+	 */
+	public static String inputStreamToString(InputStream is, String encoding) throws Exception {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		String intEncoding = "UTF-8";
+
+		if (encoding != null && !encoding.isEmpty()) {
+			intEncoding = encoding;
+		}
+
+		if (is == null) {
+			return null;
+		}
+
+		int len;
+		int size = 1024;
+		byte[] buf;
+
+		try {
+			if (is instanceof ByteArrayInputStream) {
+				size = is.available();
+				buf = new byte[size];
+				len = is.read(buf, 0, size);
+			} else {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				buf = new byte[size];
+				while ((len = is.read(buf, 0, size)) != -1) {
+					bos.write(buf, 0, len);
+				}
+				buf = bos.toByteArray();
+			}
+
+			if (buf.length == 0) {
+				return null;
+			} else {
+				return new String(buf, intEncoding);
+			}
+		} catch (IOException iex) {
+			throw new Exception("inputStreamToString Issue", iex);
+		}
+	}
 }
