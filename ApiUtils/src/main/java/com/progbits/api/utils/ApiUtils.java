@@ -516,17 +516,17 @@ public class ApiUtils implements ApiUtilsInterface {
     }
 
     @Override
-    public Boolean saveApiMapping(ApiObject obj) throws ApiException,ApiClassNotFoundException {
+    public ApiObject saveApiMapping(ApiObject obj) throws ApiException,ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Boolean saveApiModel(ApiObject obj) throws ApiException,ApiClassNotFoundException {
+    public ApiObject saveApiModel(ApiObject obj) throws ApiException,ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Boolean saveApiService(ApiObject obj) throws ApiException,ApiClassNotFoundException {
+    public ApiObject saveApiService(ApiObject obj) throws ApiException,ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

@@ -50,7 +50,7 @@ install -s mvn:com.fasterxml.jackson.core/jackson-databind/2.12.3
 install -s mvn:commons-codec/commons-codec/1.15
 install -s wrap:mvn:com.auth0/java-jwt/3.12.0
 install -s mvn:com.progbits.web/WebUtils/1.2.0
-install -s mvn:com.progbits.api.web/ApiWeb/2.2.0
+install -s mvn:com.progbits.api.web/ApiWeb/2.2.4
 ```
 
 If everything is successful, you can type `http:list` to see the following:

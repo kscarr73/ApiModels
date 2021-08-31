@@ -32,7 +32,7 @@ install -s mvn:com.fasterxml/aalto-xml/1.3.0
 install -s mvn:com.fasterxml.jackson.core/jackson-core/2.12.3
 install -s mvn:org.yaml/snakeyaml/1.29
 install -s mvn:org.apache.commons/commons-csv/1.8
-install -s mvn:com.progbits.api/ApiCore/1.2.4
+install -s mvn:com.progbits.api/ApiCore/1.2.5
 install -s mvn:com.progbits.api.transforms/ApiTransforms/1.3.2
 install -s mvn:com.progbits.api.util.mapping.graalvm/ApiMappingGraalVM/1.3.0
 install -s mvn:com.progbits.api.elastic/ElasticUtils/1.0.2
@@ -43,9 +43,9 @@ install mvn:com.zaxxer/HikariCPMariaDBFragment/1.0.0
 install -s mvn:com.zaxxer/HikariCP/3.4.5
 install -s mvn:com.progbits.db/OsgiDatabase/1.3.0
 install -s mvn:com.progbits.db/OsgiDbCommands/1.2.0
-install -s mvn:com.progbits.db/SsDbUtils/2.3.8
-install -s mvn:com.progbits.api.util/ApiUtils/1.3.0
-install -s mvn:com.progbits.api.utils.db/ApiUtilsDb/1.0.0
+install -s mvn:com.progbits.db/SsDbUtils/2.3.10
+install -s mvn:com.progbits.api.util/ApiUtils/1.3.1
+install -s mvn:com.progbits.api.utils.db/ApiUtilsDb/1.0.2
 ```
 
 ## These should no longer be needed

@@ -7,3 +7,6 @@ SELECT * FROM sm_logins;
 
 INSERT INTO sm_users (company,emailAddress,password,firstName,lastName,phoneNumber,companyRole,termsAndConditions) VALUES
 	 (?,?,?,?,?,?,?,?);
+	 
+	SELECT * FROM sm_apiServices sas;
+	

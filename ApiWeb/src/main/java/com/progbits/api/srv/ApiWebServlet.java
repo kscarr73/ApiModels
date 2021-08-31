@@ -114,9 +114,9 @@ public class ApiWebServlet extends HttpServlet {
 	@Activate
 	public void startup(Map<String, String> params) {
 		_params = params;
-		
+
 		_sendEmails.configure(params);
-		
+
 		_fm = new Configuration(Configuration.VERSION_2_3_25);
 
 		_fm.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
@@ -140,7 +140,7 @@ public class ApiWebServlet extends HttpServlet {
 			log.error("init", iex);
 		}
 	}
-	
+
 	@Modified
 	public void update(Map<String, String> params) {
 		_params = params;
@@ -151,10 +151,10 @@ public class ApiWebServlet extends HttpServlet {
 	public static SendEmails getSendEmails() {
 		return _sendEmails;
 	}
-	
+
 	@Override
 	public void init() throws ServletException {
-		
+
 	}
 
 	@Reference(policy = ReferencePolicy.DYNAMIC,
@@ -188,7 +188,7 @@ public class ApiWebServlet extends HttpServlet {
 				processOptions("GET, PUT, POST, OPTIONS", req, resp);
 				return;
 			}
-			
+
 			if (req.getRequestURI().contains("/auth/")) {
 				if ("OPTIONS".equals(req.getMethod())) {
 					processOptions("GET, PUT, POST, OPTIONS", req, resp);
@@ -291,8 +291,15 @@ public class ApiWebServlet extends HttpServlet {
 					throw new ServletException("Error in Page", ex);
 				}
 			} else if (ex instanceof ApiException) {
+				ApiException aex = (ApiException) ex;
+				
 				if (req.getHeader("Accept") != null && req.getHeader("Accept").contains("application/json")) {
-					resp.setStatus(400);
+					if (aex.getCode() != null) {
+						resp.setStatus(aex.getCode());
+					} else {
+						resp.setStatus(400);
+					}
+					
 					resp.getWriter().append("{ \"message\": \"" + ex.getMessage() + "\" }");
 				} else {
 					log.error("handleRequest", ex);
@@ -653,6 +660,8 @@ public class ApiWebServlet extends HttpServlet {
 
 			ApiObject search = processDataTable(params, req);
 
+			search.setString("company", user.getString("company"));
+			
 			ApiObject obj = null;
 
 			try {
@@ -660,11 +669,11 @@ public class ApiWebServlet extends HttpServlet {
 					case "apimappings":
 						obj = _apiUtils.searchApiMapping(search);
 						break;
-						
+
 					case "apiservices":
 						obj = _apiUtils.searchApiService(search);
 						break;
-						
+
 					case "apimodels":
 						obj = _apiUtils.searchApiModel(search);
 						break;
@@ -711,11 +720,15 @@ public class ApiWebServlet extends HttpServlet {
 						} else {
 							retObj.setInteger("iTotalRecords", 0);
 						}
-						retObj.setInteger("iTotalDisplayRecords", obj.getLong(
-								"total").
-								intValue());
+						retObj.setInteger("iTotalDisplayRecords", 0);
 					}
 					retObj.createList("data");
+
+					if (retObj.isSet("root")) {
+						for (ApiObject o : retObj.getList("root")) {
+							retObj.getList("data").add(o);
+						}
+					}
 
 					String strJson = jsonWriter.writeSingle(retObj);
 					resp.setContentLength(strJson.length());
@@ -727,28 +740,29 @@ public class ApiWebServlet extends HttpServlet {
 			}
 		} else if ("GET".equals(method) && tableUrl.getString("id") != null) {
 			ApiObject searchObj = new ApiObject();
-			
+
 			searchObj.setString("_id", tableUrl.getString("id"));
-			
+
 			ApiObject idObject = null;
-			
+
 			switch (tableUrl.getString("table")) {
 				case "apimappings":
 					idObject = _apiUtils.searchApiMapping(searchObj);
 					break;
-					
+
 				case "apimodels":
 					idObject = _apiUtils.searchApiModel(searchObj);
 					break;
-					
+
 				case "apiservices":
 					idObject = _apiUtils.searchApiService(searchObj);
 					break;
 			}
-			
+
 			resp.setStatus(200);
 			resp.setContentType("application/json");
 			try {
+				idObject.remove("total");
 				resp.getWriter().append(jsonWriter.writeSingle(idObject));
 			} catch (Exception ex) {
 				log.error("Sending GET Results", ex);
@@ -764,33 +778,28 @@ public class ApiWebServlet extends HttpServlet {
 			switch (tableUrl.getString("table")) {
 				case "apimodels":
 					saveObject.setString("company", user.getString("company"));
-					
-					_apiUtils.saveApiModel(saveObject);
 
-					ApiClasses apiRetClasses = new ApiClasses();
+					ApiObject retObjModel = _apiUtils.saveApiModel(saveObject);
 
-					_apiUtils.retrieveClasses(user.getString("company"), saveObject.getString("className"), apiRetClasses);
-
-					resp.getWriter().append(Transform.toString(
-							_apiUtils.getWriter().
-									getWriter("JSON"), ApiObject.returnClassDef(),
-							apiRetClasses.getClassList().get(0)));
+					resp.getWriter().append(jsonWriter.writeSingle(retObjModel));
 
 					break;
 
 				case "apimappings":
 					saveObject.setString("company", user.getString("company"));
+
+					ApiObject retObjMapping = _apiUtils.saveApiMapping(saveObject);
 					
-					_apiUtils.saveApiMapping(saveObject);
+					resp.getWriter().append(jsonWriter.writeSingle(retObjMapping));
+					
 					break;
 
 				case "apiservices":
 					saveObject.setString("company", user.getString("company"));
-					_apiUtils.saveApiService(saveObject);
+					
+					ApiObject retObjService = _apiUtils.saveApiService(saveObject);
 
-					ApiObject objRet = _apiUtils.retrieveServices(user.getString("company"), saveObject.getString("info.title"), null);
-
-					resp.getWriter().append(jsonWriter.writeSingle(objRet.getObject(saveObject.getString("info.title"))));
+					resp.getWriter().append(jsonWriter.writeSingle(retObjService));
 
 					break;
 			}
@@ -799,21 +808,21 @@ public class ApiWebServlet extends HttpServlet {
 		} else if ("DELETE".equals(method)) {
 			ApiObject objSearch = new ApiObject();
 			objSearch.setString("_id", tableUrl.getString("id"));
-			
+
 			switch (tableUrl.getString("table")) {
 				case "apimodels":
 					_apiUtils.deleteApiModel(objSearch);
 					break;
-					
+
 				case "apimappings":
 					_apiUtils.deleteApiMapping(objSearch);
 					break;
-					
+
 				case "apiservices":
 					_apiUtils.deleteApiService(objSearch);
 					break;
 			}
-			
+
 			resp.setStatus(200);
 		}
 	}
@@ -899,7 +908,7 @@ public class ApiWebServlet extends HttpServlet {
 
 	private ApiObject processDataTable(Map<String, String[]> params, HttpServletRequest req) {
 		ApiObject searchObj = new ApiObject();
-		
+
 		Integer iStart = 0;
 		Integer iCount = 0;
 
@@ -917,7 +926,7 @@ public class ApiWebServlet extends HttpServlet {
 		if (params.containsKey("search[value]") && !params.get("search[value]")[0].
 				isEmpty()) {
 			searchObj.setBoolean("or", true);
-			
+
 			if (req.getRequestURI().contains("es/monitors")) {
 				SsDbObjects.addQueryParam(searchObj, "monitorName", "$reg", ".*" + params.get("search[value]")[0] + ".*");
 				SsDbObjects.addQueryParam(searchObj, "server", "$reg", ".*" + params.get("search[value]")[0] + ".*");
@@ -936,7 +945,7 @@ public class ApiWebServlet extends HttpServlet {
 				"order[0][column]")[0].
 				isEmpty()) {
 			searchObj.createStringArray("orderBy");
-			
+
 			String columnId = params.get("order[0][column]")[0];
 
 			if (params.containsKey("columns[" + columnId + "][data]")) {
@@ -957,10 +966,10 @@ public class ApiWebServlet extends HttpServlet {
 			}
 
 		}
-		
+
 		return searchObj;
 	}
-	
+
 //	private EsSearch processDataTableEs(Map<String, String[]> params,
 //			HttpServletRequest req) {
 //		EsSearch search = new EsSearch();

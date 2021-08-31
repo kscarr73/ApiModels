@@ -474,7 +474,7 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 	}
 
 	@Override
-	public Boolean saveApiMapping(ApiObject obj) throws ApiException, ApiClassNotFoundException {
+	public ApiObject saveApiMapping(ApiObject obj) throws ApiException, ApiClassNotFoundException {
 		String id = obj.getString("_id");
 
 		if (id != null) {
@@ -495,18 +495,28 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 			saveObj.setDateTime("lastUpdated", OffsetDateTime.now());
 			saveObj.setString("jsonObject", _jsonWriter.writeSingle(obj));
 
-			SsDbObjects.upsertWithInteger(conn, API_MAPPINGS, "id", saveObj);
-
-			return true;
+			ApiObject saveRet = SsDbObjects.upsertWithInteger(conn, API_MAPPINGS, "id", saveObj);
+			
+			ApiObject searchObj = new ApiObject();
+			
+			searchObj.copyInto(new String[] { "company", "id"}, saveRet);
+			
+			ApiObject searchRet = searchApiMapping(conn, searchObj);
+			
+			if (searchRet.isSet("root")) {
+				return searchRet.getList("root").get(0);
+			} else {
+				return null;
+			}
 		} catch (SQLException ex) {
-			LOG.error("Save Record Error", ex);
+			processSqlException(ex);
 
-			return false;
+			return null;
 		}
 	}
 
 	@Override
-	public Boolean saveApiModel(ApiObject obj) throws ApiException, ApiClassNotFoundException {
+	public ApiObject saveApiModel(ApiObject obj) throws ApiException, ApiClassNotFoundException {
 		String id = obj.getString("_id");
 
 		if (id != null) {
@@ -528,18 +538,28 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 
 			saveObj.setString("jsonObject", _jsonWriter.writeSingle(obj));
 
-			SsDbObjects.upsertWithInteger(conn, API_MODELS, "id", saveObj);
-
-			return true;
+			ApiObject saveRet = SsDbObjects.upsertWithInteger(conn, API_MODELS, "id", saveObj);
+			
+			ApiObject searchObj = new ApiObject();
+			
+			searchObj.copyInto(new String[] { "company", "id"}, saveRet);
+			
+			ApiObject searchRet = searchApiModel(conn, searchObj);
+			
+			if (searchRet.isSet("root")) {
+				return searchRet.getList("root").get(0);
+			} else {
+				return null;
+			}
 		} catch (SQLException ex) {
-			LOG.error("Save Record Error", ex);
+			processSqlException(ex);
 
-			return false;
+			return null;
 		}
 	}
 
 	@Override
-	public Boolean saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException {
+	public ApiObject saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException {
 		String id = obj.getString("_id");
 
 		if (id != null) {
@@ -564,115 +584,152 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 			saveObj.setDateTime("lastUpdated", OffsetDateTime.now());
 			saveObj.setString("jsonObject", _jsonWriter.writeSingle(obj));
 
-			SsDbObjects.upsertWithInteger(conn, API_SERVICES, "id", saveObj);
-
-			return true;
+			ApiObject saveRet = SsDbObjects.upsertWithInteger(conn, API_SERVICES, "id", saveObj);
+			
+			ApiObject searchObj = new ApiObject();
+			
+			searchObj.copyInto(new String[] { "company", "id"}, saveRet);
+			
+			ApiObject searchRet = searchApiService(conn, searchObj);
+			
+			if (searchRet.isSet("root")) {
+				return searchRet.getList("root").get(0);
+			} else {
+				return null;
+			}
 		} catch (SQLException ex) {
-			LOG.error("Save Record Error", ex);
+			processSqlException(ex);
 
-			return false;
+			return null;
 		}
 	}
 
-	@Override
-	public ApiObject searchApiMapping(ApiObject obj) throws ApiException {
-		obj.setString("tableName", API_MAPPINGS);
+	private ApiObject searchApiMapping(Connection conn, ApiObject searchObj) throws ApiException {
+		searchObj.setString("tableName", API_MAPPINGS);
 
 		ApiObject objRet = new ApiObject();
 		objRet.setArrayList("root", new ArrayList<>());
 
-		try (Connection conn = _ds.getConnection()) {
-			if (obj.containsKey("_id")) {
-				obj.setInteger("id", Integer.parseInt(obj.getString("_id")));
-				obj.remove("_id");
-			}
-			
-			ApiObject sqlRet = SsDbObjects.find(conn, obj);
+		if (searchObj.containsKey("_id")) {
+			searchObj.setInteger("id", Integer.parseInt(searchObj.getString("_id")));
+			searchObj.remove("_id");
+		}
 
-			if (sqlRet.isSet("root")) {
-				for (ApiObject row : sqlRet.getList("root")) {
-					try {
-						ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
+		ApiObject sqlRet = SsDbObjects.find(conn, searchObj);
 
-						rowObj.setString("_id", String.valueOf(row.getInteger("id")));
+		objRet.setLong("total", sqlRet.getLong("total"));
 
-						objRet.getList("root").add(rowObj);
-					} catch (ApiClassNotFoundException cex) {
-						
-					}
+		if (sqlRet.isSet("root")) {
+			for (ApiObject row : sqlRet.getList("root")) {
+				try {
+					ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
+
+					rowObj.setString("_id", String.valueOf(row.getInteger("id")));
+
+					objRet.getList("root").add(rowObj);
+				} catch (ApiClassNotFoundException cex) {
+
 				}
 			}
-			return objRet;
-		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
 		}
+
+		return objRet;
 	}
 
 	@Override
-	public ApiObject searchApiModel(ApiObject obj) throws ApiException {
+	public ApiObject searchApiMapping(ApiObject obj) throws ApiException {
+		try (Connection conn = _ds.getConnection()) {
+			return searchApiMapping(conn, obj);
+		} catch (SQLException ex) {
+			processSqlException(ex);
+		}
+
+		return null;
+	}
+
+	private ApiObject searchApiModel(Connection conn, ApiObject obj) throws ApiException {
 		obj.setString("tableName", API_MODELS);
 
 		ApiObject objRet = new ApiObject();
 		objRet.setArrayList("root", new ArrayList<>());
 
-		try (Connection conn = _ds.getConnection()) {
-			if (obj.containsKey("_id")) {
-				obj.setInteger("id", Integer.parseInt(obj.getString("_id")));
-				obj.remove("_id");
-			}
-			
-			ApiObject sqlRet = SsDbObjects.find(conn, obj);
+		if (obj.containsKey("_id")) {
+			obj.setInteger("id", Integer.parseInt(obj.getString("_id")));
+			obj.remove("_id");
+		}
 
-			if (sqlRet.isSet("root")) {
-				for (ApiObject row : sqlRet.getList("root")) {
-					try {
-						ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
+		ApiObject sqlRet = SsDbObjects.find(conn, obj);
 
-						rowObj.setString("_id", String.valueOf(row.getInteger("id")));
+		objRet.setLong("total", sqlRet.getLong("total"));
 
-						objRet.getList("root").add(rowObj);
-					} catch (ApiClassNotFoundException cex) {
+		if (sqlRet.isSet("root")) {
+			for (ApiObject row : sqlRet.getList("root")) {
+				try {
+					ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
 
-					}
+					rowObj.setString("_id", String.valueOf(row.getInteger("id")));
+
+					objRet.getList("root").add(rowObj);
+				} catch (ApiClassNotFoundException cex) {
+
 				}
 			}
-			return objRet;
-		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
 		}
+
+		return objRet;
+	}
+
+	@Override
+	public ApiObject searchApiModel(ApiObject obj) throws ApiException {
+		try (Connection conn = _ds.getConnection()) {
+			return searchApiModel(conn, obj);
+		} catch (SQLException ex) {
+			processSqlException(ex);
+		}
+
+		return null;
+	}
+
+	private ApiObject searchApiService(Connection conn, ApiObject obj) throws ApiException {
+		obj.setString("tableName", API_SERVICES);
+		ApiObject objRet = new ApiObject();
+		objRet.setArrayList("root", new ArrayList<>());
+		
+		if (obj.containsKey("_id")) {
+			obj.setInteger("id", Integer.parseInt(obj.getString("_id")));
+			obj.remove("_id");
+		}
+
+		ApiObject sqlRet = SsDbObjects.find(conn, obj);
+
+		objRet.setLong("total", sqlRet.getLong("total"));
+
+		if (sqlRet.isSet("root")) {
+			for (ApiObject row : sqlRet.getList("root")) {
+				try {
+					ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
+
+					rowObj.setString("_id", String.valueOf(row.getInteger("id")));
+
+					objRet.getList("root").add(rowObj);
+				} catch (ApiClassNotFoundException cex) {
+
+				}
+			}
+		}
+
+		return objRet;
 	}
 
 	@Override
 	public ApiObject searchApiService(ApiObject obj) throws ApiException {
-		obj.setString("tableName", API_SERVICES);
-		ApiObject objRet = new ApiObject();
-		objRet.setArrayList("root", new ArrayList<>());
-
 		try (Connection conn = _ds.getConnection()) {
-			if (obj.containsKey("_id")) {
-				obj.setInteger("id", Integer.parseInt(obj.getString("_id")));
-				obj.remove("_id");
-			}
-			
-			ApiObject sqlRet = SsDbObjects.find(conn, obj);
-
-			if (sqlRet.isSet("root")) {
-				for (ApiObject row : sqlRet.getList("root")) {
-					try {
-						ApiObject rowObj = _jsonParser.parseSingle(new StringReader(row.getString("jsonObject")));
-
-						rowObj.setString("_id", String.valueOf(row.getInteger("id")));
-
-						objRet.getList("root").add(rowObj);
-					} catch (ApiClassNotFoundException cex) {
-
-					}
-				}
-			}
-			return objRet;
+			return searchApiService(conn, obj);
 		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
+			processSqlException(ex);
 		}
+
+		return null;
 	}
 
 	@Override
@@ -686,7 +743,7 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 
 			SsDbUtils.updateObject(conn, url, obj);
 		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
+			processSqlException(ex);
 		}
 
 		return true;
@@ -703,7 +760,7 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 
 			SsDbUtils.updateObject(conn, url, obj);
 		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
+			processSqlException(ex);
 		}
 
 		return true;
@@ -720,10 +777,20 @@ public class ApiUtilsDb implements ApiUtilsInterface {
 
 			SsDbUtils.updateObject(conn, url, obj);
 		} catch (SQLException ex) {
-			throw new ApiException("SQL Exception", ex);
+			processSqlException(ex);
 		}
 
 		return true;
 	}
 
+	private void processSqlException(SQLException ex) throws ApiException {
+		if (ex.getMessage() != null) {
+			if (ex.getMessage().contains("Duplicate")) {
+				throw new ApiException(409, "Duplicate Record");
+			}
+		} else {
+			LOG.error("SQL Error: " + ex.getMessage(), ex);
+			throw new ApiException(500, "SQL Exception");
+		}
+	}
 }

@@ -523,7 +523,19 @@ public class ApiObject implements Bindings {
                                     objSub = obj;
                                     break;
                                 }
-                            }
+                            } else if (otst instanceof Long) {
+								if (((Long) otst).
+                                        equals(Long.parseLong(splKey[1]))) {
+                                    objSub = obj;
+                                    break;
+                                }
+							} else if (otst instanceof Integer) {
+								if (((Integer) otst).
+                                        equals(Integer.parseInt(splKey[1]))) {
+                                    objSub = obj;
+                                    break;
+                                }
+							}
                         }
                     } else {
                         objSub = lstSubject.get(Integer.parseInt(arrInt));

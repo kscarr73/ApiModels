@@ -4,7 +4,7 @@
 
 	<groupId>com.progbits.api.util</groupId>
 	<artifactId>ApiUtils</artifactId>
-	<version>1.3.0</version>
+	<version>1.3.1</version>
 	<packaging>bundle</packaging>
 
 	<name>Api Services Utilities</name>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.progbits.api</groupId>
 			<artifactId>ApiCore</artifactId>
-			<version>[1.2.1,2)</version>
+			<version>[1.2.5,2)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

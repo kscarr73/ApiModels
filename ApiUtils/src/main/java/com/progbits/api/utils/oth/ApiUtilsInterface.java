@@ -76,11 +76,11 @@ public interface ApiUtilsInterface {
 	public ApiMapping getApiMapping(String company, String sourceClass, String targetClass,
 			String mapScript) throws ApiException, ApiClassNotFoundException;
 
-	public Boolean saveApiMapping(ApiObject obj) throws ApiException, ApiClassNotFoundException;
+	public ApiObject saveApiMapping(ApiObject obj) throws ApiException, ApiClassNotFoundException;
 
-	public Boolean saveApiModel(ApiObject obj) throws ApiException, ApiClassNotFoundException;
+	public ApiObject saveApiModel(ApiObject obj) throws ApiException, ApiClassNotFoundException;
 
-	public Boolean saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException;
+	public ApiObject saveApiService(ApiObject obj) throws ApiException, ApiClassNotFoundException;
 
 	public ApiObject searchApiModel(ApiObject obj) throws ApiException;
 	
