@@ -134,101 +134,105 @@ public class XsdTransform {
                 .append("targetNamespace=\"").append(targetNamespace).
                 append("\">\n");
 
-        for (ApiObject apiClass : clsObjects.getClassList()) {
-            sb.append(strElementTemplate.replace("%elename%", apiClass.
-                    getString(
-                            "name")));
+        try {
+            for (ApiObject apiClass : clsObjects.getClassList()) {
+                sb.append(strElementTemplate.replace("%elename%", apiClass.
+                        getString(
+                                "name")));
 
-            for (ApiObject fld : apiClass.getList("fields")) {
+                for (ApiObject fld : apiClass.getList("fields")) {
 
-                sb.append("<xs:element name=\"")
-                        .append(fld.getString("name"))
-                        .append("\" ");
+                    sb.append("<xs:element name=\"")
+                            .append(fld.getString("name"))
+                            .append("\" ");
 
-                String strFldType = fld.getString("type", "String").
-                        toLowerCase();
+                    String strFldType = fld.getString("type", "String").
+                            toLowerCase();
 
-                switch (strFldType) {
-                    case "string":
-                        sb.append("type=\"xs:string\" ");
-                        break;
+                    switch (strFldType) {
+                        case "string":
+                            sb.append("type=\"xs:string\" ");
+                            break;
 
-                    case "stringarray":
-                        sb.append("type=\"xs:string\" ");
-                        break;
+                        case "stringarray":
+                            sb.append("type=\"xs:string\" ");
+                            break;
 
-                    case "datetime":
-                        sb.append("type=\"xs:dateTime\" ");
-                        break;
+                        case "datetime":
+                            sb.append("type=\"xs:dateTime\" ");
+                            break;
 
-                    case "integer":
-                        sb.append("type=\"xs:integer\" ");
-                        break;
-                    case "long":
-                        sb.append("type=\"xs:long\" ");
-                        break;
-                    case "double":
-                        sb.append("type=\"xs:decimal\" ");
-                        break;
-                    case "boolean":
-                        sb.append("type=\"xs:boolean\" ");
-                        break;
-                    case "object":
-                        ApiClass objSub = clsObjects.getClass(fld.getString(
-                                "subType"));
+                        case "integer":
+                            sb.append("type=\"xs:integer\" ");
+                            break;
+                        case "long":
+                            sb.append("type=\"xs:long\" ");
+                            break;
+                        case "double":
+                            sb.append("type=\"xs:decimal\" ");
+                            break;
+                        case "boolean":
+                            sb.append("type=\"xs:boolean\" ");
+                            break;
+                        case "object":
+                            ApiClass objSub = clsObjects.getClass(fld.getString(
+                                    "subType"));
 
-                        if (objSub == null) {
-                            throw new ApiException(
-                                    "Class: " + apiClass.getString("name") + " Field: " + fld.
-                                    getString("name") + " Sub Object: [" + fld.
-                                    getString(
-                                            "subType") + "] is Not Found", null);
-                        }
+                            if (objSub == null) {
+                                throw new ApiException(
+                                        "Class: " + apiClass.getString("name") + " Field: " + fld.
+                                        getString("name") + " Sub Object: [" + fld.
+                                        getString(
+                                                "subType") + "] is Not Found", null);
+                            }
 
-                        String subTypeName = objSub.getString("name");
+                            String subTypeName = objSub.getString("name");
 
-                        sb.append("type=\"tns:").append(subTypeName).append(
-                                "\" ");
-                        break;
-                    case "arraylist":
-                        ApiClass objSub2 = clsObjects.getClass(fld.getString(
-                                "subType"));
+                            sb.append("type=\"tns:").append(subTypeName).append(
+                                    "\" ");
+                            break;
+                        case "arraylist":
+                            ApiClass objSub2 = clsObjects.getClass(fld.getString(
+                                    "subType"));
 
-                        if (objSub2 == null) {
-                            throw new ApiException(
-                                    "SubType: " + fld.getString("subType") + " Doesn't Exist",
-                                    null);
-                        }
+                            if (objSub2 == null) {
+                                throw new ApiException(
+                                        "SubType: " + fld.getString("subType") + " Doesn't Exist",
+                                        null);
+                            }
 
-                        String subTypeName2 = objSub2.getString("name");
+                            String subTypeName2 = objSub2.getString("name");
 
-                        sb.append("type=\"tns:").append(subTypeName2).append(
-                                "\" ");
-                        break;
+                            sb.append("type=\"tns:").append(subTypeName2).append(
+                                    "\" ");
+                            break;
 
-                    default:
-                        sb.append("type=\"xs:string\" ");
-                        break;
+                        default:
+                            sb.append("type=\"xs:string\" ");
+                            break;
+                    }
+
+                    sb.append("minOccurs=\"").append(fld.getLong("min")).append(
+                            "\" ");
+
+                    if (fld.getLong("max", 0L) == 0 && strFldType.contains("array")) {
+                        sb.append("maxOccurs=\"unbounded\" ");
+                    } else if (fld.getLong("max", 0L) > 0 && strFldType.contains(
+                            "array")) {
+                        sb.append("maxOccurs=\"").append(fld.getLong("max", 0L)).
+                                append("\" ");
+                    } else if ("object".equals(strFldType)) {
+                        sb.append("maxOccurs=\"1\" ");
+                    }
+
+                    sb.append("/>\n");
                 }
 
-                sb.append("minOccurs=\"").append(fld.getLong("min")).append(
-                        "\" ");
-
-                if (fld.getLong("max", 0L) == 0 && strFldType.contains("array")) {
-                    sb.append("maxOccurs=\"unbounded\" ");
-                } else if (fld.getLong("max", 0L) > 0 && strFldType.contains(
-                        "array")) {
-                    sb.append("maxOccurs=\"").append(fld.getLong("max", 0L)).
-                            append("\" ");
-                } else if ("object".equals(strFldType)) {
-                    sb.append("maxOccurs=\"1\" ");
-                }
-
-                sb.append("/>\n");
+                sb.append("    </xs:sequence>\n");
+                sb.append("  </xs:complexType>\n");
             }
-
-            sb.append("    </xs:sequence>\n");
-            sb.append("  </xs:complexType>\n");
+        } catch (ApiClassNotFoundException ex) {
+            throw new ApiException(550, ex.getMessage());
         }
 
         sb.append("</xs:schema>");
@@ -440,55 +444,59 @@ public class XsdTransform {
 
         sb.append("<resources base=\"").append(fullUrl).append("\">\n");
 
-        for (ApiObject function : apiService.getList("functions")) {
-            String funcName = function.getString("name");
-            String packageName = apiService.getString("packageName");
+        try {
+            for (ApiObject function : apiService.getList("functions")) {
+                String funcName = function.getString("name");
+                String packageName = apiService.getString("packageName");
 
-            String inboundClassDef = packageName + "." + funcName.
-                    substring(0, 1).
-                    toUpperCase() + funcName.substring(1);
-            String outboundClassDef = inboundClassDef + "Response";
-            String exceptionClassDef = DEFAULT_EXCEPTION;
+                String inboundClassDef = packageName + "." + funcName.
+                        substring(0, 1).
+                        toUpperCase() + funcName.substring(1);
+                String outboundClassDef = inboundClassDef + "Response";
+                String exceptionClassDef = DEFAULT_EXCEPTION;
 
-            ApiObject inboundClass = classes.getClass(inboundClassDef);
-            ApiObject outboundClass = classes.getClass(outboundClassDef);
-            ApiObject exceptionClass = classes.getClass(exceptionClassDef);
+                ApiObject inboundClass = classes.getClass(inboundClassDef);
+                ApiObject outboundClass = classes.getClass(outboundClassDef);
+                ApiObject exceptionClass = classes.getClass(exceptionClassDef);
 
-            String strResource = strResourceTemplate.replace("%funcName%",
-                    function.
-                            getString("name"));
-
-            if (inboundClass != null) {
-                strResource = strResource.replace("%requestObject%",
-                        inboundClass.
+                String strResource = strResourceTemplate.replace("%funcName%",
+                        function.
                                 getString("name"));
-            } else {
-                throw new ApiException(
-                        "inboundClass: " + inboundClassDef + " does not exist.",
-                        null);
-            }
 
-            if (outboundClass != null) {
-                strResource = strResource.replace("%responseObject%",
-                        outboundClass.
-                                getString("name"));
-            } else {
-                throw new ApiException(
-                        "outboundClass: " + outboundClassDef + " does not exist.",
-                        null);
-            }
+                if (inboundClass != null) {
+                    strResource = strResource.replace("%requestObject%",
+                            inboundClass.
+                                    getString("name"));
+                } else {
+                    throw new ApiException(
+                            "inboundClass: " + inboundClassDef + " does not exist.",
+                            null);
+                }
 
-            if (exceptionClass != null) {
-                strResource = strResource.replace("%exceptionObject%",
-                        exceptionClass.
-                                getString("name"));
-            } else {
-                throw new ApiException(
-                        "exceptionClass: " + exceptionClassDef + " does not exist.",
-                        null);
-            }
+                if (outboundClass != null) {
+                    strResource = strResource.replace("%responseObject%",
+                            outboundClass.
+                                    getString("name"));
+                } else {
+                    throw new ApiException(
+                            "outboundClass: " + outboundClassDef + " does not exist.",
+                            null);
+                }
 
-            sb.append(strResource);
+                if (exceptionClass != null) {
+                    strResource = strResource.replace("%exceptionObject%",
+                            exceptionClass.
+                                    getString("name"));
+                } else {
+                    throw new ApiException(
+                            "exceptionClass: " + exceptionClassDef + " does not exist.",
+                            null);
+                }
+
+                sb.append(strResource);
+            }
+        } catch (ApiClassNotFoundException ex) {
+            throw new ApiException(550, ex.getMessage());
         }
 
         sb.append("</resources>\n");
@@ -498,7 +506,7 @@ public class XsdTransform {
     }
 
     public static String convertToHtml(String fullUrl, ApiObject apiService,
-            ApiClasses classes) {
+            ApiClasses classes) throws ApiException {
         StringBuilder sb = new StringBuilder();
 
         sb.append("<html>\n");
@@ -552,55 +560,58 @@ public class XsdTransform {
         return sb.toString();
     }
 
-    public static String convertClassToHtml(String curClass, ApiClasses classes) {
+    public static String convertClassToHtml(String curClass, ApiClasses classes) throws ApiException {
         StringBuilder sb = new StringBuilder();
 
-        ApiClass thisClass = classes.getClass(curClass);
+        try {
+            ApiClass thisClass = classes.getClass(curClass);
 
-        if (thisClass == null) {
-            return "";
-        }
-
-        sb.append("<h4>").append(thisClass.getString("name")).append("</h4>\n");
-        //sb.append("<div class=\"className\">").append(thisClass.getString("className")).append("</div>\n");
-        sb.append("<div class=\"classEntry\">").append(thisClass.getString(
-                "desc")).
-                append("</div>");
-
-        sb.append("<table>");
-
-        sb.append(
-                "<thead><tr><th>Field Name</th><th>Field Type</th><th>Required</th><th>Description</th></tr></thead>");
-
-        sb.append("<tbody>");
-
-        for (ApiObject fld : thisClass.getList("fields")) {
-            sb.append("<tr>");
-
-            sb.append("<td>").append(fld.getString("name")).append("</td>\n");
-            sb.append("<td>").append(fld.getString("type")).append("</td>\n");
-            sb.append("<td>");
-
-            if (fld.getLong("min") != null && fld.getLong("min") == 1) {
-                sb.append("required");
-            } else {
-                sb.append("optional");
+            if (thisClass == null) {
+                return "";
             }
 
-            sb.append("</td>\n");
+            sb.append("<h4>").append(thisClass.getString("name")).append("</h4>\n");
+            //sb.append("<div class=\"className\">").append(thisClass.getString("className")).append("</div>\n");
+            sb.append("<div class=\"classEntry\">").append(thisClass.getString(
+                    "desc")).
+                    append("</div>");
 
-            sb.append("<td>").append(fld.getString("desc")).append("</td>\n");
+            sb.append("<table>");
 
-            sb.append("</tr>");
+            sb.append(
+                    "<thead><tr><th>Field Name</th><th>Field Type</th><th>Required</th><th>Description</th></tr></thead>");
 
-            if ("arraylist".equalsIgnoreCase(fld.getString("type")) || "object".
-                    equalsIgnoreCase(fld.getString("type"))) {
-                sb.append("<tr><td colspan=\"4\">");
-                sb.append(convertClassToHtml(fld.getString("subType"), classes));
-                sb.append("</td></tr>");
+            sb.append("<tbody>");
+
+            for (ApiObject fld : thisClass.getList("fields")) {
+                sb.append("<tr>");
+
+                sb.append("<td>").append(fld.getString("name")).append("</td>\n");
+                sb.append("<td>").append(fld.getString("type")).append("</td>\n");
+                sb.append("<td>");
+
+                if (fld.getLong("min") != null && fld.getLong("min") == 1) {
+                    sb.append("required");
+                } else {
+                    sb.append("optional");
+                }
+
+                sb.append("</td>\n");
+
+                sb.append("<td>").append(fld.getString("desc")).append("</td>\n");
+
+                sb.append("</tr>");
+
+                if ("arraylist".equalsIgnoreCase(fld.getString("type")) || "object".
+                        equalsIgnoreCase(fld.getString("type"))) {
+                    sb.append("<tr><td colspan=\"4\">");
+                    sb.append(convertClassToHtml(fld.getString("subType"), classes));
+                    sb.append("</td></tr>");
+                }
             }
+        } catch (ApiClassNotFoundException ex) {
+            throw new ApiException(550, ex.getMessage());
         }
-
         sb.append("</tbody>");
 
         sb.append("</table>");

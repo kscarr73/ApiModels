@@ -22,8 +22,13 @@ public class ApiClasses {
         mapName.put(apiCls.getString("name"), apiCls.getString("className"));
     }
 
-    public ApiClass getClass(String className) {
-        return classes.get(className);
+    public ApiClass getClass(String className) throws ApiClassNotFoundException {
+        if (classes.containsKey(className)) {
+            return classes.get(className);
+        } else {
+            throw new ApiClassNotFoundException(
+                    "API Class: [" + className + "] not in Map", className, null);
+        }
     }
 
     public Map<String, ApiClass> getClasses() {
@@ -70,7 +75,7 @@ public class ApiClasses {
         if (className != null) {
             return getInstance(className);
         } else {
-            throw new ApiClassNotFoundException("Element Name: [" + name + "] not in Map",name, 
+            throw new ApiClassNotFoundException("Element Name: [" + name + "] not in Map", name,
                     null);
         }
     }

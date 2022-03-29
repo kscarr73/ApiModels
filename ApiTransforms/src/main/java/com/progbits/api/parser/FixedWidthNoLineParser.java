@@ -25,191 +25,199 @@ import org.osgi.service.component.annotations.Component;
  * @author scarr
  */
 @Component(name = "FixedWidthNoLineParser",
-		  immediate = true,
-		  property = {
-			  "type=FIXEDNOLINE", "name=FixedWidthNoLineParser"
-		  }
+        immediate = true,
+        property = {
+            "type=FIXEDNOLINE", "name=FixedWidthNoLineParser"
+        }
 )
 public class FixedWidthNoLineParser implements ObjectParser {
 
-	private ApiObject _subject = null;
+    private ApiObject _subject = null;
 
-	private String _mainClass;
-	private ApiClasses _classes;
-	private BufferedReader br = null;
-	private Map<String, String> _props;
-	private List<String> parseErrors;
-	private Throwable throwException;
-	private Map<String, DateTimeFormatter> _dtFormats = new HashMap<>();
+    private String _mainClass;
+    private ApiClasses _classes;
+    private BufferedReader br = null;
+    private Map<String, String> _props;
+    private List<String> parseErrors;
+    private Throwable throwException;
+    private Map<String, DateTimeFormatter> _dtFormats = new HashMap<>();
 
-	@Override
-	public void initStream(ApiClasses classes, String mainClass,
-			  Map<String, String> properties, InputStream in) throws ApiException {
-		init(classes, mainClass, properties, new BufferedReader(new InputStreamReader(in)));
-	}
+    @Override
+    public void initStream(ApiClasses classes, String mainClass,
+            Map<String, String> properties, InputStream in) throws ApiException {
+        init(classes, mainClass, properties, new BufferedReader(new InputStreamReader(in)));
+    }
 
-	@Override
-	public void init(ApiClasses classes, String mainClass,
-			  Map<String, String> properties, Reader in) throws ApiException {
-		if (in instanceof BufferedReader) {
-			br = (BufferedReader) in;
-		} else {
-			br = new BufferedReader(in);
-		}
+    @Override
+    public void init(ApiClasses classes, String mainClass,
+            Map<String, String> properties, Reader in) throws ApiException {
 
-		_props = properties;
-		_classes = classes;
-		_mainClass = mainClass;
-		parseErrors = new ArrayList<>();
-	}
+        if (in != null) {
+            if (in instanceof BufferedReader) {
+                br = (BufferedReader) in;
+            } else {
+                br = new BufferedReader(in);
+            }
+        }
 
-	@Override
-	public boolean next() throws ApiException, ApiClassNotFoundException {
-		boolean bNotEnd = false;
+        _props = properties;
+        _classes = classes;
+        _mainClass = mainClass;
+        parseErrors = new ArrayList<>();
+    }
 
-		try {
-			String strLine = br.readLine();
+    @Override
+    public boolean next() throws ApiException, ApiClassNotFoundException {
+        boolean bNotEnd = false;
 
-			if (strLine != null) {
-				int iCurLoc = 0;
+        try {
+            String strLine = br.readLine();
 
-				_subject = _classes.getInstance(_mainClass);
+            if (strLine != null) {
+                int iCurLoc = 0;
 
-				parseObject(iCurLoc, strLine, _subject);
+                _subject = _classes.getInstance(_mainClass);
 
-				bNotEnd = true;
-			}
-		} catch (Exception iex) {
-			throw new ApiException(iex.getMessage(), iex);
-		}
+                parseObject(iCurLoc, strLine, _subject);
 
-		return bNotEnd;
-	}
+                bNotEnd = true;
+            }
+        } catch (Exception iex) {
+            throw new ApiException(iex.getMessage(), iex);
+        }
 
-	private int parseObject(int currLoc, String strLine, ApiObject obj) throws ApiException {
-		for (ApiObject fld : obj.getApiClass().getList("fields")) {
-			Object oFldLength = fld.getCoreObject("length");
+        return bNotEnd;
+    }
 
-			int iFieldLength = 0;
+    private int parseObject(int currLoc, String strLine, ApiObject obj) throws ApiException {
+        for (ApiObject fld : obj.getApiClass().getList("fields")) {
+            Object oFldLength = fld.getCoreObject("length");
 
-			if (oFldLength instanceof Integer) {
-				iFieldLength = (Integer) oFldLength;
-			} else if (oFldLength instanceof Long) {
-				iFieldLength = ((Long) oFldLength).intValue();
-			}
+            int iFieldLength = 0;
 
-			String fieldValue = strLine.substring(currLoc,
-					  currLoc + iFieldLength);
+            if (oFldLength instanceof Integer) {
+                iFieldLength = (Integer) oFldLength;
+            } else if (oFldLength instanceof Long) {
+                iFieldLength = ((Long) oFldLength).intValue();
+            }
 
-			currLoc += iFieldLength;
+            String fieldValue = strLine.substring(currLoc,
+                    currLoc + iFieldLength);
 
-			try {
-				switch (fld.getString("type")) {
-					case "String":
-						obj.getFields().put(fld.getString("name"),
-								  TransformString.
-											 transformString(fieldValue, fld.
-														getString("format")));
-						///System.out.println(fld.getString("name") +  " " + fieldValue + " Length = " + iFieldLength);
-						break;
+            currLoc += iFieldLength;
 
-					case "Decimal":
-						obj.getFields().put(fld.getString("name"),
-								  TransformDecimal.
-											 transformDecimal(fieldValue, fld.
-														getString("format")));
-						break;
+            try {
+                switch (fld.getString("type")) {
+                    case "String":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformString.
+                                        transformString(fieldValue, fld.
+                                                getString("format")));
+                        ///System.out.println(fld.getString("name") +  " " + fieldValue + " Length = " + iFieldLength);
+                        break;
 
-					case "Double":
-						obj.getFields().put(fld.getString("name"),
-								  TransformDecimal.
-											 transformDouble(fieldValue, fld.
-														getString("format")));
-						break;
+                    case "Decimal":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformDecimal.
+                                        transformDecimal(fieldValue, fld.
+                                                getString("format")));
+                        break;
 
-					case "DateTime":
-						obj.getFields().put(fld.getString("name"),
-								  TransformDate.
-											 transformDate(fieldValue, fld.getString(
-														"format")));
-						break;
+                    case "Double":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformDecimal.
+                                        transformDouble(fieldValue, fld.
+                                                getString("format")));
+                        break;
 
-					case "Integer":
-						obj.getFields().put(fld.getString("name"),
-								  TransformNumber.
-											 transformInteger(fieldValue, fld.
-														getString("format")));
-						break;
+                    case "DateTime":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformDate.
+                                        transformDate(fieldValue, fld.getString(
+                                                "format")));
+                        break;
 
-					case "Boolean":
-						if ("true".equalsIgnoreCase(fieldValue)) {
-							obj.getFields().put(fld.getString("name"), true);
-						} else {
-							obj.getFields().put(fld.getString("name"), false);
-						}
+                    case "Integer":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformNumber.
+                                        transformInteger(fieldValue, fld.
+                                                getString("format")));
+                        break;
 
-						break;
+                    case "Boolean":
+                        if ("true".equalsIgnoreCase(fieldValue)) {
+                            obj.getFields().put(fld.getString("name"), true);
+                        } else {
+                            obj.getFields().put(fld.getString("name"), false);
+                        }
 
-					case "Long":
-						obj.getFields().put(fld.getString("name"),
-								  TransformNumber.
-											 transformLong(fieldValue, fld.getString(
-														"format")));
-						break;
+                        break;
 
-					case "Object":
-						ApiObject newObj = _classes.getInstance(fld.getString(
-								  "subType"));
-						currLoc = parseObject(currLoc, strLine, newObj);
-						obj.setObject(fld.getString("name"), newObj);
-						break;
+                    case "Long":
+                        obj.getFields().put(fld.getString("name"),
+                                TransformNumber.
+                                        transformLong(fieldValue, fld.getString(
+                                                "format")));
+                        break;
 
-					case "ArrayList":
-						int totalBytes = strLine.length();
-						while (currLoc < totalBytes) {
-							ApiObject newArr = _classes.getInstance(fld.
-									  getString("subType"));
-							currLoc = parseObject(currLoc, strLine, newArr);
-							if (!obj.isSet(fld.getString("name"))) {
-								obj.createList(fld.getString("name"));
-							}
-							obj.getList(fld.getString("name")).add(newArr);
-						}
-						break;
-				}
-			} catch (Exception ex) {
-				if (!this.parseErrors.contains("Field: " + fld.getString("name") + " " + ex.getMessage())) {
-					this.parseErrors.add("Field: " + fld.getString("name") + " " + ex.getMessage());
-				}
-				this.throwException = ex;
-			}
-		}
+                    case "Object":
+                        ApiObject newObj = _classes.getInstance(fld.getString(
+                                "subType"));
+                        currLoc = parseObject(currLoc, strLine, newObj);
+                        obj.setObject(fld.getString("name"), newObj);
+                        break;
 
-		return currLoc;
-	}
+                    case "ArrayList":
+                        int totalBytes = strLine.length();
+                        while (currLoc < totalBytes) {
+                            ApiObject newArr = _classes.getInstance(fld.
+                                    getString("subType"));
+                            currLoc = parseObject(currLoc, strLine, newArr);
+                            if (!obj.isSet(fld.getString("name"))) {
+                                obj.createList(fld.getString("name"));
+                            }
+                            obj.getList(fld.getString("name")).add(newArr);
+                        }
+                        break;
+                }
+            } catch (Exception ex) {
+                if (!this.parseErrors.contains("Field: " + fld.getString("name") + " " + ex.getMessage())) {
+                    this.parseErrors.add("Field: " + fld.getString("name") + " " + ex.getMessage());
+                }
+                this.throwException = ex;
+            }
+        }
 
-	@Override
-	public ApiObject getObject() {
-		return _subject;
-	}
+        return currLoc;
+    }
 
-	@Override
-	public ObjectParser getParser() {
-		return new FixedWidthNoLineParser();
-	}
+    @Override
+    public ApiObject getObject() {
+        return _subject;
+    }
 
-	@Override
-	public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public ObjectParser getParser() {
+        return new FixedWidthNoLineParser();
+    }
 
-	@Override
-	public List<String> getParseErrors() {
-		return this.parseErrors;
-	}
+    @Override
+    public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public Throwable getThrowException() {
-		return throwException;
-	}
+    @Override
+    public ApiObject parseSingle(Reader in, String className) throws ApiException, ApiClassNotFoundException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<String> getParseErrors() {
+        return this.parseErrors;
+    }
+
+    @Override
+    public Throwable getThrowException() {
+        return throwException;
+    }
 }
