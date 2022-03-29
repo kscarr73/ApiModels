@@ -9,7 +9,7 @@ import com.progbits.api.model.ApiClass;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import com.progbits.api.model.ApiObjectDef;
-import com.progbits.api.parser.JsonObjectParser;
+import com.progbits.api.parser.YamlObjectParser;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
 import java.io.File;
 import java.io.IOException;
@@ -25,17 +25,17 @@ import java.util.Map;
  *
  * @author scarr
  */
-public class ApiUtilsLoader implements ApiUtilsInterface {
+public class ApiUtilsYamlLoader implements ApiUtilsInterface {
 
     private ClassLoader _loader = null;
-    private ParserService _parser;
-    private WriterService _writer;
+    private final ParserService _parser;
+    private final WriterService _writer;
     private ApiMapping mappingFactory = null;
+    private final YamlObjectParser _objectParser = new YamlObjectParser(true);
 
-    private ApiClasses _defaultClasses = ApiObjectDef.returnClassDef();
-    private JsonObjectParser _objectParser = new JsonObjectParser(true);
+    private final ApiClasses _defaultClasses = ApiObjectDef.returnClassDef();
 
-    public ApiUtilsLoader(ClassLoader loader, ParserService parser,
+    public ApiUtilsYamlLoader(ClassLoader loader, ParserService parser,
             WriterService writer) {
         _loader = loader;
         _parser = parser;
@@ -76,7 +76,7 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     @Override
     public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        String strFileName = "classes/" + thisClass + ".json";
+        String strFileName = "classes/" + thisClass + ".yaml";
 
         try {
             ApiClass newClass = getClassFromFile(strFileName);
@@ -122,7 +122,7 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
                     }
                 }
             }
-        } catch (ApiClassNotFoundException ex) {
+        } catch (Exception ex) {
             throw new ApiException(550, ex.getMessage());
         }
     }
@@ -191,7 +191,7 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
 
             ApiObject obj = _objectParser.parseSingle(new StringReader(salesJson));
             obj.setApiClasses(_defaultClasses);
-            obj.setApiClass(_defaultClasses.getClass("com.icg.isg.api.ApiClass"));
+            obj.setApiClass(_defaultClasses.getClass("com.progbits.api.ApiClass"));
 
             ApiClass cldObj = new ApiClass(obj);
 
@@ -205,12 +205,13 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify, boolean localCopy) throws ApiException, ApiClassNotFoundException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     @Override
     public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify, boolean localCopy) throws ApiException, ApiClassNotFoundException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        retrievePackage(company, thisClass, classes, verify);
     }
 
     @Override

@@ -16,44 +16,46 @@ import java.util.Map;
  */
 public interface ObjectParser {
 
-   /**
-    * Initialize the Parser using an Input Stream
-    *
-    * @param classes ApiClasses for this Parser
-    * @param mainClass The mainClass/rootClass to be used from ApiClasses
-    * @param properties Properties to change default behavior of the Parser
-    * @param in InputStream to pass to the Parser and read from
-    */
-   void initStream(ApiClasses classes, String mainClass,
-           Map<String, String> properties, InputStream in) throws ApiException;
+    /**
+     * Initialize the Parser using an Input Stream
+     *
+     * @param classes ApiClasses for this Parser
+     * @param mainClass The mainClass/rootClass to be used from ApiClasses
+     * @param properties Properties to change default behavior of the Parser
+     * @param in InputStream to pass to the Parser and read from
+     */
+    void initStream(ApiClasses classes, String mainClass,
+            Map<String, String> properties, InputStream in) throws ApiException;
 
-   /**
-    * Initialize the Parser using a Reader Object
-    *
-    * @param classes ApiClasses for this Parser
-    * @param mainClass The mainClass/rootClass to be used from ApiClasses
-    * @param properties Properties to change default behavior of the Parser
-    * @param in Reader to pass to the Parser and read from
-    * @throws ApiException
-    */
-   void init(ApiClasses classes, String mainClass,
-           Map<String, String> properties, Reader in) throws ApiException;
+    /**
+     * Initialize the Parser using a Reader Object
+     *
+     * @param classes ApiClasses for this Parser
+     * @param mainClass The mainClass/rootClass to be used from ApiClasses
+     * @param properties Properties to change default behavior of the Parser
+     * @param in Reader to pass to the Parser and read from
+     * @throws ApiException
+     */
+    void init(ApiClasses classes, String mainClass,
+            Map<String, String> properties, Reader in) throws ApiException;
 
-   boolean next() throws ApiException, ApiClassNotFoundException;
+    boolean next() throws ApiException, ApiClassNotFoundException;
 
-   /**
-    * Parse a Single Object from the input stream
-    *
-    * @param in Input Stream Reader
-    * @return
-    */
-   ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException;
+    /**
+     * Parse a Single Object from the input stream
+     *
+     * @param in Input Stream Reader
+     * @return
+     */
+    ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException;
 
-   ApiObject getObject();
+    ApiObject parseSingle(Reader in, String className) throws ApiException, ApiClassNotFoundException;
 
-   ObjectParser getParser();
+    ApiObject getObject();
 
-   List<String> getParseErrors();
+    ObjectParser getParser();
 
-   Throwable getThrowException();
+    List<String> getParseErrors();
+
+    Throwable getThrowException();
 }

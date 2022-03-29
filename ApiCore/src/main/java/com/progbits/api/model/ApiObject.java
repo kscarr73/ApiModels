@@ -4,10 +4,10 @@ import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiDataValidationException;
 import com.progbits.api.exception.ApiException;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import javax.script.Bindings;
-
-import java.time.OffsetDateTime;
 
 /**
  * Runtime Representation of API Classes
@@ -92,11 +90,21 @@ public class ApiObject implements Bindings {
     }
 
     public Integer getInteger(String key) {
-        return (Integer) getCoreObject(key);
+        Object objValue = getCoreObject(key);
+
+        if (objValue instanceof Integer) {
+            return (Integer) objValue;
+        } else if (objValue instanceof Long) {
+            return ((Long) objValue).intValue();
+        } else if (objValue instanceof String) {
+            return Integer.valueOf((String) objValue);
+        } else {
+            return null;
+        }
     }
 
     public Integer getInteger(String key, Integer defValue) {
-        Integer iRet = (Integer) getCoreObject(key);
+        Integer iRet = getInteger(key);
 
         if (iRet == null) {
             return defValue;
@@ -110,7 +118,7 @@ public class ApiObject implements Bindings {
     }
 
     public Boolean getBoolean(String key, Boolean defValue) {
-        Boolean bRet = (Boolean) getCoreObject(key);
+        Boolean bRet = getBoolean(key);
 
         if (bRet == null) {
             return defValue;
@@ -237,8 +245,8 @@ public class ApiObject implements Bindings {
             return null;
         } else {
             throw new ClassCastException(
-                getString(FIELDNAMES.name.name()) + ": " + key
-                + " Is Not Long Value: Type:" + objValue.getClass().getName());
+                    getString(FIELDNAMES.name.name()) + ": " + key
+                    + " Is Not Long Value: Type:" + objValue.getClass().getName());
         }
 
     }
@@ -291,7 +299,7 @@ public class ApiObject implements Bindings {
     public ApiObject newSubObject(String key) {
         if (_class != null) {
             String subType = _class.
-                getString("fields[name=" + key + "].subType");
+                    getString("fields[name=" + key + "].subType");
 
             return newObject(subType);
         } else {
@@ -451,23 +459,23 @@ public class ApiObject implements Bindings {
 
                                         for (ApiObject obj : al) {
                                             Object otst = obj.getFields().get(
-                                                splKey[0]);
+                                                    splKey[0]);
 
                                             if (otst instanceof String) {
                                                 if (((String) otst).
-                                                    equals(splKey[1])) {
+                                                        equals(splKey[1])) {
                                                     objSub = obj;
                                                     break;
                                                 }
                                             } else if (otst instanceof Long) {
                                                 if (((Long) otst).
-                                                    equals(Long.parseLong(splKey[1]))) {
+                                                        equals(Long.parseLong(splKey[1]))) {
                                                     objSub = obj;
                                                     break;
                                                 }
                                             } else if (otst instanceof Integer) {
                                                 if (((Integer) otst).
-                                                    equals(Integer.parseInt(splKey[1]))) {
+                                                        equals(Integer.parseInt(splKey[1]))) {
                                                     objSub = obj;
                                                     break;
                                                 }
@@ -527,23 +535,23 @@ public class ApiObject implements Bindings {
 
                         for (ApiObject obj : lstSubject) {
                             Object otst = obj.getFields().get(
-                                splKey[0]);
+                                    splKey[0]);
 
                             if (otst instanceof String) {
                                 if (((String) otst).
-                                    equals(splKey[1])) {
+                                        equals(splKey[1])) {
                                     objSub = obj;
                                     break;
                                 }
                             } else if (otst instanceof Long) {
                                 if (((Long) otst).
-                                    equals(Long.parseLong(splKey[1]))) {
+                                        equals(Long.parseLong(splKey[1]))) {
                                     objSub = obj;
                                     break;
                                 }
                             } else if (otst instanceof Integer) {
                                 if (((Integer) otst).
-                                    equals(Integer.parseInt(splKey[1]))) {
+                                        equals(Integer.parseInt(splKey[1]))) {
                                     objSub = obj;
                                     break;
                                 }
@@ -561,198 +569,6 @@ public class ApiObject implements Bindings {
         }
 
         return resp;
-    }
-
-    public static ApiClasses returnClassDef() {
-        ApiClasses retClass = new ApiClasses();
-
-        ApiClass cls = new ApiClass();
-        cls.setName("apiClass");
-
-        cls.setString("name", "apiClass");
-        cls.setString("className", "com.progbits.api.ApiClass");
-        cls.setString("desc", "Define a Business Model Class");
-
-        cls.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "name")
-            .setString("type", "String")
-            .setString("desc", "The name of the Class");
-
-        cls.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "className")
-            .setString("type", "String")
-            .setString("desc", "Package where the Class resides");
-
-        cls.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "desc")
-            .setString("type", "String")
-            .setString("desc", "Description of the Class")
-            .setLong("min", 1L)
-            .setLong("max", 1L);
-
-        cls.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "fields")
-            .setString("type", "ArrayList")
-            .setString("subType", "com.progbits.api.ApiField")
-            .setString("desc", "List of Fields that makeup the Class")
-            .setLong("min", 1L)
-            .setLong("max", 0L);
-
-        ApiClass fld = new ApiClass();
-
-        fld.setString("name", "apiField");
-        fld.setString("className", "com.progbits.api.ApiField");
-        fld.setString("desc", "Define a Business Model Field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "name")
-            .setString("type", "String")
-            .setString("desc", "The name of the field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "type")
-            .setString("type", "String")
-            .setString("desc", "Type used for this field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "subType")
-            .setString("type", "String")
-            .setString("desc", "Object Name for a SubType");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "desc")
-            .setString("type", "String")
-            .setString("desc", "Description of this Field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "sampleData")
-            .setString("type", "String")
-            .setString("desc", "Sample Information for this Field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "length")
-            .setString("type", "Integer")
-            .setString("desc", "The Length of this Field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "min")
-            .setString("type", "Long")
-            .setString("desc", "Minimum Number required for this Field.  1 in this field means required.");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "max")
-            .setString("type", "Long")
-            .setString("desc", "Max Number required for this Field");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "format")
-            .setString("type", "String")
-            .setString("desc", "A Type Specific Format to be used on output and input.");
-
-        fld.getListAdd("fields")
-            .setName("apiField")
-            .setString("name", "status")
-            .setString("type", "String")
-            .setString("desc", "Status of this Object.  ENABLED, DISABLED");
-
-        retClass.addClass(cls);
-        retClass.addClass(fld);
-
-        return retClass;
-    }
-
-    public static ApiClasses returnServiceDef() throws ApiException, ApiClassNotFoundException {
-        ApiClasses classes = returnClassDef();
-
-        ApiClasses retClass = new ApiClasses();
-
-        ApiClass cls = new ApiClass(classes.getInstance(
-            "com.progbits.api.ApiClass"));
-
-        cls.setString("name", "apiService");
-        cls.setString("className", "com.progbits.api.ApiService");
-        cls.setString("desc", "Define a Service for the API System");
-
-        cls.createList("fields");
-
-        cls.getList("fields").add(classes.getClassByName("apiField"));
-        cls.getListLast("fields").setString("name", "name");
-        cls.getListLast("fields").setString("type", "String");
-        cls.getListLast("fields").setString("desc", "The name of the Service");
-
-        cls.getList("fields").add(classes.getClassByName("apiField"));
-        cls.getListLast("fields").setString("name", "packageName");
-        cls.getListLast("fields").setString("type", "String");
-        cls.getListLast("fields").setString("desc",
-            "The base package location of the Service");
-
-        cls.getList("fields").add(classes.getClassByName("apiField"));
-        cls.getListLast("fields").setString("name", "status");
-        cls.getListLast("fields").setString("type", "String");
-        cls.getListLast("fields").setString("desc",
-            "Status of this API.  ENABLED, DISABLED");
-
-        cls.getList("fields").add(classes.getClassByName("apiField"));
-        cls.getListLast("fields").setString("name", "url");
-        cls.getListLast("fields").setString("type", "String");
-        cls.getListLast("fields").setString("desc", "Base URL for this Service");
-        cls.getListLast("fields").setLong("min", 1L);
-        cls.getListLast("fields").setLong("max", 1L);
-
-        cls.getList("fields").add(classes.getClassByName("apiField"));
-        cls.getListLast("fields").setName("apiField");
-        cls.getListLast("fields").setString("name", "functions");
-        cls.getListLast("fields").setString("type", "ArrayList");
-        cls.getListLast("fields").
-            setString("subType", "com.progbits.api.ApiFunction");
-        cls.getListLast("fields").setString("desc",
-            "List of Functions used with this Service");
-        cls.getListLast("fields").setLong("min", 1L);
-        cls.getListLast("fields").setLong("max", 1L);
-
-        ApiClass funct = new ApiClass(classes.
-            getInstance("com.progbits.api.ApiClass"));
-
-        funct.setString("name", "apiFunction");
-        funct.setString("className", "com.progbits.api.ApiFunction");
-        funct.setString("desc", "Define a Function for a Service");
-
-        funct.createList("fields");
-
-        funct.getListAdd("fields");
-        funct.getListLast("fields").setName("apiField");
-        funct.getListLast("fields").setString("name", "name");
-        funct.getListLast("fields").setString("type", "String");
-        funct.getListLast("fields").setString("desc", "Name of this Function");
-
-        funct.getListAdd("fields");
-        funct.getListLast("fields").setName("apiField");
-        funct.getListLast("fields").setString("name", "desc");
-        funct.getListLast("fields").setString("type", "String");
-        funct.getListLast("fields").setString("desc",
-            "Description of what this function is used for");
-
-        Map<String, ApiClass> retClasses = new HashMap<>();
-        retClasses.put("com.progbits.api.ApiClass", cls);
-        retClasses.put("com.progbits.api.ApiFunction", funct);
-
-        retClass.addClass(cls);
-        retClass.addClass(funct);
-
-        return retClass;
     }
 
     public void createStringArray(String key) {
@@ -886,7 +702,7 @@ public class ApiObject implements Bindings {
 
         if (!errors.isEmpty()) {
             throw new ApiDataValidationException("Validation Failure: " + errors,
-                null);
+                    null);
         }
     }
 
@@ -916,15 +732,15 @@ public class ApiObject implements Bindings {
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof String)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not a String");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not a String");
                         } else if (validateRequired(field)) {
                             if (!isSet(field.getString(FIELDNAMES.name.name()))) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         }
 
@@ -933,11 +749,11 @@ public class ApiObject implements Bindings {
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof Integer)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Integer");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Integer");
                         }
 
                         break;
@@ -945,75 +761,75 @@ public class ApiObject implements Bindings {
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof Long)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Long");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Long");
                         }
                         break;
                     case "boolean":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof Boolean)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Boolean");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Boolean");
                         }
                         break;
                     case "decimal":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof BigDecimal)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Decimal");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Decimal");
                         }
                         break;
                     case "datetime":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof OffsetDateTime)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an DateTime");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an DateTime");
                         }
                         break;
                     case "object":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof ApiObject)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Object");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an Object");
                         } else {
                             ((ApiObject) oFld).validateFields(
-                                strSetPrefix + field.getString(
-                                    "name"), errors);
+                                    strSetPrefix + field.getString(
+                                            "name"), errors);
                         }
                         break;
                     case "arraylist":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof ArrayList)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
                         } else {
                             for (ApiObject obj : (ArrayList<ApiObject>) oFld) {
                                 obj.validateFields(strSetPrefix + field.
-                                    getString(FIELDNAMES.name.name()),
-                                    errors);
+                                        getString(FIELDNAMES.name.name()),
+                                        errors);
                             }
                         }
                         break;
@@ -1021,33 +837,33 @@ public class ApiObject implements Bindings {
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof ArrayList)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
                         }
                         break;
                     case "arrayinteger":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof ArrayList)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
                         }
                         break;
                     case "arraydouble":
                         if (oFld == null) {
                             if (validateRequired(field)) {
                                 errors.add(
-                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
+                                        strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Required Field");
                             }
                         } else if (!(oFld instanceof ArrayList)) {
                             errors.add(
-                                strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
+                                    strSetPrefix + field.getString(FIELDNAMES.name.name()) + " Is Not an ArrayList");
                         }
                         break;
                 }
@@ -1150,7 +966,7 @@ public class ApiObject implements Bindings {
 
                     case TYPE_DECIMAL:
                         retObj.setDecimal(k, new BigDecimal(((BigDecimal) v).
-                            toString()));
+                                toString()));
                         break;
 
                     case TYPE_LONG:
@@ -1173,7 +989,7 @@ public class ApiObject implements Bindings {
     public Object put(String name, Object value) {
         if (_class != null) {
             String type = _class.getString(
-                "fields[name=" + name + "].type", "");
+                    "fields[name=" + name + "].type", "");
 
             switch (type) {
                 case "String":
@@ -1311,7 +1127,7 @@ public class ApiObject implements Bindings {
 
     @Override
     public void putAll(
-        Map<? extends String, ? extends Object> map) {
+            Map<? extends String, ? extends Object> map) {
         _fields.putAll(map);
     }
 
@@ -1367,13 +1183,13 @@ public class ApiObject implements Bindings {
 
     @Override
     public void forEach(
-        BiConsumer<? super String, ? super Object> bc) {
+            BiConsumer<? super String, ? super Object> bc) {
         _fields.forEach(bc);
     }
 
     @Override
     public Object compute(String k,
-        BiFunction<? super String, ? super Object, ? extends Object> bf) {
+            BiFunction<? super String, ? super Object, ? extends Object> bf) {
         return _fields.compute(k, bf);
     }
 

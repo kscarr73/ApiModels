@@ -1,6 +1,7 @@
 package com.progbits.api.writer;
 
 import com.progbits.api.ObjectWriter;
+import com.progbits.api.exception.ApiClassNotFoundException;
 import com.progbits.api.exception.ApiException;
 import com.progbits.api.formaters.TransformDate;
 import com.progbits.api.formaters.TransformDecimal;
@@ -449,13 +450,13 @@ public class FixedWidthWriter implements ObjectWriter {
         boolean bDisplayName = "true".equalsIgnoreCase(this._props.get(CONSTANTS.DisplayName.name()));
 
         if ("true".equalsIgnoreCase(this._props.get(CONSTANTS.WithHeader.name()))) {
-            ApiClass cls = this._classes.getClass(this.mainClassName);
+            try {
+                ApiClass cls = this._classes.getClass(this.mainClassName);
 
-            for (ApiObject fld : cls.getList(CONSTANTS.fields.name())) {
-                String strFieldName = fld.getString(
-                        bDisplayName ? CONSTANTS.DisplayName.name() : CONSTANTS.name.name());
+                for (ApiObject fld : cls.getList(CONSTANTS.fields.name())) {
+                    String strFieldName = fld.getString(
+                            bDisplayName ? CONSTANTS.DisplayName.name() : CONSTANTS.name.name());
 
-                try {
                     Object objLength = fld.getCoreObject("length");
                     if (objLength instanceof Integer) {
                         _write.append(
@@ -469,17 +470,12 @@ public class FixedWidthWriter implements ObjectWriter {
                                         " ", ((Long) objLength).intValue()
                                 ));
                     }
-                } catch (IOException io) {
-                    throw new ApiException(io.getMessage(), io);
                 }
-            }
 
-            try {
                 _write.append("\n");
                 _write.flush();
-            } catch (IOException io) {
-                throw new ApiException(io.getMessage(), io);
-
+            } catch (IOException | ApiClassNotFoundException ex) {
+                throw new ApiException(510, ex.getMessage());
             }
         }
     }

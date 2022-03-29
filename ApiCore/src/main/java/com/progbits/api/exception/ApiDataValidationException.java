@@ -1,6 +1,6 @@
 package com.progbits.api.exception;
 
-public class ApiDataValidationException extends RuntimeException{
+public class ApiDataValidationException extends Exception {
 
     public ApiDataValidationException() {
     }

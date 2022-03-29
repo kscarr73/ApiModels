@@ -11,18 +11,18 @@ import org.testng.annotations.Test;
  */
 public class TestYamlParser {
 
-	@Test
-	public void runSingleTest() throws Exception {
-		YamlObjectParser parser = new YamlObjectParser(true);
+    @Test
+    public void runSingleTest() throws Exception {
+        YamlObjectParser parser = new YamlObjectParser(true);
 
-		InputStreamReader reader = new InputStreamReader(this.getClass().getResourceAsStream("/YamlParserTest.yaml"));
+        InputStreamReader reader = new InputStreamReader(this.getClass().getResourceAsStream("/YamlParserTest.yaml"));
 
-		try {
-			ApiObject objResp = parser.parseSingle(reader);
+        try {
+            ApiObject objResp = parser.parseSingle(reader);
 
-			assert objResp != null;
-		} catch (Exception ex) {
-			
-		}
-	}
+            assert objResp != null;
+        } catch (Exception ex) {
+
+        }
+    }
 }

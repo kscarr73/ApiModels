@@ -7,7 +7,6 @@ import com.progbits.api.model.ApiClass;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -28,12 +27,10 @@ import org.yaml.snakeyaml.events.Event;
 import org.yaml.snakeyaml.events.MappingEndEvent;
 import org.yaml.snakeyaml.events.MappingStartEvent;
 import org.yaml.snakeyaml.events.ScalarEvent;
-import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
-import org.yaml.snakeyaml.tokens.TagToken;
 
 /**
  *
@@ -249,7 +246,7 @@ public class YamlObjectParser implements ObjectParser {
                     if (!obj.containsKey(key)) {
                         obj.createStringArray(key);
                     }
-                    
+
                     obj.getStringArray(key).add(subject);
                 } else {
                     obj.setString(key, subject);
@@ -296,19 +293,19 @@ public class YamlObjectParser implements ObjectParser {
                     if (!obj.containsKey(key)) {
                         obj.createIntegerArray(key);
                     }
-                    
+
                     obj.getIntegerArray(key).add(Integer.parseInt(subject));
                 } else {
                     obj.setLong(key, Long.parseLong(subject));
                 }
                 break;
-                
+
             case "tag:yaml.org,2002:float":
                 if (inArray) {
                     if (!obj.containsKey(key)) {
                         obj.createDoubleArray(key);
                     }
-                    
+
                     obj.getDoubleArray(key).add(Double.parseDouble(subject));
                 } else {
                     obj.setDouble(key, Double.parseDouble(subject));
@@ -324,12 +321,17 @@ public class YamlObjectParser implements ObjectParser {
 
     @Override
     public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
+        return parseSingle(in, null);
+    }
+
+    @Override
+    public ApiObject parseSingle(Reader in, String className) throws ApiException, ApiClassNotFoundException {
         ApiObject retObj;
 
         Iterable<Event> parse = _factory.parse(in);
 
-        if (_classes != null) {
-            retObj = _classes.getInstance(_mainClass);
+        if (_classes != null && className != null) {
+            retObj = _classes.getInstance(className);
         } else {
             retObj = new ApiObject();
         }
