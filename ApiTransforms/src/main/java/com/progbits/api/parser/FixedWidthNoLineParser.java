@@ -10,6 +10,7 @@ import com.progbits.api.formaters.TransformString;
 import com.progbits.api.model.ApiClasses;
 import com.progbits.api.model.ApiObject;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -168,15 +169,31 @@ public class FixedWidthNoLineParser implements ObjectParser {
                         break;
 
                     case "ArrayList":
-                        int totalBytes = strLine.length();
-                        while (currLoc < totalBytes) {
-                            ApiObject newArr = _classes.getInstance(fld.
-                                    getString("subType"));
-                            currLoc = parseObject(currLoc, strLine, newArr);
+                        if (fld.containsKey("iterationCount")) {
+                            int iCnt = obj.getInteger(fld.getString("iterationCount"));
+
                             if (!obj.isSet(fld.getString("name"))) {
                                 obj.createList(fld.getString("name"));
                             }
-                            obj.getList(fld.getString("name")).add(newArr);
+
+                            for (var i = 0; i < iCnt; i++) {
+                                ApiObject newArr = _classes.getInstance(fld.
+                                        getString("subType"));
+                                currLoc = parseObject(currLoc, strLine, newArr);
+
+                                obj.getList(fld.getString("name")).add(newArr);
+                            }
+                        } else {
+                            int totalBytes = strLine.length();
+                            while (currLoc < totalBytes) {
+                                ApiObject newArr = _classes.getInstance(fld.
+                                        getString("subType"));
+                                currLoc = parseObject(currLoc, strLine, newArr);
+                                if (!obj.isSet(fld.getString("name"))) {
+                                    obj.createList(fld.getString("name"));
+                                }
+                                obj.getList(fld.getString("name")).add(newArr);
+                            }
                         }
                         break;
                 }
@@ -203,12 +220,32 @@ public class FixedWidthNoLineParser implements ObjectParser {
 
     @Override
     public ApiObject parseSingle(Reader in) throws ApiException, ApiClassNotFoundException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return parseSingle(in, null);
     }
 
     @Override
     public ApiObject parseSingle(Reader in, String className) throws ApiException, ApiClassNotFoundException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        BufferedReader br;
+        ApiObject objResp = null;
+
+        if (in instanceof BufferedReader) {
+            br = (BufferedReader) in;
+        } else {
+            br = new BufferedReader(in);
+        }
+
+        try {
+            String strLine = br.readLine();
+
+            int iCurLoc = 0;
+
+            objResp = _classes.getInstance(className);
+            parseObject(iCurLoc, strLine, objResp);
+        } catch (IOException io) {
+            throw new ApiException(500, io.getMessage());
+        }
+
+        return objResp;
     }
 
     @Override

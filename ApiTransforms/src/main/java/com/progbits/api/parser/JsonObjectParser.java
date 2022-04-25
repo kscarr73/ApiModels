@@ -126,6 +126,8 @@ public class JsonObjectParser implements ObjectParser {
                 } else {
                     apiClass = apiClasses.getClassByName(curClass);
                 }
+            } else if (obj != null) {
+                apiClass = obj.getApiClass();
             } else {
                 throw new ApiException(
                         "Field Name is Null. Main Class: " + _mainClass, null);
