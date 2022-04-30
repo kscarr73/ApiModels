@@ -11,12 +11,10 @@ import com.progbits.api.model.ApiObject;
 import com.progbits.api.model.ApiObjectDef;
 import com.progbits.api.parser.YamlObjectParser;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +74,15 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     @Override
     public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        String strFileName = "classes/" + thisClass + ".yaml";
+        String strFileName = thisClass;
+
+        if (!strFileName.startsWith("classes/")) {
+            strFileName = "classes/" + strFileName;
+        }
+
+        if (!thisClass.endsWith(".yml") && !thisClass.endsWith(".yaml")) {
+            strFileName += ".yaml";
+        }
 
         try {
             ApiClass newClass = getClassFromFile(strFileName);
@@ -87,7 +93,7 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
                 if (fld.getString("subType") != null && !fld.
                         getString("subType").
                         isEmpty()) {
-                    if (classes.getClass(fld.getString("subType")) == null) {
+                    if (!classes.getClasses().containsKey(fld.getString("subType"))) {
                         retrieveClasses(company, fld.getString("subType"), classes);
                     }
                 }
@@ -105,22 +111,12 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     @Override
     public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        URL url = _loader.getResource("classes/");
+        try ( InputStream is = _loader.getResourceAsStream("classes/");  BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
+            String l = null;
 
-        File[] files = new File(url.getPath()).listFiles();
-
-        try {
-            for (var file : files) {
-                if (file.isFile()) {
-                    String strFileName = file.getAbsolutePath();
-
-                    if (strFileName.endsWith(".yaml")) {
-                        String parsedFileName = strFileName.substring(
-                                strFileName.lastIndexOf("/") + 1, strFileName.lastIndexOf("."));
-
-                        retrieveClasses(company, parsedFileName, classes);
-                    }
-                }
+            while ((l = br.readLine()) != null) {
+                String parsedFileName = l;
+                retrieveClasses(company, parsedFileName, classes);
             }
         } catch (Exception ex) {
             throw new ApiException(550, ex.getMessage());
@@ -181,15 +177,10 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     }
 
     private ApiClass getClassFromFile(String file) throws ApiException {
-        try {
-            String strFile = _loader.getResource(file).toString();
-
-            String salesJson = new String(
-                    Files.readAllBytes(Paths.get(strFile.replace("file:", ""))));
-
+        try ( InputStream is = _loader.getResourceAsStream(file)) {
             ApiClasses apiClasses = new ApiClasses();
 
-            ApiObject obj = _objectParser.parseSingle(new StringReader(salesJson));
+            ApiObject obj = _objectParser.parseSingle(new InputStreamReader(is));
             obj.setApiClasses(_defaultClasses);
             obj.setApiClass(_defaultClasses.getClass("com.progbits.api.ApiClass"));
 

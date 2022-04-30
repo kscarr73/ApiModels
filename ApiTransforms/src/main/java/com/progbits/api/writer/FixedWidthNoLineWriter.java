@@ -101,7 +101,7 @@ public class FixedWidthNoLineWriter implements ObjectWriter {
             }
 
             Object fieldValue = ao.getCoreObject(fld.getString("name"));
-            String fieldFormat = ao.getString("format");
+            String fieldFormat = fld.getString("format");
 
             try {
                 switch (fld.getString("type")) {

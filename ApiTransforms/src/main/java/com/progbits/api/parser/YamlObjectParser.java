@@ -223,9 +223,17 @@ public class YamlObjectParser implements ObjectParser {
                             curField = null;
                         }
                     } else {
-                        Tag t = resolver.resolve(NodeId.scalar, se.getValue(), true);
 
-                        processScalar(obj, key, curField, t.getValue(), se.getValue(), inArray);
+                        String tagValue = null;
+
+                        if (se.getImplicit().bothFalse()) {
+                            tagValue = se.getTag();
+                        } else {
+                            Tag t = resolver.resolve(NodeId.scalar, se.getValue(), true);
+                            tagValue = t.getValue();
+                        }
+
+                        processScalar(obj, key, curField, tagValue, se.getValue(), inArray);
 
                         if (!inArray) {
                             key = null;
