@@ -293,7 +293,9 @@ public class ApiObject implements Bindings {
      * @return ApiObject the created ApiObject
      */
     public ApiObject createObject(String key) {
-        return (ApiObject) _fields.put(key, newSubObject(key));
+        _fields.put(key, newSubObject(key));
+        
+        return this.getObject(key);
     }
 
     public ApiObject newSubObject(String key) {
@@ -643,7 +645,7 @@ public class ApiObject implements Bindings {
         } else if (obj instanceof BigDecimal) {
             return (((BigDecimal) obj) != BigDecimal.ZERO);
         } else if (obj instanceof List) {
-            return (((List) obj).size() > 0);
+            return (!((List) obj).isEmpty());
         } else if (obj instanceof ApiObject) {
             return true;
         } else {
@@ -671,7 +673,7 @@ public class ApiObject implements Bindings {
         } else if (obj instanceof List) {
             List objTest = (List) obj;
 
-            if (objTest.size() > 0) {
+            if (!objTest.isEmpty()) {
                 Object objItemTest = objTest.get(0);
 
                 if (objItemTest instanceof ApiObject) {
@@ -879,109 +881,9 @@ public class ApiObject implements Bindings {
      * @return ApiObject clone of the current ApiObject
      *
      * @throws ApiException An API Exception
-     */
-    @SuppressWarnings("UnnecessaryBoxing")
+     */    
     public ApiObject cloneApiObject() throws ApiException {
-        final ApiObject retObj;
-
-        if (this.getApiClass() != null) {
-            retObj = this.getApiClass().createInstance();
-        } else {
-            retObj = new ApiObject();
-        }
-
-        this.getFields().forEach((k, v) -> {
-            try {
-                int iFieldType = this.getType(k);
-
-                switch (iFieldType) {
-                    case TYPE_ARRAYLIST:
-                        List<ApiObject> newList = new ArrayList<>();
-
-                        ((List<ApiObject>) v).forEach((entry) -> {
-                            try {
-                                newList.add(entry.cloneApiObject());
-                            } catch (ApiException aex) {
-
-                            }
-                        });
-
-                        retObj.setArrayList(k, newList);
-                        break;
-
-                    case TYPE_OBJECT:
-                        retObj.setObject(k, ((ApiObject) v).cloneApiObject());
-                        break;
-
-                    case TYPE_STRINGARRAY:
-                        List<String> newStrArray = new ArrayList<>();
-
-                        ((List<String>) v).forEach((entry) -> {
-                            newStrArray.add(new String(entry.getBytes()));
-                        });
-
-                        retObj.getFields().put(k, newStrArray);
-
-                        break;
-
-                    case TYPE_INTEGERARRAY:
-                        List<Integer> newIntArray = new ArrayList<>();
-
-                        ((List<Integer>) v).forEach((entry) -> {
-                            newIntArray.add(Integer.valueOf(entry.intValue()));
-                        });
-
-                        retObj.getFields().put(k, newIntArray);
-                        break;
-
-                    case TYPE_DOUBLEARRAY:
-                        List<Double> newDblArray = new ArrayList<>();
-
-                        ((List<Integer>) v).forEach((entry) -> {
-                            newDblArray.add(Double.valueOf(entry.doubleValue()));
-                        });
-
-                        retObj.getFields().put(k, newDblArray);
-                        break;
-
-                    case TYPE_BOOLEAN:
-                        retObj.setBoolean(k, Boolean.valueOf((Boolean) v));
-                        break;
-
-                    case TYPE_STRING:
-                        retObj.setString(k, new String((String) v));
-                        break;
-
-                    case TYPE_INTEGER:
-                        retObj.setInteger(k, new Integer((Integer) v));
-                        break;
-
-                    case TYPE_DOUBLE:
-                        retObj.setDouble(k, new Double((Double) v));
-                        break;
-
-                    case TYPE_DATETIME:
-                        retObj.setDateTime(k, ((OffsetDateTime) v).plusNanos(0));
-                        break;
-
-                    case TYPE_DECIMAL:
-                        retObj.setDecimal(k, new BigDecimal(((BigDecimal) v).
-                                toString()));
-                        break;
-
-                    case TYPE_LONG:
-                        retObj.setLong(k, new Long((Long) v));
-                        break;
-
-                    default:
-                        break;
-                }
-            } catch (ApiException aex) {
-
-            }
-        });
-
-        return retObj;
+       return ApiObjectUtils.cloneApiObject(this, null);
     }
 
     // <editor-fold desc="Bindings">
