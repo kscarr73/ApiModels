@@ -455,9 +455,9 @@ public class ApiUtils implements ApiUtilsInterface {
      *
      * @param fileName Name of the file to retrieve
      * @param type apimappings, apiclasses, webservices
-     * @return
-     * @throws ApiException
-     * @throws ApiClassNotFoundException
+     * @return ApiObject
+     * @throws ApiException Api Exception
+     * @throws ApiClassNotFoundException Api Class Not Found
      */
     public ApiObject getApiFile(String fileName, String type) throws ApiException, ApiClassNotFoundException {
         ApiObject resp = null;

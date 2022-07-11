@@ -11,12 +11,15 @@ import com.progbits.api.model.ApiObject;
 import com.progbits.api.model.ApiObjectDef;
 import com.progbits.api.parser.YamlObjectParser;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Uses Class Loader to pull classes and Mappings
@@ -111,15 +114,16 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     @Override
     public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        try ( InputStream is = _loader.getResourceAsStream("classes/");  BufferedReader br = new BufferedReader(new InputStreamReader(is));) {
-            String l = null;
+        var env = ClasspathHelper.forResource("classes/", _loader);
 
-            while ((l = br.readLine()) != null) {
-                String parsedFileName = l;
-                retrieveClasses(company, parsedFileName, classes);
-            }
-        } catch (Exception ex) {
-            throw new ApiException(550, ex.getMessage());
+        Reflections reflections = new Reflections(
+                new ConfigurationBuilder()
+                        .addUrls(env)
+                        .setScanners(Scanners.values()));
+        var entries = reflections.getResources(thisClass + ".*.yaml");
+
+        for (var parsedFileName : entries) {
+            retrieveClasses(company, parsedFileName, classes);
         }
     }
 

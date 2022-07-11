@@ -49,8 +49,8 @@ public interface ApiUtilsInterface {
      * service
      *
      * @return The Services found
-     * @throws ApiClassNotFoundException
-     * @throws ApiException
+     * @throws ApiClassNotFoundException Class Not Found
+     * @throws ApiException General Exception
      */
     public ApiObject retrieveServices(String company, String serviceName, String access) throws ApiException, ApiClassNotFoundException;
 
@@ -71,8 +71,8 @@ public interface ApiUtilsInterface {
      *
      * @param mapName Name of the object to retrieve
      * @return
-     * @throws ApiException
-     * @throws ApiClassNotFoundException
+     * @throws ApiException General Exception
+     * @throws ApiClassNotFoundException Class Not Found
      */
     public ApiObject getApiMappingObject(String company, String mapName) throws ApiException, ApiClassNotFoundException;
 

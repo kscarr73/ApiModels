@@ -11,14 +11,16 @@ import com.progbits.api.model.ApiObject;
 import com.progbits.api.model.ApiObjectDef;
 import com.progbits.api.parser.JsonObjectParser;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Uses Class Loader to pull classes and Mappings
@@ -76,7 +78,15 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     @Override
     public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        String strFileName = "classes/" + thisClass + ".json";
+        String strFileName = thisClass;
+
+        if (!strFileName.startsWith("classes/")) {
+            strFileName = "classes/" + strFileName;
+        }
+
+        if (!thisClass.endsWith(".json")) {
+            strFileName += ".json";
+        }
 
         try {
             ApiClass newClass = getClassFromFile(strFileName);
@@ -105,25 +115,16 @@ public class ApiUtilsLoader implements ApiUtilsInterface {
     @Override
     public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        URL url = _loader.getResource("classes/");
+        var env = ClasspathHelper.forResource("classes/", _loader);
 
-        File[] files = new File(url.getPath()).listFiles();
+        Reflections reflections = new Reflections(
+                new ConfigurationBuilder()
+                        .addUrls(env)
+                        .setScanners(Scanners.values()));
+        var entries = reflections.getResources(thisClass + ".*.json");
 
-        try {
-            for (var file : files) {
-                if (file.isFile()) {
-                    String strFileName = file.getAbsolutePath();
-
-                    if (strFileName.endsWith(".yaml")) {
-                        String parsedFileName = strFileName.substring(
-                                strFileName.lastIndexOf("/") + 1, strFileName.lastIndexOf("."));
-
-                        retrieveClasses(company, parsedFileName, classes);
-                    }
-                }
-            }
-        } catch (ApiClassNotFoundException ex) {
-            throw new ApiException(550, ex.getMessage());
+        for (var parsedFileName : entries) {
+            retrieveClasses(company, parsedFileName, classes);
         }
     }
 
