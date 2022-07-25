@@ -124,6 +124,23 @@ public class FixedWidthNoLineWriter implements ObjectWriter {
                                 fieldFormat));
                         break;
                     case "Integer":
+                        if (fld.containsKey("iterationCount")) {
+                            String iterationKey = fld.getString("iterationCount");
+                            switch (ao.getType(iterationKey)) {
+                                case ApiObject.TYPE_ARRAYLIST:
+                                    fieldValue = ao.getList(iterationKey).size();
+                                    break;
+
+                                case ApiObject.TYPE_STRINGARRAY:
+                                    fieldValue = ao.getStringArray(iterationKey).size();
+                                    break;
+
+                                default:
+                                    fieldValue = 0;
+                                    break;
+                            }
+                        }
+
                         writer.
                                 append(TransformNumber.
                                         formatInteger(fieldValue, fieldFormat));
@@ -149,6 +166,15 @@ public class FixedWidthNoLineWriter implements ObjectWriter {
                             writeObject(rowObj);
                         }
                         break;
+
+                    case "StringArray": {
+                        for (String strValue : ao.getStringArray(fld.getString("name"))) {
+                            writer.append(TransformString.forceRightSize(
+                                    TransformString.
+                                            formatString(strValue, fieldFormat),
+                                    " ", iFieldLength));
+                        }
+                    }
                 }
             } catch (Exception ex) {
                 String errMsg = "Field: " + fld.getString("name") + " " + ex.getMessage();

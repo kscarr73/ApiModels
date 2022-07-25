@@ -196,6 +196,27 @@ public class FixedWidthNoLineParser implements ObjectParser {
                             }
                         }
                         break;
+
+                    case "StringArray":
+                        if (fld.containsKey("iterationCount")) {
+                            obj.createStringArray(fld.getString("name"));
+
+                            int iCnt = obj.getInteger(fld.getString("iterationCount"));
+
+                            for (int iIter = 0; iIter < iCnt; iIter++) {
+                                fieldValue = strLine.substring(currLoc,
+                                        currLoc + iFieldLength);
+
+                                obj.getStringArray(fld.getString("name")).add(
+                                        TransformString.
+                                                transformString(fieldValue, fld.
+                                                        getString("format"))
+                                );
+
+                                currLoc += iFieldLength;
+                            }
+                        }
+                        break;
                 }
             } catch (Exception ex) {
                 if (!this.parseErrors.contains("Field: " + fld.getString("name") + " " + ex.getMessage())) {
