@@ -272,7 +272,9 @@ public class JsonObjectParser implements ObjectParser {
                                 }
 
                                 if (arrayType == ApiObject.TYPE_INTEGERARRAY) {
-                                    obj.getIntegerArray(key).add(parse.getIntValue());
+                                    if (parse.getNumberType() == JsonParser.NumberType.INT) {
+                                        obj.getIntegerArray(key).add(parse.getIntValue());
+                                    }
                                 } else {
                                     obj.getDoubleArray(key).add(parse.getDoubleValue());
                                 }
