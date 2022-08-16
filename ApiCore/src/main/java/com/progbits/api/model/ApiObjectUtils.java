@@ -1,6 +1,5 @@
 package com.progbits.api.model;
 
-import com.progbits.api.exception.ApiException;
 import static com.progbits.api.model.ApiObject.TYPE_ARRAYLIST;
 import static com.progbits.api.model.ApiObject.TYPE_BOOLEAN;
 import static com.progbits.api.model.ApiObject.TYPE_DATETIME;
@@ -38,7 +37,7 @@ public class ApiObjectUtils {
     @SuppressWarnings("UnnecessaryBoxing")
     public static ApiObject cloneApiObject(ApiObject subject, Map<String, String> rename) {
         final Map<String, String> lclRename;
-        
+
         if (rename == null) {
             lclRename = new HashMap<>();
         } else {
@@ -50,19 +49,21 @@ public class ApiObjectUtils {
 
     /**
      * Null Safe deep copy of all fields and sub objects with Optional Rename.
+     *
      * @param subject The ApiObject to copy from
      * @param fieldPrefix Should start with an empty string ""
      * @param limitToMap Should ONLY the fields in the map be returned.
-     * @param lclRename Map with fields.  Dot notation can be used for sub objects.
-     * @return 
+     * @param lclRename Map with fields. Dot notation can be used for sub
+     * objects.
+     * @return
      */
     public static ApiObject cloneApiObject(ApiObject subject, String fieldPrefix, boolean limitToMap, final Map<String, String> lclRename) {
         final ApiObject retObj;
-        
+
         if (subject == null) {
             return null;
         }
-        
+
         if (subject.getApiClass() != null) {
             retObj = subject.getApiClass().createInstance();
         } else {
@@ -83,17 +84,17 @@ public class ApiObjectUtils {
                         newList.add(cloneApiObject(entry, k + ".", limitToMap, lclRename));
                     });
 
-                    putField(retObj, k, 
-                            newList, 
+                    putField(retObj, k,
+                            newList,
                             fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_OBJECT:
-                    putField(retObj, k, 
-                            cloneApiObject((ApiObject) v, k + ".", limitToMap, lclRename), 
+                    putField(retObj, k,
+                            cloneApiObject((ApiObject) v, k + ".", limitToMap, lclRename),
                             fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_STRINGARRAY:
@@ -104,7 +105,7 @@ public class ApiObjectUtils {
                     });
 
                     putField(retObj, k, newStrArray, fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_INTEGERARRAY:
@@ -115,7 +116,7 @@ public class ApiObjectUtils {
                     });
 
                     putField(retObj, k, newIntArray, fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_DOUBLEARRAY:
@@ -126,7 +127,7 @@ public class ApiObjectUtils {
                     });
 
                     putField(retObj, k, newDblArray, fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_BOOLEAN:
@@ -143,7 +144,7 @@ public class ApiObjectUtils {
 
                 case TYPE_DOUBLE:
                     putField(retObj, k, Double.valueOf((Double) v), fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 case TYPE_DATETIME:
@@ -156,7 +157,7 @@ public class ApiObjectUtils {
 
                 case TYPE_LONG:
                     putField(retObj, k, Long.valueOf((Long) v), fieldPrefix + k, limitToMap, lclRename);
-                    
+
                     break;
 
                 default:
@@ -172,6 +173,8 @@ public class ApiObjectUtils {
             if (limitToMap) {
                 if (rename.containsKey(searchField)) {
                     subject.put(rename.get(searchField), value);
+                } else if (rename.containsKey(searchFieldAll(searchField))) {
+                    subject.put(field, value);
                 }
             } else {
                 if (rename.containsKey(searchField)) {
@@ -182,7 +185,15 @@ public class ApiObjectUtils {
             }
         }
     }
-    
+
+    private static String searchFieldAll(String subject) {
+        if (subject.contains(".")) {
+            return subject.substring(0, subject.lastIndexOf(".") + 1) + "*";
+        } else {
+            return "*";
+        }
+    }
+
     public static boolean isNull(ApiObject subject, String field) {
         if (subject == null) {
             return true;
