@@ -1,5 +1,4 @@
 # Purpose
-
 ApiModels is used for Generic Runtime models, that can parse various formats, and exported to various formats.
 
 Currently, we support the following formats:
@@ -10,48 +9,66 @@ Currently, we support the following formats:
 * Segmented Fixed Width (EDI)
 * YAML
 
-# Installation
+# Example Usage
+```java
+public class HttpHelper {
+	public static JsonObjectWriter jsonWriter = new JsonObjectWriter(true);
+	public static JsonObjectParser jsonParser = new JsonObjectParser(true);
 
-# Install
+    public static String parseObjectToJson(ApiObject subject) {
+        try {
+            return jsonWriter.writeSingle(subject);
+        } catch (ApiException aex) {
+            log.error("parseObjectToJson", aex);
+            return null;
+        }
+    }
 
-* This package uses a modified Karaf installation.  
-You can download this version from here.  <https://github.com/kscarr73/ApiModels/blob/master/docs/progbits-karaf-4.3.0.7z>
-
-The changes are listed here. <https://github.com/kscarr73/ApiModels/blob/master/docs/Karaf.md>
-
-* Start Karaf
-* Make sure you have configured your ElasticSearch Environment. Reference <https://github.com/kscarr73/ElasticUtils/blob/main/README.md>
-
-* In the Karaf Console, paste the following:
-
-```
-feature:install http-whiteboard
-feature:install scr
-install -s mvn:org.codehaus.woodstox/stax2-api/4.2.1
-install -s mvn:com.fasterxml/aalto-xml/1.3.0
-install -s mvn:com.fasterxml.jackson.core/jackson-core/2.12.3
-install -s mvn:org.yaml/snakeyaml/1.29
-install -s mvn:org.apache.commons/commons-csv/1.8
-install -s mvn:com.progbits.api/ApiCore/1.2.5
-install -s mvn:com.progbits.api.transforms/ApiTransforms/1.3.2
-install -s mvn:com.progbits.api.util.mapping.graalvm/ApiMappingGraalVM/1.3.0
-install -s mvn:com.progbits.api.elastic/ElasticUtils/1.0.2
-feature:install jdbc
-install -s mvn:org.javassist/javassist/3.19.0-GA
-install -s mvn:org.mariadb.jdbc/mariadb-java-client/2.7.1
-install mvn:com.zaxxer/HikariCPMariaDBFragment/1.0.0
-install -s mvn:com.zaxxer/HikariCP/3.4.5
-install -s mvn:com.progbits.db/OsgiDatabase/1.3.0
-install -s mvn:com.progbits.db/OsgiDbCommands/1.2.0
-install -s mvn:com.progbits.db/SsDbUtils/2.3.10
-install -s mvn:com.progbits.api.util/ApiUtils/1.3.1
-install -s mvn:com.progbits.api.utils.db/ApiUtilsDb/1.0.2
+    public static ApiObject parseString(String subject) {
+        try {
+            return jsonParser.parseSingle(new StringReader(subject));
+        } catch (ApiException | ApiClassNotFoundException aex) {
+            log.error("parseString", aex);
+            return null;
+        }
+    }
+}
 ```
 
-## These should no longer be needed
-```
-#install -s mvn:org.glassfish/javax.json/1.1.4
-#install -s mvn:org.javolution/javolution-core-java/6.0.0
+# Main Projects
+The main projects of ApiModels is in 3 different repos.  Depending on the requirements for your project, you may only need ApiCore, or ApiCore and ApiTransforms.
+
+## ApiCore
+This is where the main objects of ApiModels reside.  This includes the ApiObject class itself, as well as the ApiClass and ApiClasses objects.  This create the core of the ApiModels system.
+```xml
+<dependency>
+	<groupId>com.progbits.api</groupId>
+	<artifactId>ApiCore</artifactId>
+	<version>1.3.2</version>
+</dependency>
 ```
 
-* Now that you have the ApiModels base, you can install the ApiWeb.  Reference <https://github.com/kscarr73/ApiModels/blob/master/ApiWeb/README.md>
+## ApiTransforms
+The Transforms project includes various types of transforms that can be used on an ApiObject.  This is where the main formats are handled.
+
+```xml
+<dependency>
+	<groupId>com.progbits.api.transforms</groupId>
+	<artifactId>ApiTransforms</artifactId>
+	<version>1.3.7</version>
+</dependency>
+```
+
+## ApiUtils
+This project adds some functions for using Models with ApiObjects.  This is where you can create model definitions, and process at runtime.
+
+```xml
+<dependency>
+	<groupId>com.progbits.api.util</groupId>
+    <artifactId>ApiUtils</artifactId>
+    <version>1.3.4</version>
+</dependency>
+```
+
+# Karaf Installation
+[Karaf Installation](https://github.com/kscrr73/ApiModels/docs/Karaf Install.md)
