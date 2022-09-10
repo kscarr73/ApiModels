@@ -1,5 +1,5 @@
 # Purpose
-ApiModels is used for Generic Runtime models, that can parse various formats, and exported to various formats.
+ApiModels is used for Generic Runtime models, that can parse various formats, and be used to exported various formats.
 
 Currently, we support the following formats:
 
