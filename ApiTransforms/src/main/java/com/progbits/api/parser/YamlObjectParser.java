@@ -18,8 +18,10 @@ import java.util.List;
 import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.events.DocumentEndEvent;
@@ -47,9 +49,9 @@ public class YamlObjectParser implements ObjectParser {
     private String _mainClass;
     private ApiClasses _classes;
     private Iterable<Event> _parser;
-    private Yaml _factory = new Yaml(new Constructor(), new Representer(), new DumperOptions(),
-            new Resolver());
-    private Resolver resolver = new Resolver();
+    
+    private Yaml factory;
+    private Resolver resolver;
     private Map<String, String> _props;
     private List<String> parseErrors;
     private Throwable throwException;
@@ -57,19 +59,37 @@ public class YamlObjectParser implements ObjectParser {
     private Map<String, DateTimeFormatter> _dtFormats = new HashMap<>();
 
     public YamlObjectParser() {
-
+        createYaml();
     }
 
     public YamlObjectParser(boolean genericProcessor) {
+        createYaml();
         if (genericProcessor) {
             internalInit(null, null, null, null);
         }
     }
 
+    private void createYaml() {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
+        loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
+        loaderOptions.setAllowRecursiveKeys(true);
+        
+        createYaml(loaderOptions);
+    }
+    
+    private void createYaml(LoaderOptions loaderOptions) {
+        SafeConstructor constructor = new SafeConstructor(loaderOptions);
+        DumperOptions dumperOptions = new DumperOptions();
+        Representer representer = new Representer(dumperOptions);
+        this.resolver = new Resolver();
+        
+        factory = new Yaml(constructor, representer, dumperOptions, resolver);
+    }
     private void internalInit(ApiClasses classes, String mainClass,
             Map<String, String> properties, Reader in) {
         if (in != null) {
-            _parser = _factory.parse(in);
+            _parser = factory.parse(in);
         }
         _props = properties;
         _classes = classes;
@@ -336,7 +356,7 @@ public class YamlObjectParser implements ObjectParser {
     public ApiObject parseSingle(Reader in, String className) throws ApiException, ApiClassNotFoundException {
         ApiObject retObj;
 
-        Iterable<Event> parse = _factory.parse(in);
+        Iterable<Event> parse = factory.parse(in);
 
         if (_classes != null && className != null) {
             retObj = _classes.getInstance(className);
