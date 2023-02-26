@@ -5,7 +5,7 @@
 	<groupId>com.progbits.web</groupId>
 	<artifactId>WebUtils</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 	<name>Web Utilities</name>
 	<url>http://maven.apache.org</url>
 
