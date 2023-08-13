@@ -17,9 +17,9 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: Publish package
         run: |
-          echo $GITHUB_REF_NAME | awk '{split($0,a,"_"); print "project_build=" a[1]}' >> $GITHUB_ENV
-          echo ${{ env.project_build }}
-          mvn --batch-mode deploy -pl "${{ env.project_build }}"
+          echo $GITHUB_REF_NAME | awk '{split($0,a,"_"); print "PROJECT_BUILD=" a[1]}' >> $GITHUB_ENV
+          echo $PROJECT_BUILD
+          mvn --batch-mode deploy -pl $PROJECT_BUILD
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
