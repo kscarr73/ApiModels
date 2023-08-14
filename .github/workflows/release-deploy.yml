@@ -19,7 +19,7 @@ jobs:
         run: |
           echo $GITHUB_REF_NAME
           echo $GITHUB_REF_NAME | awk '{split($0,a,"_"); print "PROJECT_BUILD=" a[1]}' >> $GITHUB_ENV
-          echo "PROJECT_BUILD=$( echo $GITHUB_REF_NAME | awk '{split($0,a,"_"); print a[1]}' )" >> $GITHUB_ENV
+          echo "PROJECT_BUILD=$( echo $GITHUB_REF_NAME | awk '{split($0,a,"_"); print a[1]}' )"
           echo $PROJECT_BUILD
           mvn --batch-mode deploy -pl $PROJECT_BUILD
         env:
