@@ -102,6 +102,27 @@ public class FixedWidthNoLineParser implements ObjectParser {
                 iFieldLength = ((Long) oFldLength).intValue();
             }
 
+            if (fld.containsKey("iterationCount")) {
+                String strFld = fld.getString("iterationCount");
+
+                if (strFld.contains("-")) {
+                    String[] splitFld = strFld.split("-");
+
+                    if (!obj.isSet(splitFld[0])) {
+                        iFieldLength = 0;
+                    }
+                } else {
+                    if (!obj.isSet(fld.getString("iterationCount"))) {
+                        iFieldLength = 0;
+                    }
+                }
+            }
+
+            if (currLoc + iFieldLength > strLine.length()) {
+                currLoc = strLine.length() + 1;
+                break;
+            }
+
             String fieldValue = strLine.substring(currLoc,
                     currLoc + iFieldLength);
 
@@ -170,7 +191,20 @@ public class FixedWidthNoLineParser implements ObjectParser {
 
                     case "ArrayList":
                         if (fld.containsKey("iterationCount")) {
-                            int iCnt = obj.getInteger(fld.getString("iterationCount"));
+                            String strIterationCount = fld.getString("iterationCount");
+                            int iCnt = 0;
+
+                            if (strIterationCount.contains("-")) {
+                                String[] splitCount = strIterationCount.split("-");
+
+                                if (obj.isSet(splitCount[0])) {
+                                    iCnt = obj.getInteger(splitCount[0]) - Integer.parseInt(splitCount[1]);
+                                }
+                            } else {
+                                if (obj.isSet(fld.getString("iterationCount"))) {
+                                    iCnt = obj.getInteger(fld.getString("iterationCount"));
+                                }
+                            }
 
                             if (!obj.isSet(fld.getString("name"))) {
                                 obj.createList(fld.getString("name"));
@@ -201,20 +235,42 @@ public class FixedWidthNoLineParser implements ObjectParser {
                         if (fld.containsKey("iterationCount")) {
                             obj.createStringArray(fld.getString("name"));
 
-                            int iCnt = obj.getInteger(fld.getString("iterationCount"));
+                            String strIterationCount = fld.getString("iterationCount");
+                            int iCnt = 0;
 
-                            for (int iIter = 0; iIter < iCnt; iIter++) {
+                            if (strIterationCount.contains("-")) {
+                                String[] splitCount = strIterationCount.split("-");
+
+                                if (obj.isSet(splitCount[0])) {
+                                    iCnt = obj.getInteger(splitCount[0]) - Integer.parseInt(splitCount[1]);
+                                }
+                            } else {
+                                if (obj.isSet(fld.getString("iterationCount"))) {
+                                    iCnt = obj.getInteger(fld.getString("iterationCount"));
+                                }
+                            }
+
+                            if (iCnt > 0) {
+                                obj.getStringArray(fld.getString("name")).add(
+                                        TransformString.
+                                                transformString(fieldValue, fld.
+                                                        getString("format"))
+                                );
+                            }
+
+                            for (int iIter = 0; iIter < iCnt - 1; iIter++) {
                                 fieldValue = strLine.substring(currLoc,
                                         currLoc + iFieldLength);
+
+                                currLoc += iFieldLength;
 
                                 obj.getStringArray(fld.getString("name")).add(
                                         TransformString.
                                                 transformString(fieldValue, fld.
                                                         getString("format"))
                                 );
-
-                                currLoc += iFieldLength;
                             }
+
                         }
                         break;
                 }
