@@ -14,10 +14,6 @@
         <module>ApiCore</module>
         <module>ApiUtils</module>
         <module>ApiMappingGraalVM</module>
-        <module>GraalVMJSOsgi</module>
-        <module>ApiWeb</module>
-	<module>ApiExport</module>
-	<module>ApiExportMappingPython</module>
     </modules>
 
 </project>
