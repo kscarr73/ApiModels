@@ -11,15 +11,15 @@ import com.progbits.api.model.ApiObject;
 import com.progbits.api.model.ApiObjectDef;
 import com.progbits.api.parser.YamlObjectParser;
 import com.progbits.api.utils.oth.ApiUtilsInterface;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.Resource;
+import io.github.classgraph.ResourceList;
+import io.github.classgraph.ScanResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Uses Class Loader to pull classes and Mappings
@@ -35,6 +35,8 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     private final YamlObjectParser _objectParser = new YamlObjectParser(true);
 
     private final ApiClasses _defaultClasses = ApiObjectDef.returnClassDef();
+    
+    private ScanResult _scanResult = null;
 
     public ApiUtilsYamlLoader(ClassLoader loader, ParserService parser,
             WriterService writer) {
@@ -77,10 +79,14 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     @Override
     public void retrieveClasses(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
+        if (_scanResult == null) {
+            _scanResult = new ClassGraph().addClassLoader(_loader).acceptPaths("models").scan();
+        }
+        
         String strFileName = thisClass;
 
-        if (!strFileName.startsWith("classes/")) {
-            strFileName = "classes/" + strFileName;
+        if (!strFileName.startsWith("models/")) {
+            strFileName = "models/" + strFileName;
         }
 
         if (!thisClass.endsWith(".yml") && !thisClass.endsWith(".yaml")) {
@@ -88,16 +94,20 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
         }
 
         try {
-            ApiClass newClass = getClassFromFile(strFileName);
+            ResourceList resourceList = _scanResult.getResourcesWithPath(strFileName);
+            
+            if (!resourceList.isEmpty()) {
+                ApiClass newClass = getClassFromFile(resourceList.get(0));
 
-            classes.addClass(newClass);
+                classes.addClass(newClass);
 
-            for (ApiObject fld : newClass.getList("fields")) {
-                if (fld.getString("subType") != null && !fld.
-                        getString("subType").
-                        isEmpty()) {
-                    if (!classes.getClasses().containsKey(fld.getString("subType"))) {
-                        retrieveClasses(company, fld.getString("subType"), classes);
+                for (ApiObject fld : newClass.getList("fields")) {
+                    if (fld.getString("subType") != null && !fld.
+                            getString("subType").
+                            isEmpty()) {
+                        if (!classes.getClasses().containsKey(fld.getString("subType"))) {
+                            retrieveClasses(company, fld.getString("subType"), classes);
+                        }
                     }
                 }
             }
@@ -114,16 +124,14 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
     @Override
     public void retrievePackage(String company, String thisClass, ApiClasses classes,
             boolean verify) throws ApiException, ApiClassNotFoundException {
-        var env = ClasspathHelper.forResource("classes/", _loader);
+        if (_scanResult == null) {
+            _scanResult = new ClassGraph().addClassLoader(_loader).acceptPaths("models").scan();
+        }
 
-        Reflections reflections = new Reflections(
-                new ConfigurationBuilder()
-                        .addUrls(env)
-                        .setScanners(Scanners.values()));
-        var entries = reflections.getResources(thisClass + ".*.yaml");
-
-        for (var parsedFileName : entries) {
-            retrieveClasses(company, parsedFileName, classes);
+        ResourceList resources = _scanResult.getResourcesMatchingWildcard("models/" + thisClass + "*.yaml");
+        
+        for (var resource : resources) {
+            retrieveClasses(company, resource.getPath(), classes);
         }
     }
 
@@ -180,8 +188,8 @@ public class ApiUtilsYamlLoader implements ApiUtilsInterface {
         }
     }
 
-    private ApiClass getClassFromFile(String file) throws ApiException {
-        try ( InputStream is = _loader.getResourceAsStream(file)) {
+    private ApiClass getClassFromFile(Resource file) throws ApiException {
+        try ( InputStream is = file.open()) {
             ApiClasses apiClasses = new ApiClasses();
 
             ApiObject obj = _objectParser.parseSingle(new InputStreamReader(is));

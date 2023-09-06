@@ -1,0 +1,15 @@
+---
+name: Default
+className: com.test.Default
+desc: Default class to test Yaml Loader
+fields:
+    - name: firstName
+      type: String
+      length: 10
+    - name: lastName
+      type: String
+      length: 25
+      default: Carr
+    - name: age
+      type: Integer
+      default: 25
