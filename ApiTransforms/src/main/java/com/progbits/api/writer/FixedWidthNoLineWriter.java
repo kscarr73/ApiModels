@@ -163,7 +163,7 @@ public class FixedWidthNoLineWriter implements ObjectWriter {
                     case "ArrayList":
                         for (ApiObject rowObj : ao.
                                 getList(fld.getString("name"))) {
-                            writeObject(rowObj);
+                            writeObject(writer, rowObj);
                         }
                         break;
 
