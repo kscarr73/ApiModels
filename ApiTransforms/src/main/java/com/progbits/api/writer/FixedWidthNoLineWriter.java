@@ -157,7 +157,7 @@ public class FixedWidthNoLineWriter implements ObjectWriter {
                                 fieldFormat));
                         break;
                     case "Object":
-                        writeObject(ao.getObject(fld.getString("name")));
+                        writeObject(writer, ao.getObject(fld.getString("name")));
                         break;
 
                     case "ArrayList":
