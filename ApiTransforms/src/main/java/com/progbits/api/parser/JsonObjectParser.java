@@ -344,6 +344,7 @@ public class JsonObjectParser implements ObjectParser {
                         obj.setBoolean(key, true);
                         break;
                     case VALUE_NULL:
+                        obj.put(key, null);
                         break;
                     case START_ARRAY:
                         if (key == null) {
