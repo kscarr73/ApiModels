@@ -72,7 +72,9 @@ public class ApiObjectUtils {
 
         retObj.setName(subject.getName());
 
-        subject.getFields().forEach((k, v) -> {
+        for (var fldEntry : subject.getFields().entrySet()) {
+            var k = fldEntry.getKey();
+            var v = fldEntry.getValue();
 
             int iFieldType = subject.getType(k);
 
@@ -161,9 +163,10 @@ public class ApiObjectUtils {
                     break;
 
                 default:
+                    putField(retObj, k, v, fieldPrefix + k, limitToMap, lclRename);
                     break;
             }
-        });
+        }
 
         return retObj;
     }

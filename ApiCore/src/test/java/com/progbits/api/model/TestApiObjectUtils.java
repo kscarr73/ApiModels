@@ -3,7 +3,6 @@ package com.progbits.api.model;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import org.testng.annotations.Test;
 
 /**
@@ -18,6 +17,7 @@ public class TestApiObjectUtils {
         retObj.setString("something", "else");
         retObj.setInteger("age", 35);
         retObj.setDecimal("testDecimal", new BigDecimal("0.34"));
+        retObj.setBoolean("blnTest", true);
         
         retObj.getListAdd("subList")
                 .setString("name", "Scott")
@@ -60,5 +60,16 @@ public class TestApiObjectUtils {
         
         assert deepClone != null;
         assert !deepClone.isSet("age");
+    }
+    
+    @Test
+    public void testBoolean() {
+        ApiObject objSubject = getSubject();
+        
+        objSubject.setInteger("myNull", null);
+        
+        ApiObject deepClone = ApiObjectUtils.cloneApiObject(objSubject, null);
+        
+        assert deepClone != null;
     }
 }

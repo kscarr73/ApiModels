@@ -664,6 +664,8 @@ public class ApiObject implements Bindings {
             return TYPE_INTEGER;
         } else if (obj instanceof Long) {
             return TYPE_LONG;
+        } else if (obj instanceof Boolean) {
+            return TYPE_BOOLEAN;
         } else if (obj instanceof OffsetDateTime) {
             return TYPE_DATETIME;
         } else if (obj instanceof Double) {
