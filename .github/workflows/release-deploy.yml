@@ -22,7 +22,7 @@ jobs:
       - name: Publish package
         run: |
           echo "${{ env.PROJECT_BUILD}}"
-          mvn package install
+          mvn package
           mvn --batch-mode deploy -pl "${{ env.PROJECT_BUILD }}"
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
